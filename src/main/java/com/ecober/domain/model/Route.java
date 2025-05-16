@@ -1,4 +1,4 @@
-package com.ecober.model;
+package com.ecober.domain.model;
 public class Route
 {
     String source;
@@ -13,6 +13,5 @@ public class Route
         this.destination = destination;
         this.distanceKm = distanceKm;
     }
-
 
 }
