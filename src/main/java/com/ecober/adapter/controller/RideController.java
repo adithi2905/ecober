@@ -4,21 +4,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.ecober.adapter.Dto.DriverDTO;
 import com.ecober.adapter.Dto.RiderDTO;
-import com.ecober.domain.service.FetchNearestRiderService;
+import com.ecober.domain.service.DriverMatchingService;
 
-@Controller
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+@RestController
+@RequestMapping("/ride")
 public class RideController {
 
     @Autowired
-    FetchNearestRiderService fetchNearestRiderService;
+    DriverMatchingService fetchNearestRiderService;
     @PostMapping("/requestRide")
-    public ResponseEntity<DriverDTO> requestRide(@RequestParam RiderDTO riderDTO)
+    public ResponseEntity<DriverDTO> requestRide(@RequestBody RiderDTO riderDTO)
     {
-        DriverDTO matchedDriver=fetchNearestRiderService.fetchNearestRider(riderDTO.getRiderPickupLocation(),riderDTO.getRiderDropOffLocation(),riderDTO.getPreferredVehicleType(),riderDTO.isWilingToPool());
+        DriverDTO matchedDriver=fetchNearestRiderService.fetchNearestDriver(riderDTO.getRiderPickupLocation(),riderDTO.getRiderDropOffLocation(),riderDTO.getPreferredVehicleType(),riderDTO.isWilingToPool());
         return ResponseEntity.ok(matchedDriver);
     }
 

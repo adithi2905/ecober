@@ -1,6 +1,13 @@
 package com.ecober.domain.model;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
 public class Route
 {
+    @Id
+    String routeID;
     String source;
     String destination;
     double distanceKm;

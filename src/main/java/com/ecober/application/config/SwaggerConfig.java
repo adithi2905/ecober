@@ -12,7 +12,6 @@ public class SwaggerConfig {
     {   
         return new OpenAPI().info(new Info().title("Ecober API").version("1.0").description("Carbon aware ride matching APIs"));
         
-
     }
     
 }

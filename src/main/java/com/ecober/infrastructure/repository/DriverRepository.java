@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository;
 import com.ecober.domain.model.Driver;
 
 @Repository
-public interface RiderRepository extends JpaRepository<Driver,String>{
-    List<Driver>findByDriverLocation(String location);
-    
+public interface DriverRepository extends JpaRepository<Driver,String>{
+    List<Driver> findByVerifiedDriverTrueAndVehicleTypeAndDriverLocation(
+    String vehicleType,String driverLocation);
 
 }
