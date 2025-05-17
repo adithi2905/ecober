@@ -1,12 +1,14 @@
 package com.ecober.adapter.Dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class DriverDTO {
     private String driverName;
     private String vehicleNo;

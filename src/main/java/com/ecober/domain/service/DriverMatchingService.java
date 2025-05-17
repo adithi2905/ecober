@@ -1,28 +1,31 @@
 package com.ecober.domain.service;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ecober.adapter.Dto.DriverDTO;
+import com.ecober.adapter.mapper.DriverMapper;
+import com.ecober.domain.model.Driver;
+import com.ecober.infrastructure.repository.DriverRepository;
 
 @Service
 public class DriverMatchingService
 {
+    @Autowired
+    DriverRepository driverRepository;
 
-    private final List<DriverDTO>availableDrivers=List.of(new DriverDTO("Alice", "KA01X123", "D001", true, "Indiranagar", "EV", 18.5, 4.5, 12.0),
-        new DriverDTO("Bob", "KA02Y456", "D002", true, "MG Road", "SUV", 10.0, 4.2, 20.0),
-        new DriverDTO("Charlie", "KA03Z789", "D003", false, "Indiranagar", "Sedan", 15.0, 3.9, 5.0));
-
+    @Autowired
+    DriverMapper driverMapper;
+    
         public DriverDTO fetchNearestDriver(String riderPickupLocation, String riderDropOffLocation, String preferredVehicleType, boolean wilingToPool) {
-            for(DriverDTO driver:availableDrivers)
-            {
-                if(driver.getDriverLocation().equalsIgnoreCase(riderPickupLocation) &&
-                (driver.getVehicleType().equalsIgnoreCase(preferredVehicleType)) &&
-                (driver.isVerifiedDriver()))
-                return driver;
-                
-            }
-            throw new RuntimeException("No suitable driver found");
-    }
+            final List<Driver> availableDrivers =driverRepository.findByVerifiedDriverTrueAndVehicleTypeAndDriverLocation(preferredVehicleType,riderPickupLocation);
+            
+            
+            Driver best= availableDrivers.stream().sorted((d1, d2) -> Double.compare(d2.getTrustScore(), d1.getTrustScore()))
+            .findFirst().orElseThrow(() -> new RuntimeException("No suitable driver found"));
+            return driverMapper.toDto(best);
+    
+        }
 
 }
