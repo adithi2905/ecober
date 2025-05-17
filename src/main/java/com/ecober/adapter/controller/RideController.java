@@ -13,6 +13,7 @@ import com.ecober.adapter.Dto.RiderDTO;
 import com.ecober.domain.service.DriverMatchingService;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/ride")
 public class RideController {
@@ -20,7 +21,7 @@ public class RideController {
     @Autowired
     DriverMatchingService fetchNearestRiderService;
     @PostMapping("/requestRide")
-    public ResponseEntity<DriverDTO> requestRide(@RequestBody RiderDTO riderDTO)
+    public ResponseEntity<DriverDTO> requestRide(@Valid @RequestBody RiderDTO riderDTO)
     {
         DriverDTO matchedDriver=fetchNearestRiderService.fetchNearestDriver(riderDTO.getRiderPickupLocation(),riderDTO.getRiderDropOffLocation(),riderDTO.getPreferredVehicleType(),riderDTO.isWilingToPool());
         return ResponseEntity.ok(matchedDriver);

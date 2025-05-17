@@ -9,7 +9,6 @@ import com.ecober.domain.model.Driver;
 
 @Repository
 public interface DriverRepository extends JpaRepository<Driver,String>{
-    List<Driver> findByVerifiedDriverTrueAndVehicleTypeAndDriverLocation(
-    String vehicleType,String driverLocation);
+    List<Driver> findByDriverLocation(String driverLocation);
 
 }

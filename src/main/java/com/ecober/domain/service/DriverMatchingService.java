@@ -19,8 +19,8 @@ public class DriverMatchingService
     DriverMapper driverMapper;
     
         public DriverDTO fetchNearestDriver(String riderPickupLocation, String riderDropOffLocation, String preferredVehicleType, boolean wilingToPool) {
-            final List<Driver> availableDrivers =driverRepository.findByVerifiedDriverTrueAndVehicleTypeAndDriverLocation(preferredVehicleType,riderPickupLocation);     
-            Driver best= availableDrivers.stream().filter(d -> d.getTrustScore() >= 4.0)
+            final List<Driver> availableDrivers =driverRepository.findByDriverLocation(riderPickupLocation);     
+            Driver best= availableDrivers.stream()
             .findFirst().orElseThrow(() -> new RuntimeException("No suitable driver found"));
             return driverMapper.toDto(best);
     

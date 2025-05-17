@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name="drivers")
+@Table(name="driver")
 public class Driver {
     @Id
     private String driverId;
