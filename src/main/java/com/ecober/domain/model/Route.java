@@ -2,8 +2,12 @@ package com.ecober.domain.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import lombok.Builder;
+import lombok.Getter;
 
 @Entity
+@Getter
+@Builder
 public class Route
 {
     @Id
@@ -11,14 +15,9 @@ public class Route
     String source;
     String destination;
     double distanceKm;
-    double carbonCOst;
+    double carbonCost;
     double estimatedTime;
     boolean isPooledEligible;
 
-    public Route(String source, String destination, double distanceKm) {
-        this.source = source;
-        this.destination = destination;
-        this.distanceKm = distanceKm;
-    }
 
 }
