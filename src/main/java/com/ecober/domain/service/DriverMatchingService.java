@@ -37,6 +37,7 @@ public class DriverMatchingService
         public DriverDTO fetchNearestDriver(String riderId,String riderPickupLocation,String riderDropOffLocation,double pickupLatitude, double pickupLongitude,double dropoffLatitude,double dropoffLongitude,String preferredVehicleType, boolean wilingToPool) {
             Logger.getLogger(riderPickupLocation);
             double dist=GeoUtils.haversinDistance(pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude);
+            double carbonEmission=GeoUtils.calculateEmissions(dist, preferredVehicleType);
             final List<Driver> availableDrivers =driverRepository.findByDriverLocation(riderPickupLocation);     
             Driver best= availableDrivers.stream()
             .findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable driver found"));
@@ -46,7 +47,7 @@ public class DriverMatchingService
     .source(riderPickupLocation)
     .destination(riderDropOffLocation)
     .distanceKm(dist)
-    .carbonCost(dist*0.21)
+    .carbonCost(carbonEmission)
     .estimatedTime(0.0) 
     .build();
     return routeRepository.save(newRoute);

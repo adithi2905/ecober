@@ -2,6 +2,19 @@ package com.ecober.util;
 
 public class GeoUtils {
 
+    public static double calculateEmissions(double distanceKm,String vehicleType)
+    {
+        double factor=switch(vehicleType.toUpperCase())
+        {
+            case "EV" ->0.05;
+            case "BIKE" ->0.08;
+            case "SUV" ->0.25;
+            case "SEDAN" ->0.21;
+            default ->0.21;
+        };
+        return distanceKm*factor;
+    }
+
     public static double haversinDistance(double lat1,double lon1,double lat2,double lon2)
     {
         final int EARTH_RADIUS=6371;
