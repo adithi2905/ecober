@@ -2,6 +2,7 @@ package com.ecober.domain.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,7 @@ public class DriverMatchingService
     DriverMapper driverMapper;
 
         public DriverDTO fetchNearestDriver(String riderId,String riderPickupLocation,String riderDropOffLocation,double pickupLatitude, double pickupLongitude,double dropoffLatitude,double dropoffLongitude,String preferredVehicleType, boolean wilingToPool) {
+            Logger.getLogger(riderPickupLocation);
             final List<Driver> availableDrivers =driverRepository.findByDriverLocation(riderPickupLocation);     
             Driver best= availableDrivers.stream()
             .findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable driver found"));

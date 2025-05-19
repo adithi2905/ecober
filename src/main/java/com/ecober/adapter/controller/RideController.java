@@ -12,8 +12,9 @@ import com.ecober.adapter.Dto.DriverDTO;
 import com.ecober.adapter.Dto.RiderDTO;
 import com.ecober.domain.service.DriverMatchingService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 @RestController
 @RequestMapping("/ride")
 public class RideController {
@@ -21,12 +22,10 @@ public class RideController {
     @Autowired
     DriverMatchingService fetchNearestRiderService;
     @PostMapping("/requestRide")
-    public ResponseEntity<DriverDTO> requestRide(@Valid @RequestBody RiderDTO riderDTO)
+    public ResponseEntity<DriverDTO> requestRide(@NotNull @RequestBody RiderDTO riderDTO)
     {
-        DriverDTO matchedDriver=fetchNearestRiderService.fetchNearestDriver(riderDTO.getRiderId(),riderDTO.getRiderPickupLocation(),riderDTO.getRiderDropOffLocation(),riderDTO.getPickupLatitude(),riderDTO.getPickupLongitude(),riderDTO.getDropoffLatitude(),riderDTO.getDropoffLongitude(),riderDTO.getPreferredVehicleType(),riderDTO.isWilingToPool());
+        DriverDTO matchedDriver=fetchNearestRiderService.fetchNearestDriver(riderDTO.getRiderId(),riderDTO.getRiderPickupLocation(),riderDTO.getRiderDropOffLocation(),riderDTO.getPickupLatitude(),riderDTO.getPickupLongitude(),riderDTO.getDropoffLatitude(),riderDTO.getDropoffLongitude(),riderDTO.getPreferredVehicleType(),riderDTO.isWillingToPool());
         return ResponseEntity.ok(matchedDriver);
     }
 
-    
-    
 }

@@ -18,3 +18,11 @@ ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS;
 
+SELECT * FROM driver
+WHERE driver_name = 'Fiona'
+  AND vehicle_no = 'KA21E1446'
+  AND verified_driver = 1
+  AND driver_location = 'Koramangala'
+  AND vehicle_type = 'Hatchback'
+  AND fuel_efficiency = 24.4
+  AND trust_score = 4.4;
