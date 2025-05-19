@@ -14,7 +14,15 @@ public class Co2AnalyticsService
     @Autowired
     TripRepository tripRepository;
 
-    CarbonDTO carbonDto;
+    private String determineBadge(double totalCarbonEmission)
+    {
+        if(totalCarbonEmission<20)
+        return "🌿 Green Rider";
+        else if(totalCarbonEmission<50)
+        return "🌤 Conscious Rider";
+        else
+        return "🚗 Frequent Rider";
+    }
 
     public CarbonDTO getRiderCarbonEmission(String riderID)
     {
@@ -25,8 +33,8 @@ public class Co2AnalyticsService
         {
             totalEmissions+=trips.get(i).getCarbonEmissions();
         }
+        String badge=determineBadge(totalEmissions);
         double averageEmissionPerTrip=totalEmissions/totalTrips;
-        carbonDto=CarbonDTO.builder().riderId(riderID).totalEmissions(totalEmissions).totalTrips(totalTrips).averageEmissionPerTrip(averageEmissionPerTrip).ecoBadge("friendly").build();     
-        return carbonDto;
+        return CarbonDTO.builder().riderId(riderID).totalEmissions(totalEmissions).totalTrips(totalTrips).averageEmissionPerTrip(averageEmissionPerTrip).ecoBadge(badge).build();     
     }
 }
