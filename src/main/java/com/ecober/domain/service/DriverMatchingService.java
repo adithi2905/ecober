@@ -1,9 +1,12 @@
 package com.ecober.domain.service;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.ecober.adapter.Dto.DriverDTO;
 import com.ecober.adapter.mapper.DriverMapper;
@@ -33,11 +36,10 @@ public class DriverMatchingService
         public DriverDTO fetchNearestDriver(String riderId,String riderPickupLocation,String riderDropOffLocation,double pickupLatitude, double pickupLongitude,double dropoffLatitude,double dropoffLongitude,String preferredVehicleType, boolean wilingToPool) {
             final List<Driver> availableDrivers =driverRepository.findByDriverLocation(riderPickupLocation);     
             Driver best= availableDrivers.stream()
-            .findFirst().orElseThrow(() -> new RuntimeException("No suitable driver found"));
-            
+            .findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable driver found"));
             Route route = routeRepository.findBySourceAndDestination(riderPickupLocation, riderDropOffLocation)
                         .orElseGet(() -> {
-                        Route newRoute = Route.builder()
+                        Route newRoute = Route.builder().routeID(UUID.randomUUID().toString())
     .source(riderPickupLocation)
     .destination(riderDropOffLocation)
     .distanceKm(GeoUtils.haversinDistance(pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude))
