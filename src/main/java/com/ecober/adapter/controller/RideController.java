@@ -23,7 +23,7 @@ public class RideController {
     @PostMapping("/requestRide")
     public ResponseEntity<DriverDTO> requestRide(@Valid @RequestBody RiderDTO riderDTO)
     {
-        DriverDTO matchedDriver=fetchNearestRiderService.fetchNearestDriver(riderDTO.getRiderPickupLocation(),riderDTO.getRiderDropOffLocation(),riderDTO.getPreferredVehicleType(),riderDTO.isWilingToPool());
+        DriverDTO matchedDriver=fetchNearestRiderService.fetchNearestDriver(riderDTO.getRiderId(),riderDTO.getRiderPickupLocation(),riderDTO.getRiderDropOffLocation(),riderDTO.getPickupLatitude(),riderDTO.getPickupLongitude(),riderDTO.getDropoffLatitude(),riderDTO.getDropoffLongitude(),riderDTO.getPreferredVehicleType(),riderDTO.isWilingToPool());
         return ResponseEntity.ok(matchedDriver);
     }
 
