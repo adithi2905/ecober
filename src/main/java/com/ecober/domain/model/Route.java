@@ -28,5 +28,4 @@ public class Route
     @Column(name = "is_pooled_eligible", nullable = false)
     boolean isPooledEligible;
 
-
 }
