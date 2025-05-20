@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ecober.adapter.Dto.CarbonDTO;
+import com.ecober.adapter.Dto.DistanceDurationDTO;
 import com.ecober.adapter.Dto.DriverDTO;
 import com.ecober.adapter.Dto.RiderDTO;
 import com.ecober.domain.service.Co2AnalyticsService;
 import com.ecober.domain.service.DriverMatchingService;
+import com.ecober.domain.service.RouteOptimizingService;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.constraints.NotNull;
@@ -28,11 +30,25 @@ public class RideController {
     @Autowired
     Co2AnalyticsService co2AnalyticsService;
 
+    @Autowired
+    RouteOptimizingService routeOptimizingService;
+
     @PostMapping("/requestRide")
     public ResponseEntity<DriverDTO> requestRide(@NotNull @RequestBody RiderDTO riderDTO)
     {
         DriverDTO matchedDriver=fetchNearestRiderService.fetchNearestDriver(riderDTO.getRiderId(),riderDTO.getRiderPickupLocation(),riderDTO.getRiderDropOffLocation(),riderDTO.getPickupLatitude(),riderDTO.getPickupLongitude(),riderDTO.getDropoffLatitude(),riderDTO.getDropoffLongitude(),riderDTO.getPreferredVehicleType(),riderDTO.isWillingToPool());
         return ResponseEntity.ok(matchedDriver);
+    }
+
+    @GetMapping("/distanceDuration/{riderId}")
+    public ResponseEntity<DistanceDurationDTO> requestDistanceDuration(@PathVariable String riderId) {
+        double pickupLat = 12.9352;
+        double pickupLong = 77.6245;
+        double dropoffLat = 12.9716;
+        double dropoffLong = 77.5946;
+
+        DistanceDurationDTO dto = routeOptimizingService.getETA(pickupLat, pickupLong, dropoffLat, dropoffLong);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/carbonEmission/{riderId}")
