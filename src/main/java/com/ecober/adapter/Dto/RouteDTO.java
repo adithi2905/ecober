@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Route {
+public class RouteDTO {
 
     private String source;
     private String destination;
