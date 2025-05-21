@@ -1,5 +1,7 @@
 package com.ecober.adapter.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,8 +16,10 @@ import com.ecober.adapter.Dto.CarbonDTO;
 import com.ecober.adapter.Dto.DistanceDurationDTO;
 import com.ecober.adapter.Dto.DriverDTO;
 import com.ecober.adapter.Dto.RiderDTO;
+import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.domain.service.Co2AnalyticsService;
 import com.ecober.domain.service.DriverMatchingService;
+import com.ecober.domain.service.RiderService;
 import com.ecober.domain.service.RouteOptimizingService;
 
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +27,9 @@ import jakarta.validation.constraints.NotNull;
 @RestController
 @RequestMapping("/ride")
 public class RideController {
+
+    @Autowired
+    RiderService riderService;
 
     @Autowired
     DriverMatchingService fetchNearestRiderService;
@@ -47,7 +54,7 @@ public class RideController {
         double dropoffLat = 12.9716;
         double dropoffLong = 77.5946;
 
-        DistanceDurationDTO dto = routeOptimizingService.getETA(pickupLat, pickupLong, dropoffLat, dropoffLong);
+        DistanceDurationDTO dto = routeOptimizingService.getDistanceAndETA(pickupLat, pickupLong, dropoffLat, dropoffLong);
         return ResponseEntity.ok(dto);
     }
 
@@ -56,5 +63,12 @@ public class RideController {
     {
         CarbonDTO carbonDTO=co2AnalyticsService.getRiderCarbonEmission(riderId);
         return ResponseEntity.ok(carbonDTO);
+    }
+
+    @GetMapping("/riderService/getTrips/{riderID}")
+    public ResponseEntity<List<TripDTO>> requestAllTrips(@PathVariable String riderId)
+    {
+        List<TripDTO>trips=riderService.fetchAllTrips(riderId);
+        return ResponseEntity.ok(trips);
     }
 }
