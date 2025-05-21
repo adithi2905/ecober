@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.ecober.adapter.Dto.DistanceDurationDTO;
 import com.ecober.adapter.Dto.DriverDTO;
 import com.ecober.adapter.mapper.DriverMapper;
 import com.ecober.domain.model.Driver;
@@ -34,10 +35,20 @@ public class DriverMatchingService
     @Autowired
     DriverMapper driverMapper;
 
+    @Autowired
+    RouteOptimizingService routeOptimizingService;
+
+    DistanceDurationDTO distanceDurationDTO;
         public DriverDTO fetchNearestDriver(String riderId,String riderPickupLocation,String riderDropOffLocation,double pickupLatitude, double pickupLongitude,double dropoffLatitude,double dropoffLongitude,String preferredVehicleType, boolean wilingToPool) {
             Logger.getLogger(riderPickupLocation);
-            double dist=GeoUtils.haversinDistance(pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude);
-            double carbonEmission=GeoUtils.calculateEmissions(dist, preferredVehicleType);
+            try{
+            distanceDurationDTO=routeOptimizingService.getDistanceAndETA(pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude);
+            }
+            catch(Exception ex)
+            {
+            distanceDurationDTO=GeoUtils.haversinDistanceandDuration(pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude);
+        }
+            double carbonEmission=GeoUtils.calculateEmissions(distanceDurationDTO.getDistanceKm(), preferredVehicleType);
             final List<Driver> availableDrivers =driverRepository.findByDriverLocation(riderPickupLocation);     
             Driver best= availableDrivers.stream()
             .findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable driver found"));
@@ -46,9 +57,9 @@ public class DriverMatchingService
                         Route newRoute = Route.builder().routeID(UUID.randomUUID().toString())
     .source(riderPickupLocation)
     .destination(riderDropOffLocation)
-    .distanceKm(dist)
+    .distanceKm(distanceDurationDTO.getDistanceKm())
     .carbonCost(carbonEmission)
-    .estimatedTime(0.0) 
+    .estimatedTime(distanceDurationDTO.getDurationInMins()) 
     .build();
     return routeRepository.save(newRoute);
 });
