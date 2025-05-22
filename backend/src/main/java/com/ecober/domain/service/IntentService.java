@@ -40,7 +40,7 @@ public class IntentService {
         headers.set("HTTP-Referer", "http://localhost:3000");
 
         Map<String, Object> body = Map.of(
-            "model", "openai/gpt-3.5-turbo",
+            "model", "mistralai/mistral-7b-instruct:free",
             "messages", List.of(
                 Map.of("role", "user", "content", prompt)
             )

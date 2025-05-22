@@ -24,10 +24,14 @@ import com.ecober.domain.service.IntentService;
 
 import com.ecober.domain.service.RouteOptimizingService;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 
 
 import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+
 @RestController
 @RequestMapping("/ride")
 public class RideController {
@@ -58,7 +62,6 @@ public class RideController {
         public ResponseEntity<String> chatIntent(@RequestBody Map<String, String> payload) {
             String userMessage = payload.get("message");
             String intentJson = intentService.getIntent(userMessage);
-
             return ResponseEntity.ok(intentJson);
         }
 
@@ -76,17 +79,23 @@ public class RideController {
     @PostMapping("/chatbot")
 public ResponseEntity<String> chat(@RequestBody Map<String, String> payload) {
     String userMessage = payload.get("message");
-    String botReply;
+    String intentJson = intentService.getIntent(userMessage);
+    ObjectMapper objectMapper = new ObjectMapper();
+    try {
+        Map<String, String> intentMap = objectMapper.readValue(intentJson, new TypeReference<>() {});
+        String intent = intentMap.get("intent");
 
-    if (userMessage != null && userMessage.toLowerCase().contains("last ride")) {
-        botReply = "Your last ride emitted 1.4 kg of CO₂ 🌱";
-    } else if (userMessage != null && userMessage.toLowerCase().contains("week")) {
-        botReply = "You emitted 7.6 kg of CO₂ this week. Great job reducing emissions!";
-    } else {
-        botReply = "I can tell you about your carbon footprint. Try asking about your last ride or weekly emissions!";
+        return switch (intent) {
+            case "get_last_ride_emission" -> ResponseEntity.ok("Your last ride emitted 1.4 kg of CO₂ 🌱");
+            case "get_weekly_emission" -> ResponseEntity.ok("You emitted 7.6 kg of CO₂ this week 🌍");
+            case "get_monthly_emission" -> ResponseEntity.ok("You emitted 32.1 kg of CO₂ this month 📅");
+            case "get_all_trips" -> ResponseEntity.ok("You have taken 12 trips so far 🚗");
+            default -> ResponseEntity.ok("Sorry, I couldn't understand that. Try asking about emissions or trips.");
+        };
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error parsing intent: " + e.getMessage());
     }
-
-    return ResponseEntity.ok(botReply);
 }
 
     @GetMapping("/carbonEmission/{riderId}")
