@@ -10,7 +10,6 @@ C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\mapper\TripMapper.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\controller\RideController.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\DriverDTO.java
-C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\IntentService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\RouteDTO.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\Driver.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\DriverMatchingService.java

@@ -9,26 +9,26 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-05-21T21:41:23-0400",
+    date = "2025-05-26T04:36:27-0400",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
 )
 @Component
 public class TripMapperImpl implements TripMapper {
 
     @Override
-    public TripDTO toDto(Trip results) {
-        if ( results == null ) {
+    public TripDTO toDto(Trip trip) {
+        if ( trip == null ) {
             return null;
         }
 
         TripDTO.TripDTOBuilder tripDTO = TripDTO.builder();
 
-        tripDTO.userId( results.getUserId() );
-        tripDTO.driverId( results.getDriverId() );
-        tripDTO.startTime( results.getStartTime() );
-        tripDTO.endTime( results.getEndTime() );
-        tripDTO.carbonEmissions( results.getCarbonEmissions() );
-        tripDTO.route( results.getRoute() );
+        tripDTO.userId( trip.getUserId() );
+        tripDTO.driverId( trip.getDriverId() );
+        tripDTO.startTime( trip.getStartTime() );
+        tripDTO.endTime( trip.getEndTime() );
+        tripDTO.carbonEmissions( trip.getCarbonEmissions() );
+        tripDTO.route( trip.getRoute() );
 
         return tripDTO.build();
     }

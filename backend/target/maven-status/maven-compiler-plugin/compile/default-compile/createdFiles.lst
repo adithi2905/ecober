@@ -21,8 +21,6 @@ com\ecober\domain\model\Driver.class
 com\ecober\adapter\mapper\DriverMapperImpl.class
 com\ecober\adapter\Dto\TripDTO.class
 com\ecober\domain\service\Co2AnalyticsService.class
-com\ecober\domain\service\IntentService.class
-com\ecober\adapter\controller\RideController$1.class
 com\ecober\adapter\Dto\CarbonDTO$CarbonDTOBuilder.class
 com\ecober\domain\service\RouteOptimizingService.class
 com\ecober\util\GeoUtils.class
