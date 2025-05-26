@@ -19,10 +19,11 @@ public class RiderService {
     @Autowired
     TripMapper tripMapper;
 
-    public List<Trip> fetchAllTrips(String riderID)
+    public List<TripDTO> fetchAllTrips(String riderID)
     {
         List<Trip>results=tripRepository.findByUserId(riderID);
-        List<TripDTO>trips=tripMapper.toDto(results);
+        List<TripDTO>trips=tripMapper.toDtoList(results);
+        return trips;
         
     }
     

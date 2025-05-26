@@ -1,6 +1,5 @@
 package com.ecober.domain.service;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -8,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import com.ecober.adapter.Dto.DistanceDurationDTO;
 import org.json.JSONObject;
-
 @Service
 public class RouteOptimizingService {
 
@@ -18,7 +16,7 @@ public class RouteOptimizingService {
     @Autowired
     RestTemplate restTemplate;
 
-    public DistanceDurationDTO getETA(double pickupLat,double pickupLong,double dropoffLat,double dropoffLong)
+    public DistanceDurationDTO getDistanceAndETA(double pickupLat,double pickupLong,double dropoffLat,double dropoffLong)
     {
         String url=String.format("https://maps.googleapis.com/maps/api/directions/json?origin=%f,%f&destination=%f,%f&departure_time=now&key=%s",
             pickupLat, pickupLong, dropoffLat, dropoffLong, gmapApiKey);
