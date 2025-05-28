@@ -6,6 +6,8 @@ import BookingConfirmation from './components/bookingConfirmation';
 import DashboardLayout from './dashboards/dashboardLayout';
 import TripHistory from './components/tripsHistory';
 import Profile from './components/Profile';
+import EcoReport from './components/ecoReport';
+import GreenGoals from './components/greenGoals';
 
 function App() {
   return (
@@ -13,10 +15,13 @@ function App() {
       <Routes>
         {/* All dashboard content goes inside this layout */}
         <Route element={<DashboardLayout />}>
+
           <Route path="/rideBooking" element={<RiderBooking />} />
           <Route path="/bookingConfirmation" element={<BookingConfirmation />} />
           <Route path="/tripsHistory" element={<TripHistory />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/ecoReport" element={<EcoReport />} />
+          <Route path="/goals" element={<GreenGoals />} />
         
         </Route>
       </Routes>
