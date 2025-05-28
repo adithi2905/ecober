@@ -2,9 +2,9 @@ import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 
 const navLinks = [
-  { name: 'Book Ride', path: '/rideBooking' },
-  { name: 'Past Rides', path: '/tripsHistory' },
-  { name: 'Profile', path: '/profile' },
+{ name: 'Book Ride', path: '/rideBooking' },
+{ name: 'Past Rides', path: '/tripsHistory' },
+{ name: 'Profile', path: '/profile' },
    { name: 'Eco History', path: '/ecoReport' },
     { name: 'Green Goals', path: '/goals' },
 ];
