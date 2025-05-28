@@ -19,6 +19,7 @@ import com.ecober.adapter.Dto.RiderDTO;
 import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.domain.service.Co2AnalyticsService;
 import com.ecober.domain.service.DriverMatchingService;
+import com.ecober.domain.service.RiderRequestService;
 import com.ecober.domain.service.RiderService;
 import com.ecober.domain.service.RouteOptimizingService;
 
@@ -40,12 +41,16 @@ public class RideController {
     @Autowired
     RouteOptimizingService routeOptimizingService;
 
+    @Autowired
+    private RiderRequestService riderRequestService;
+
+
     @PostMapping("/requestRide")
-    public ResponseEntity<DriverDTO> requestRide(@NotNull @RequestBody RiderDTO riderDTO)
-    {
-        DriverDTO matchedDriver=fetchNearestRiderService.fetchNearestDriver(riderDTO.getRiderId(),riderDTO.getRiderPickupLocation(),riderDTO.getRiderDropOffLocation(),riderDTO.getPickupLatitude(),riderDTO.getPickupLongitude(),riderDTO.getDropoffLatitude(),riderDTO.getDropoffLongitude(),riderDTO.getPreferredVehicleType(),riderDTO.isWillingToPool());
+    public ResponseEntity<DriverDTO> requestRide(@NotNull @RequestBody RiderDTO riderDTO) {
+        DriverDTO matchedDriver = riderRequestService.handleRideRequest(riderDTO);
         return ResponseEntity.ok(matchedDriver);
     }
+
 
     @GetMapping("/distanceDuration/{riderId}")
     public ResponseEntity<DistanceDurationDTO> requestDistanceDuration(@PathVariable String riderId) {
