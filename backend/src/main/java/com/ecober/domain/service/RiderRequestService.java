@@ -29,6 +29,7 @@ public class RiderRequestService {
 
     public DriverDTO handleRideRequest(RiderDTO riderDTO) {
 
+        // Step 1: Compute Route & Emission
         Route route = routeService.getOrCreateRoute(
                 riderDTO.getRiderPickupLocation(),
                 riderDTO.getRiderDropOffLocation(),
@@ -39,12 +40,14 @@ public class RiderRequestService {
                 riderDTO.getPreferredVehicleType()
         );
 
+        // Step 2: Find Best Driver
         Driver driver = driverMatchingService.findBestDriver(
                 riderDTO.getRiderPickupLocation(),
                 riderDTO.getPreferredVehicleType(),
                 riderDTO.isWillingToPool()
         );
 
+        // Step 3: Create Trip
         tripService.createTrip(riderDTO.getRiderId(), driver.getDriverId().toString(), route);
 
         return driverMapper.toDto(driver);
