@@ -28,7 +28,6 @@ com\ecober\adapter\Dto\DriverDTO.class
 com\ecober\adapter\mapper\TripMapper.class
 com\ecober\infrastructure\repository\RouteRepository.class
 com\ecober\application\config\AppConfig.class
-com\ecober\domain\service\RideRequestService.class
 com\ecober\adapter\mapper\DriverMapper.class
 com\ecober\domain\model\Route.class
 com\ecober\domain\service\CarbonScoringService.class
