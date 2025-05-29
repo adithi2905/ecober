@@ -20,9 +20,9 @@ public class RouteService {
     private RouteOptimizingService routeOptimizingService;
 
     public Route getOrCreateRoute(String pickup, String dropoff,
-                                  double pickupLat, double pickupLng,
-                                  double dropoffLat, double dropoffLng,
-                                  String vehicleType) {
+                                double pickupLat, double pickupLng,
+                                double dropoffLat, double dropoffLng,
+                                String vehicleType) {
 
         Optional<Route> existing = routeRepository.findBySourceAndDestination(pickup, dropoff);
         if (existing.isPresent()) return existing.get();

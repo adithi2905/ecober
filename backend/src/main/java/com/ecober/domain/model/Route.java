@@ -27,5 +27,6 @@ public class Route
     double estimatedTime;
     @Column(name = "is_pooled_eligible", nullable = false)
     boolean isPooledEligible;
+    double carbonEmission;
 
 }

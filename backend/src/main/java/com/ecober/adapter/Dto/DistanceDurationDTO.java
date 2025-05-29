@@ -1,13 +1,10 @@
 package com.ecober.adapter.Dto;
-
 import java.time.LocalDateTime;
+import lombok.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-
+@Data
 @Builder
-@Getter
+@NoArgsConstructor
 @AllArgsConstructor
 public class DistanceDurationDTO {
     private double distanceKm;

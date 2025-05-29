@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-05-28T19:38:21-0400",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
+    date = "2025-05-29T01:18:25-0400",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.42.0.v20250514-1000, environment: Java 21.0.7 (Eclipse Adoptium)"
 )
 @Component
 public class TripMapperImpl implements TripMapper {
@@ -23,12 +23,15 @@ public class TripMapperImpl implements TripMapper {
 
         TripDTO.TripDTOBuilder tripDTO = TripDTO.builder();
 
-        tripDTO.userId( trip.getUserId() );
-        tripDTO.driverId( trip.getDriverId() );
-        tripDTO.startTime( trip.getStartTime() );
-        tripDTO.endTime( trip.getEndTime() );
         tripDTO.carbonEmissions( trip.getCarbonEmissions() );
-        tripDTO.route( trip.getRoute() );
+        tripDTO.driverId( trip.getDriverId() );
+        tripDTO.driverName( trip.getDriverName() );
+        tripDTO.ecoScore( trip.getEcoScore() );
+        tripDTO.endTime( trip.getEndTime() );
+        tripDTO.estimatedEmission( trip.getEstimatedEmission() );
+        tripDTO.feedback( trip.getFeedback() );
+        tripDTO.startTime( trip.getStartTime() );
+        tripDTO.userId( trip.getUserId() );
 
         return tripDTO.build();
     }

@@ -2,9 +2,15 @@ package com.ecober.domain.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class Rider {
 
@@ -22,7 +28,7 @@ public class Rider {
     @Id
     private String riderId;
     private String preferredVehicleType;
-    private boolean wilingToPool;
+    private boolean willingToPool;
     private double co2Saved;
 
 }

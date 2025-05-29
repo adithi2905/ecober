@@ -1,15 +1,18 @@
 package com.ecober.domain.service;
 
-import com.ecober.adapter.Dto.DriverDTO;
+import com.ecober.adapter.Dto.RideResponseDTO;
 import com.ecober.adapter.Dto.RiderDTO;
 import com.ecober.adapter.mapper.DriverMapper;
 import com.ecober.domain.model.Driver;
 import com.ecober.domain.model.Route;
+import com.ecober.util.GeoUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RiderRequestService {
+    
 
     @Autowired
     private RouteService routeService;
@@ -26,8 +29,12 @@ public class RiderRequestService {
     @Autowired
     private GeocodingService geocodingService;
 
-    public DriverDTO handleRideRequest(RiderDTO riderDTO) {
+    @Autowired
+    private CarbonScoringService carbonScoringService;
 
+    public RideResponseDTO handleRideRequest(RiderDTO riderDTO) {
+
+        System.out.println("Ride request received for rider: " + riderDTO.getRiderName());
         double[] pickupLatLong = geocodingService.getLatAndLong(riderDTO.getRiderPickupLocation());
         double[] dropoffLatLong = geocodingService.getLatAndLong(riderDTO.getRiderDropOffLocation());
 
@@ -54,14 +61,29 @@ public class RiderRequestService {
                 updatedRiderDTO.getPreferredVehicleType()
         );
 
+        double distanceKm = route.getDistanceKm();
+        String vehicleType = updatedRiderDTO.getPreferredVehicleType();
+
+        double carbonEmission = GeoUtils.calculateEmissions(distanceKm, vehicleType);
+        double savings = carbonScoringService.calculateEmissionSavings(distanceKm, vehicleType);
+        String score = carbonScoringService.getEcoScore(carbonEmission);
+        String feedback = carbonScoringService.getCarbonFeedback(savings);
+
+
         Driver driver = driverMatchingService.findBestDriver(
                 updatedRiderDTO.getRiderPickupLocation(),
                 updatedRiderDTO.getPreferredVehicleType(),
                 updatedRiderDTO.isWillingToPool()
         );
 
-        tripService.createTrip(updatedRiderDTO.getRiderId(), driver.getDriverId().toString(), route);
+        tripService.createTrip(updatedRiderDTO.getRiderId(), driver.getDriverId().toString(), driver.getDriverName(),route);
 
-        return driverMapper.toDto(driver);
+        return RideResponseDTO.builder()
+        .driver(driverMapper.toDto(driver))
+        .carbonEmission(carbonEmission)
+        .emissionSaved(savings)
+        .ecoScore(score)
+        .feedback(feedback)
+        .build();
     }
 }

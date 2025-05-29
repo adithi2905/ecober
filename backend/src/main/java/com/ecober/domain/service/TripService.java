@@ -14,8 +14,9 @@ public class TripService {
     @Autowired
     private TripRepository tripRepository;
 
-    public void createTrip(String riderId, String driverId, Route route) {
-        Trip trip = new Trip(riderId, driverId, route, LocalDateTime.now());
-        tripRepository.save(trip);
-    }
+    public void createTrip(String riderId, String driverId, String driverName, Route route) {
+    Trip trip = new Trip(riderId, driverId, driverName, route, LocalDateTime.now());
+    tripRepository.save(trip);
+}
+
 }
