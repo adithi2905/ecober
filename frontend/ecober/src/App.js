@@ -1,13 +1,13 @@
-import React from "react";
-import {BrowserRouter,Routes,Route} from 'react-router-dom';
 import './App.css';
-import ChatBot from './components/Chatbot';
+import './index.css'; 
+import { BrowserRouter, Routes,Route } from 'react-router-dom';
+import RiderBooking from './components/riderBooking';
 
 function App() {
   return (
     <BrowserRouter>
     <Routes>
-      <Route path="/chatbot" element={<ChatBot/>}></Route>
+      <Route path='/rideBooking' element={<RiderBooking/>}></Route>
     </Routes>
     </BrowserRouter>
   );
