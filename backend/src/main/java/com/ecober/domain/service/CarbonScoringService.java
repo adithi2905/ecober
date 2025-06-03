@@ -4,33 +4,51 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CarbonScoringService {
-
-    private static final double EMISSION_THRESHOLD_LOW = 0.1;  
-    private static final double EMISSION_THRESHOLD_HIGH = 0.2;
-
-    public String getEcoScore(double carbonEmitted) {
-        if (carbonEmitted < EMISSION_THRESHOLD_LOW) {
-            return "A+ (Excellent)";
-        } else if (carbonEmitted < EMISSION_THRESHOLD_HIGH) {
-            return "B (Good)";
+    
+    private static final double EXCELLENT_THRESHOLD = 10.0;
+    private static final double GOOD_THRESHOLD = 25.0;
+    private static final double AVERAGE_THRESHOLD = 50.0;
+    
+    public double calculateCarbonScore(double totalEmissions, int totalTrips) {
+        if (totalTrips == 0) return 100.0;
+        
+        double averageEmissionPerTrip = totalEmissions / totalTrips;
+        
+        if (averageEmissionPerTrip <= EXCELLENT_THRESHOLD) {
+            return 100.0 - (averageEmissionPerTrip / EXCELLENT_THRESHOLD * 10);
+        } else if (averageEmissionPerTrip <= GOOD_THRESHOLD) {
+            return 90.0 - ((averageEmissionPerTrip - EXCELLENT_THRESHOLD) / (GOOD_THRESHOLD - EXCELLENT_THRESHOLD) * 20);
+        } else if (averageEmissionPerTrip <= AVERAGE_THRESHOLD) {
+            return 70.0 - ((averageEmissionPerTrip - GOOD_THRESHOLD) / (AVERAGE_THRESHOLD - GOOD_THRESHOLD) * 30);
         } else {
-            return "C (Needs Improvement)";
+            return Math.max(0, 40.0 - ((averageEmissionPerTrip - AVERAGE_THRESHOLD) / 50.0 * 40));
         }
     }
-
-    public double calculateEmissionSavings(double distanceKm, String vehicleType) {
-        double petrolEmissionPerKm = 0.21;
-        double electricEmissionPerKm = 0.05;
-
-        double baseEmission = petrolEmissionPerKm * distanceKm;
-        double currentEmission = (vehicleType.equalsIgnoreCase("Electric") ? electricEmissionPerKm : petrolEmissionPerKm) * distanceKm;
-
-        return baseEmission - currentEmission; 
+    public String getCarbonRating(double score) {
+        if (score >= 90) return "A+";
+        if (score >= 80) return "A";
+        if (score >= 70) return "B+";
+        if (score >= 60) return "B";
+        if (score >= 50) return "C+";
+        if (score >= 40) return "C";
+        if (score >= 30) return "D";
+        return "F";
     }
-
-    public String getCarbonFeedback(double savingsKg) {
-        if (savingsKg >= 20) return "You're a Climate Hero 🌱";
-        else if (savingsKg >= 5) return "Nice! You're helping the planet 🌍";
-        else return "Every small step counts 🚲";
+    
+    public double calculateCO2Savings(double actualEmissions, String vehicleType) {
+        double averageCarEmission = actualEmissions * (0.21 / getEmissionFactor(vehicleType));
+        return Math.max(0, averageCarEmission - actualEmissions);
+    }
+    
+    private double getEmissionFactor(String vehicleType) {
+        return switch(vehicleType.toUpperCase()) {
+            case "EV" -> 0.05;
+            case "BIKE" -> 0.08;
+            case "SUV" -> 0.25;
+            case "SEDAN" -> 0.21;
+            default -> 0.21;
+        };
     }
 }
+
+    
