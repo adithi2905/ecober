@@ -1,5 +1,4 @@
 package com.ecober.domain.service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +26,10 @@ public class DriverMatchingService {
 
     @Autowired
     private DriverRepository driverRepository;
+public class DriverMatchingService
+{
+    @Autowired
+    DriverRepository driverRepository;
 
     @Autowired
     private TripRepository tripRepository;

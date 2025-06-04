@@ -9,6 +9,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
+
+
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -19,12 +22,13 @@ public class RiderDTO {
     @NotNull
     private String riderPickupLocation;
 
+    @NotNull
+    private String riderPickupLocation;
     private String riderDropOffLocation;
     private double pickupLatitude;
     private double pickupLongitude;
     private double dropoffLatitude;
     private double dropoffLongitude;
-
     private String riderId;
     private String preferredVehicleType;
     private boolean willingToPool;

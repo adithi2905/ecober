@@ -3,7 +3,6 @@ package com.ecober.domain.model;
 import java.time.LocalDateTime;
 
 import com.ecober.adapter.Dto.DriverDTO;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,8 +21,6 @@ public class Trip {
     private Long Id;
     private String userId;
     private String driverId;
-
-
     private String driverName;
     private double estimatedEmission;
     private String ecoScore;
@@ -47,6 +44,5 @@ public class Trip {
         this.startTime = startTime;
         this.carbonEmissions = route.getDistanceKm() * 0.21; 
     }
-
     
 }
