@@ -8,19 +8,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-@Setter
-
-
-@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class RiderDTO {
 
     private String riderName;
-
-    @NotNull
-    private String riderPickupLocation;
 
     @NotNull
     private String riderPickupLocation;

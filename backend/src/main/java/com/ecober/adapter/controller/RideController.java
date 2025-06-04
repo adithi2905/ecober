@@ -17,6 +17,7 @@ import com.ecober.adapter.Dto.DistanceDurationDTO;
 import com.ecober.adapter.Dto.DriverDTO;
 import com.ecober.adapter.Dto.RiderDTO;
 import com.ecober.adapter.Dto.TripDTO;
+import com.ecober.domain.model.Location;
 import com.ecober.domain.service.Co2AnalyticsService;
 import com.ecober.domain.service.DriverMatchingService;
 import com.ecober.domain.service.RiderService;
@@ -39,9 +40,7 @@ public class RideController {
     @Autowired
     RiderService riderService;
 
-    @Autowired
-    IntentService intentService;
-
+    
     @Autowired
     DriverMatchingService fetchNearestRiderService;
 
@@ -58,45 +57,17 @@ public class RideController {
         return ResponseEntity.ok(matchedDriver);
     }
 
-        @PostMapping("/chatbotIntent")
-        public ResponseEntity<String> chatIntent(@RequestBody Map<String, String> payload) {
-            String userMessage = payload.get("message");
-            String intentJson = intentService.getIntent(userMessage);
-            return ResponseEntity.ok(intentJson);
-        }
-
     @GetMapping("/distanceDuration/{riderId}")
     public ResponseEntity<DistanceDurationDTO> requestDistanceDuration(@PathVariable String riderId) {
         double pickupLat = 12.9352;
         double pickupLong = 77.6245;
         double dropoffLat = 12.9716;
         double dropoffLong = 77.5946;
-
-        DistanceDurationDTO dto = routeOptimizingService.getDistanceAndETA(pickupLat, pickupLong, dropoffLat, dropoffLong);
+        Location pickup=new Location(pickupLat,pickupLong,"",0.0);
+        Location dropoff=new Location(dropoffLat,dropoffLong,"",0.0);
+        DistanceDurationDTO dto = routeOptimizingService.getDistanceAndETA(pickup,dropoff);
         return ResponseEntity.ok(dto);
     }
-
-    @PostMapping("/chatbot")
-public ResponseEntity<String> chat(@RequestBody Map<String, String> payload) {
-    String userMessage = payload.get("message");
-    String intentJson = intentService.getIntent(userMessage);
-    ObjectMapper objectMapper = new ObjectMapper();
-    try {
-        Map<String, String> intentMap = objectMapper.readValue(intentJson, new TypeReference<>() {});
-        String intent = intentMap.get("intent");
-
-        return switch (intent) {
-            case "get_last_ride_emission" -> ResponseEntity.ok("Your last ride emitted 1.4 kg of CO₂ 🌱");
-            case "get_weekly_emission" -> ResponseEntity.ok("You emitted 7.6 kg of CO₂ this week 🌍");
-            case "get_monthly_emission" -> ResponseEntity.ok("You emitted 32.1 kg of CO₂ this month 📅");
-            case "get_all_trips" -> ResponseEntity.ok("You have taken 12 trips so far 🚗");
-            default -> ResponseEntity.ok("Sorry, I couldn't understand that. Try asking about emissions or trips.");
-        };
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error parsing intent: " + e.getMessage());
-    }
-}
 
     @GetMapping("/carbonEmission/{riderId}")
     public ResponseEntity<CarbonDTO> requestCarbonEmission(@PathVariable String riderId)

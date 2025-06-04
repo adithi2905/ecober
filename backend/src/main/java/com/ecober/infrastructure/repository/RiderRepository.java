@@ -15,7 +15,7 @@ public interface RiderRepository extends JpaRepository<Rider, String> {
     
     List<Rider> findByRiderPickupLocation(String pickupLocation);
     
-    List<Rider> findByWilingToPool(boolean willingToPool);
+    List<Rider> findByWillingToPool(boolean willingToPool);
     
     List<Rider> findByPreferredVehicleType(String vehicleType);
 }
