@@ -25,10 +25,6 @@ import com.ecober.util.GeoUtils;
 public class DriverMatchingService {
 
     @Autowired
-    private DriverRepository driverRepository;
-public class DriverMatchingService
-{
-    @Autowired
     DriverRepository driverRepository;
 
     @Autowired
@@ -119,3 +115,4 @@ public class DriverMatchingService
         }
     }
 }
+

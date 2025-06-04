@@ -26,4 +26,4 @@ public class RiderService {
         return trips;
         
     }
-    
+}    

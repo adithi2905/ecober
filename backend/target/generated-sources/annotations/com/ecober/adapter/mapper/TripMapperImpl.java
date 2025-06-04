@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-06-03T19:49:41-0400",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.42.0.v20250514-1000, environment: Java 21.0.7 (Eclipse Adoptium)"
+    date = "2025-06-03T22:48:34-0400",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
 )
 @Component
 public class TripMapperImpl implements TripMapper {
@@ -23,15 +23,15 @@ public class TripMapperImpl implements TripMapper {
 
         TripDTO.TripDTOBuilder tripDTO = TripDTO.builder();
 
-        tripDTO.carbonEmissions( trip.getCarbonEmissions() );
-        tripDTO.driverId( trip.getDriverId() );
-        tripDTO.driverName( trip.getDriverName() );
-        tripDTO.ecoScore( trip.getEcoScore() );
-        tripDTO.endTime( trip.getEndTime() );
-        tripDTO.estimatedEmission( trip.getEstimatedEmission() );
-        tripDTO.feedback( trip.getFeedback() );
-        tripDTO.startTime( trip.getStartTime() );
         tripDTO.userId( trip.getUserId() );
+        tripDTO.driverId( trip.getDriverId() );
+        tripDTO.startTime( trip.getStartTime() );
+        tripDTO.endTime( trip.getEndTime() );
+        tripDTO.carbonEmissions( trip.getCarbonEmissions() );
+        tripDTO.driverName( trip.getDriverName() );
+        tripDTO.estimatedEmission( trip.getEstimatedEmission() );
+        tripDTO.ecoScore( trip.getEcoScore() );
+        tripDTO.feedback( trip.getFeedback() );
 
         return tripDTO.build();
     }
