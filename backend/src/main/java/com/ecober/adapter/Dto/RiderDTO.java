@@ -5,6 +5,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 
 
 @Getter
@@ -14,6 +18,10 @@ import lombok.Getter;
 public class RiderDTO {
 
     private String riderName;
+
+    @NotNull
+    private String riderPickupLocation;
+
     @NotNull
     private String riderPickupLocation;
     private String riderDropOffLocation;
@@ -25,5 +33,4 @@ public class RiderDTO {
     private String preferredVehicleType;
     private boolean willingToPool;
     private double co2Saved;
-
 }
