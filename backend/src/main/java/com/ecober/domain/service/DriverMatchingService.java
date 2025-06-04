@@ -52,57 +52,67 @@ public class DriverMatchingService {
 
         Logger.getLogger(DriverMatchingService.class.getName()).info("Matching driver for: " + riderPickupAddress);
 
-        // Build Location objects
-        Location pickup = new Location();
-        pickup.setLatitude(pickupLatitude);
-        pickup.setLongitude(pickupLongitude);
-        pickup.setAddress(riderPickupAddress);
-        pickup.setElevation(0.0); // or fetch from an elevation API if needed
+        // Step 1: Construct pickup and dropoff locations
+        Location pickup = new Location(pickupLatitude, pickupLongitude, riderPickupAddress, 0.0);
+        Location dropoff = new Location(dropoffLatitude, dropoffLongitude, riderDropoffAddress, 0.0);
 
-        Location dropoff = new Location();
-        dropoff.setLatitude(dropoffLatitude);
-        dropoff.setLongitude(dropoffLongitude);
-        dropoff.setAddress(riderDropoffAddress);
-        dropoff.setElevation(0.0);
-
-        // Calculate route info
-        DistanceDurationDTO distanceDurationDTO;
+        // Step 2: Estimate distance and duration
+        DistanceDurationDTO distanceDTO;
         try {
-            distanceDurationDTO = routeOptimizingService.getDistanceAndETA(pickup, dropoff);
+            distanceDTO = routeOptimizingService.getDistanceAndETA(pickup, dropoff);
         } catch (Exception ex) {
-            distanceDurationDTO = GeoUtils.haversinDistanceandDuration(pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude);
+            distanceDTO = GeoUtils.haversinDistanceandDuration(
+                    pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude
+            );
         }
 
-        double carbonEmission = GeoUtils.calculateEmissions(distanceDurationDTO.getDistanceKm(), preferredVehicleType);
+        double carbonEmission = GeoUtils.calculateEmissions(distanceDTO.getDistanceKm(), preferredVehicleType);
 
-        // Find available drivers
-        List<Driver> availableDrivers = driverRepository.findByDriverLocation(riderPickupAddress);
-        Driver best = availableDrivers.stream()
-                .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable driver found"));
-
-        // Fetch or create route
+        // Step 3: Reuse or create a route
         Route route = routeRepository.findByCoordinates(
                 pickup.getLatitude(), pickup.getLongitude(),
                 dropoff.getLatitude(), dropoff.getLongitude()
-        ).orElseGet(() -> {
-            Route newRoute = Route.builder()
+        ).orElse(null);
+
+        if (route == null) {
+            route = Route.builder()
                     .routeID(UUID.randomUUID().toString())
                     .source(pickup)
                     .destination(dropoff)
-                    .distanceKm(distanceDurationDTO.getDistanceKm())
+                    .distanceKm(distanceDTO.getDistanceKm())
                     .carbonCost(carbonEmission)
-                    .estimatedTime(distanceDurationDTO.getDurationInMins())
+                    .estimatedTime(distanceDTO.getDurationInMins())
                     .isPooledEligible(willingToPool)
                     .carbonEmission(carbonEmission)
                     .build();
-            return routeRepository.save(newRoute);
-        });
+            route = routeRepository.save(route);
+        }
 
-        // Create trip
+        // Step 4: Find nearest driver using Haversine distance
+        List<Driver> drivers = driverRepository.findAll(); // You can optimize this later
+        Driver best = drivers.stream()
+                .min((d1, d2) -> {
+                    Location loc1 = parseDriverLocation(d1.getDriverLocation());
+                    Location loc2 = parseDriverLocation(d2.getDriverLocation());
+                    double d1Dist = GeoUtils.distanceBetween(pickup, loc1);
+                    double d2Dist = GeoUtils.distanceBetween(pickup, loc2);
+                    return Double.compare(d1Dist, d2Dist);
+                })
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable driver found"));
+
+        // Step 5: Create trip and persist
         Trip trip = new Trip(riderId, best.getDriverId().toString(), best.getDriverName(), route, LocalDateTime.now());
         tripRepository.save(trip);
 
         return driverMapper.toDto(best);
+    }
+
+    private Location parseDriverLocation(String driverLocStr) {
+        try {
+            String[] parts = driverLocStr.split(",");
+            return new Location(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]), null, 0.0);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid driverLocation format: " + driverLocStr);
+        }
     }
 }
