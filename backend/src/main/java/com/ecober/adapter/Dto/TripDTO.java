@@ -1,8 +1,5 @@
 package com.ecober.adapter.Dto;
 import java.time.LocalDateTime;
-
-import com.ecober.domain.model.Route;
-
 import lombok.*;
 
 @Builder

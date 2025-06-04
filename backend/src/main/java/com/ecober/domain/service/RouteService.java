@@ -1,6 +1,7 @@
 package com.ecober.domain.service;
 
 import com.ecober.adapter.Dto.DistanceDurationDTO;
+import com.ecober.domain.model.Location;
 import com.ecober.domain.model.Route;
 import com.ecober.infrastructure.repository.RouteRepository;
 import com.ecober.util.GeoUtils;
@@ -19,19 +20,20 @@ public class RouteService {
     @Autowired
     private RouteOptimizingService routeOptimizingService;
 
-    public Route getOrCreateRoute(String pickup, String dropoff,
-                                double pickupLat, double pickupLng,
-                                double dropoffLat, double dropoffLng,
-                                String vehicleType) {
+    public Route getOrCreateRoute(Location pickup, Location dropoff, String vehicleType) {
+        Optional<Route> existing = routeRepository.findByCoordinates(
+                pickup.getLatitude(), pickup.getLongitude(),
+                dropoff.getLatitude(), dropoff.getLongitude());
 
-        Optional<Route> existing = routeRepository.findBySourceAndDestination(pickup, dropoff);
         if (existing.isPresent()) return existing.get();
 
         DistanceDurationDTO distanceDuration;
         try {
-            distanceDuration = routeOptimizingService.getDistanceAndETA(pickupLat, pickupLng, dropoffLat, dropoffLng);
+            distanceDuration = routeOptimizingService.getDistanceAndETA(pickup, dropoff);
         } catch (Exception e) {
-            distanceDuration = GeoUtils.haversinDistanceandDuration(pickupLat, pickupLng, dropoffLat, dropoffLng);
+            distanceDuration = GeoUtils.haversinDistanceandDuration(
+                    pickup.getLatitude(), pickup.getLongitude(),
+                    dropoff.getLatitude(), dropoff.getLongitude());
         }
 
         double emission = GeoUtils.calculateEmissions(distanceDuration.getDistanceKm(), vehicleType);
