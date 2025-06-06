@@ -29,7 +29,6 @@ C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\TripService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\GeocodingService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\infrastructure\repository\TripRepository.java
-C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\controller\RiderController.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\EcoberApplication.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\Route.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\infrastructure\repository\RouteRepository.java

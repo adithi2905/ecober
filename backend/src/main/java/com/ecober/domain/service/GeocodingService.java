@@ -17,7 +17,7 @@ public class GeocodingService
 
     @Autowired
     RestTemplate restTemplate;
-  public double[] getLatAndLong(String location) {
+public  double[] getLatAndLong(String location) {
     String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" +
             URLEncoder.encode(location, StandardCharsets.UTF_8) +
             "&key=" + gmapKey;

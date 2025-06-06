@@ -9,10 +9,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Getter
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class Trip {
 
@@ -25,7 +27,6 @@ public class Trip {
     private double estimatedEmission;
     private String ecoScore;
     private String feedback;
-
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
@@ -33,16 +34,5 @@ public class Trip {
 
     @ManyToOne
     @JoinColumn(name = "route_id")
-    private Route route;
-
-    public Trip(){}
-
-    public Trip(String userId, String driverId, String driverName,Route route, LocalDateTime startTime) {
-        this.userId = userId;
-        this.driverId = driverId;
-        this.route = route;
-        this.startTime = startTime;
-        this.carbonEmissions = route.getDistanceKm() * 0.21; 
-    }
-    
+    private Route route;    
 }

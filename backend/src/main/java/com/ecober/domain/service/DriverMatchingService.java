@@ -1,5 +1,6 @@
 package com.ecober.domain.service;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -28,7 +29,7 @@ public class DriverMatchingService {
     DriverRepository driverRepository;
 
     @Autowired
-    private TripRepository tripRepository;
+    private TripService tripService;
 
     @Autowired
     private RouteRepository routeRepository;
@@ -38,6 +39,9 @@ public class DriverMatchingService {
 
     @Autowired
     private RouteOptimizingService routeOptimizingService;
+
+    @Autowired
+    private GeocodingService geocodingService;
 
     public DriverDTO fetchNearestDriver(String riderId,
                                         String riderPickupAddress,
@@ -88,31 +92,18 @@ public class DriverMatchingService {
         }
 
         // Step 4: Find nearest driver using Haversine distance
-        List<Driver> drivers = driverRepository.findAll(); // You can optimize this later
+        List<Driver> drivers = driverRepository.findAll(); 
         Driver best = drivers.stream()
-                .min((d1, d2) -> {
-                    Location loc1 = parseDriverLocation(d1.getDriverLocation());
-                    Location loc2 = parseDriverLocation(d2.getDriverLocation());
-                    double d1Dist = GeoUtils.distanceBetween(pickup, loc1);
-                    double d2Dist = GeoUtils.distanceBetween(pickup, loc2);
-                    return Double.compare(d1Dist, d2Dist);
-                })
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable driver found"));
+    .min(Comparator.comparingDouble(d -> {
+        double[] coords = geocodingService.getLatAndLong(d.getDriverLocation());
+        return GeoUtils.haversinDistance(pickup.getLatitude(), pickup.getLongitude(), coords[0], coords[1]);
+    }))
+    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable driver found"));
 
         // Step 5: Create trip and persist
-        Trip trip = new Trip(riderId, best.getDriverId().toString(), best.getDriverName(), route, LocalDateTime.now());
-        tripRepository.save(trip);
-
-        return driverMapper.toDto(best);
+        tripService.createTrip(riderId, best, route, carbonEmission);
+    return driverMapper.toDto(best);
     }
 
-    private Location parseDriverLocation(String driverLocStr) {
-        try {
-            String[] parts = driverLocStr.split(",");
-            return new Location(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]), null, 0.0);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid driverLocation format: " + driverLocStr);
-        }
-    }
 }
 
