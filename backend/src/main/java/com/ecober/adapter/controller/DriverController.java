@@ -23,7 +23,7 @@ public class DriverController {
     @Autowired
     private DriverService driverService;
 
-    @GetMapping
+    @GetMapping("/all-drivers")
     public ResponseEntity<List<DriverDTO>> getAllDrivers() {
         return ResponseEntity.ok(driverService.getAllDrivers());
     }
@@ -40,7 +40,7 @@ public class DriverController {
         return ResponseEntity.ok(driverService.getDriversByLocation(location));
     }
 
-    @PostMapping
+    @PostMapping("/create-drivers")
     public ResponseEntity<DriverDTO> createDriver(@RequestBody DriverDTO driverDTO) {
         return ResponseEntity.ok(driverService.createDriver(driverDTO));
     }

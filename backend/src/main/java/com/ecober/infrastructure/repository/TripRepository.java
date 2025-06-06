@@ -9,6 +9,6 @@ import com.ecober.domain.model.Trip;
 public interface TripRepository extends JpaRepository<Trip,String>{
     List<Trip> findByUserId(String userId);
 
-    List<Trip> findByDriverId(String driverId);
-    
+    List<Trip> findByDriverId(String driverid);
+
 }
