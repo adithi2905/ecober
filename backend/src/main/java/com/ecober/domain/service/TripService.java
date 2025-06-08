@@ -1,9 +1,12 @@
 package com.ecober.domain.service;
 
+import com.ecober.adapter.Dto.RiderDTO;
 import com.ecober.domain.model.Driver;
 import com.ecober.domain.model.Route;
 import com.ecober.domain.model.Trip;
+import com.ecober.domain.model.User;
 import com.ecober.infrastructure.repository.TripRepository;
+import com.ecober.infrastructure.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,15 +20,23 @@ public class TripService {
     @Autowired
     private TripRepository tripRepository;
 
-   
+    @Autowired
+    UserRepository userRepository;
+
+    RiderDTO riderDTO;
    public void createTrip(UUID riderId, Driver best, Route route, double carbonEmission) {
+
     Trip trip = new Trip();
+    User user = userRepository.findById(riderId)
+    .orElseThrow(() -> new RuntimeException("User not found with id " + riderDTO.getRiderId()));
+    trip.setUser(user);
     trip.setDriverId(best.getDriverId());
     trip.setDriverName(best.getDriverName());
     trip.setRoute(route);
     trip.setStartTime(LocalDateTime.now());
     trip.setEstimatedEmission(carbonEmission);
     trip.setEcoScore("B+");
+    trip.setUser(user);
     tripRepository.save(trip);
 
 
