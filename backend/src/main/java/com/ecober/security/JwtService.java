@@ -3,37 +3,49 @@ package com.ecober.security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
+import java.util.UUID;
 import java.security.Key;
 
 @Service
 public class JwtService {
 
-    private final String SECRET_KEY = "ecoberSecretKeyecoberSecretKey1234"; // min 256 bits
+    private static final String SECRET_KEY = "ecoberSecretKeyecoberSecretKey1234"; // min 256 bits
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    public String generateToken(String username) {
+    /**
+     * Generates JWT using userId as subject
+     */
+    public String generateToken(UUID userId) {
         return Jwts.builder()
-            .setSubject(username)
+            .setSubject(userId.toString()) // ✅ Set UUID as subject
             .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day
+            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
             .signWith(getSigningKey(), SignatureAlgorithm.HS256)
             .compact();
     }
 
-    public String extractUsername(String token) {
+    /**
+     * Extracts userId from JWT token
+     */
+    public String extractUserId(String token) {
         return Jwts.parserBuilder()
             .setSigningKey(getSigningKey())
             .build()
             .parseClaimsJws(token)
             .getBody()
-            .getSubject();
+            .getSubject(); // ✅ subject = userId (UUID)
     }
 
-    public boolean isTokenValid(String token, String username) {
-        return extractUsername(token).equals(username);
+    /**
+     * Validates token against stored userId
+     */
+    public boolean isTokenValid(String token, UUID userId) {
+        String extractedUserId = extractUserId(token);
+        return extractedUserId.equals(userId.toString());
     }
 }
