@@ -43,7 +43,7 @@ public class DriverMatchingService {
     @Autowired
     private GeocodingService geocodingService;
 
-    public DriverDTO fetchNearestDriver(String riderId,
+    public DriverDTO fetchNearestDriver(UUID riderId,
                                         String riderPickupAddress,
                                         String riderDropoffAddress,
                                         double pickupLatitude,

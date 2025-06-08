@@ -1,22 +1,20 @@
 package com.ecober.adapter.Dto;
 import java.time.LocalDateTime;
-import lombok.*;
-import java.time.LocalDateTime;
-
-import com.ecober.domain.model.Route;
+import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Builder
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class TripDTO {
-    private Long Id;
-    private String userId;
+    private UUID riderId;
     private String driverId;
 
     private LocalDateTime startTime;

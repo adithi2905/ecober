@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class TripService {
@@ -17,9 +18,8 @@ public class TripService {
     private TripRepository tripRepository;
 
    
-   public void createTrip(String riderId, Driver best, Route route, double carbonEmission) {
+   public void createTrip(UUID riderId, Driver best, Route route, double carbonEmission) {
     Trip trip = new Trip();
-    trip.setUserId(riderId);
     trip.setDriverId(best.getDriverId());
     trip.setDriverName(best.getDriverName());
     trip.setRoute(route);

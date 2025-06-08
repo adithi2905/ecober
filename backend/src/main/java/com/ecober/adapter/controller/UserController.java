@@ -10,7 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ecober.adapter.Dto.UserDTO;
 import com.ecober.adapter.mapper.UserMapper;
 import com.ecober.domain.model.User;
+import com.ecober.domain.service.UserLoginService;
 import com.ecober.domain.service.UserRegistrationService;
+
+import jakarta.servlet.http.HttpSession;
 
 
 @RestController
@@ -23,7 +26,10 @@ public class UserController {
     @Autowired
     UserRegistrationService userRegService;
 
-    @PostMapping
+    @Autowired
+    UserLoginService userLogin;
+
+    @PostMapping("/registration")
     public ResponseEntity<String> registerUser(@RequestBody UserDTO userDto)
     {
         if(userDto.getPassword()!=null)
@@ -38,5 +44,23 @@ public class UserController {
         }
     }
 
-    
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(@RequestBody UserDTO userDto,HttpSession session)
+    {
+        ResponseEntity<String>results=null;
+        if(userDto.getPassword()!=null)
+        {
+        User user=userMapper.toEntity(userDto);
+        session.setAttribute("riderId", user.getId());
+        results = userLogin.userLogin(user, session);
+        }
+        return results;
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpSession session) {
+        session.invalidate();
+        return ResponseEntity.ok("Logged out");
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.ecober.domain.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class RiderService {
 
     public List<TripDTO> fetchAllTrips(String riderID)
     {
-        List<Trip>results=tripRepository.findByUserId(riderID);
+        List<Trip>results=tripRepository.findByUserId(UUID.fromString(riderID));
         List<TripDTO>trips=tripMapper.toDtoList(results);
         return trips;
         

@@ -2,6 +2,7 @@ package com.ecober.domain.service;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Service;
@@ -11,9 +12,9 @@ public class NotificationService {
     
     private final Map<String, String> lastNotifications = new ConcurrentHashMap<>();
     
-    public void notifyRider(String riderId, String message) {
+    public void notifyRider(UUID riderId, String message) {
         String notification = String.format("[%s] Rider %s: %s", 
-            LocalDateTime.now().toString(), riderId, message);
+            LocalDateTime.now().toString(), riderId.toString(), message);
         lastNotifications.put("rider_" + riderId, notification);
         
         // In a real implementation, this would send push notifications, SMS, or emails
@@ -29,21 +30,21 @@ public class NotificationService {
         System.out.println("DRIVER NOTIFICATION: " + notification);
     }
     
-    public void notifyBoth(String riderId, String driverId, String message) {
+    public void notifyBoth(UUID riderId, String driverId, String message) {
         notifyRider(riderId, message);
         notifyDriver(driverId, message);
     }
     
-    public String getLastNotification(String userId, String userType) {
+    public String getLastNotification(UUID userId, String userType) {
         return lastNotifications.get(userType.toLowerCase() + "_" + userId);
     }
     
-    public void sendCarbonUpdateNotification(String userId, double co2Saved) {
+    public void sendCarbonUpdateNotification(UUID userId, double co2Saved) {
         String message = String.format("Great job! You've saved %.2f kg of CO₂ with eco-friendly rides! 🌱", co2Saved);
         notifyRider(userId, message);
     }
     
-    public void sendBadgeUpdateNotification(String userId, String newBadge) {
+    public void sendBadgeUpdateNotification(UUID userId, String newBadge) {
         String message = String.format("Congratulations! You've earned a new badge: %s 🏆", newBadge);
         notifyRider(userId, message);
     }
