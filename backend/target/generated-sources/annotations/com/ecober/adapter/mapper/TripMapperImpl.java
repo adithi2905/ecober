@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-06-08T18:44:08-0400",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
+    date = "2025-06-08T22:46:57-0400",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.42.0.v20250514-1000, environment: Java 21.0.7 (Eclipse Adoptium)"
 )
 @Component
 public class TripMapperImpl implements TripMapper {
@@ -23,14 +23,14 @@ public class TripMapperImpl implements TripMapper {
 
         TripDTO.TripDTOBuilder tripDTO = TripDTO.builder();
 
-        tripDTO.driverId( trip.getDriverId() );
-        tripDTO.startTime( trip.getStartTime() );
-        tripDTO.endTime( trip.getEndTime() );
         tripDTO.carbonEmissions( trip.getCarbonEmissions() );
+        tripDTO.driverId( trip.getDriverId() );
         tripDTO.driverName( trip.getDriverName() );
-        tripDTO.estimatedEmission( trip.getEstimatedEmission() );
         tripDTO.ecoScore( trip.getEcoScore() );
+        tripDTO.endTime( trip.getEndTime() );
+        tripDTO.estimatedEmission( trip.getEstimatedEmission() );
         tripDTO.feedback( trip.getFeedback() );
+        tripDTO.startTime( trip.getStartTime() );
 
         return tripDTO.build();
     }
@@ -43,14 +43,14 @@ public class TripMapperImpl implements TripMapper {
 
         Trip trip = new Trip();
 
+        trip.setCarbonEmissions( tripDTO.getCarbonEmissions() );
         trip.setDriverId( tripDTO.getDriverId() );
         trip.setDriverName( tripDTO.getDriverName() );
-        trip.setEstimatedEmission( tripDTO.getEstimatedEmission() );
         trip.setEcoScore( tripDTO.getEcoScore() );
+        trip.setEndTime( tripDTO.getEndTime() );
+        trip.setEstimatedEmission( tripDTO.getEstimatedEmission() );
         trip.setFeedback( tripDTO.getFeedback() );
         trip.setStartTime( tripDTO.getStartTime() );
-        trip.setEndTime( tripDTO.getEndTime() );
-        trip.setCarbonEmissions( tripDTO.getCarbonEmissions() );
 
         return trip;
     }

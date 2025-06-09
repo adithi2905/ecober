@@ -1,9 +1,11 @@
 package com.ecober.adapter.controller;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,15 +41,25 @@ public class RideController {
     @Autowired
     private RouteOptimizingService routeOptimizingService;
 
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
     @PostMapping("/requestRide")
-    public ResponseEntity<DriverDTO> requestRide(@Valid @RequestBody RiderDTO riderDTO) {
+    public ResponseEntity<?> requestRide(@Valid @RequestBody RiderDTO riderDTO) {
         UUID riderId = AuthUtil.getCurrentUserId();
         if (riderId == null) {
             return ResponseEntity.status(401).build();
         }
 
-        riderDTO.setRiderId(riderId);
+        String rideKey="Ride in progress "+riderId;
+        if(Boolean.TRUE.equals(redisTemplate.hasKey(rideKey)))
+        {
+            return ResponseEntity.status(409).body("Ride already in progress.Please wait");
 
+        }
+        redisTemplate.opsForValue().set(rideKey,"LOCKED",Duration.ofMinutes(5));
+        riderDTO.setRiderId(riderId);
+    
         DriverDTO matchedDriver = driverMatchingService.fetchNearestDriver(
                 riderId,
                 riderDTO.getRiderPickupLocation(),
@@ -60,7 +72,13 @@ public class RideController {
                 riderDTO.isWillingToPool()
         );
 
+        if (matchedDriver == null) {
+        return ResponseEntity.status(404).body("No driver available at the moment.");
+        }
+        redisTemplate.opsForValue().set(rideKey, "LOCKED", Duration.ofMinutes(5));
         return ResponseEntity.ok(matchedDriver);
+
+
     }
 
     @GetMapping("/distanceDuration/{tripId}")
