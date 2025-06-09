@@ -43,5 +43,5 @@ public class RouteOptimizingService {
                 .durationInTrafficSecs(durationSeconds)
                 .distanceKm(distanceInMeters / 1000)
                 .build();
-    }
+}
 }

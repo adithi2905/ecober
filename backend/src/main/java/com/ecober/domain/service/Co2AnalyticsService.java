@@ -1,6 +1,8 @@
 package com.ecober.domain.service;
 
 import java.util.List;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +28,7 @@ public class Co2AnalyticsService
 
     public CarbonDTO getRiderCarbonEmission(String riderID)
     {
-        List<Trip>trips=tripRepository.findByUserId(riderID);
+        List<Trip>trips=tripRepository.findByUserId(UUID.fromString(riderID));
         int totalTrips=trips.size();
         double totalEmissions=0.0;
         for(int i=0;i<trips.size();i++)

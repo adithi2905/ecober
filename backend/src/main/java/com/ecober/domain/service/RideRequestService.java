@@ -1,6 +1,5 @@
 package com.ecober.domain.service;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,57 +8,68 @@ import org.springframework.stereotype.Service;
 import com.ecober.adapter.Dto.DriverDTO;
 import com.ecober.adapter.Dto.RiderDTO;
 import com.ecober.domain.model.Rider;
+import com.ecober.domain.model.User;
 import com.ecober.infrastructure.repository.RiderRepository;
+import com.ecober.infrastructure.repository.UserRepository;
+
+import jakarta.servlet.http.HttpSession;
 
 @Service
 public class RideRequestService {
-    
+
     @Autowired
     private DriverMatchingService driverMatchingService;
-    
+
     @Autowired
     private RiderRepository riderRepository;
-    
+
+    @Autowired
+    private UserRepository userRepository;
+
     @Autowired
     private NotificationService notificationService;
-    
-    public DriverDTO processRideRequest(RiderDTO riderDTO) {
-        // Save or update rider information
+
+    public DriverDTO processRideRequest(RiderDTO riderDTO, HttpSession session) {
+        UUID userId = (UUID) session.getAttribute("riderId");
+        if (userId == null) {
+            throw new IllegalStateException("Rider is not logged in or session expired.");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("User not found with ID: " + userId));
+
         Rider rider = mapToRider(riderDTO);
+        rider.setUser(user);
         riderRepository.save(rider);
-        
-        // Find and match driver
+
         DriverDTO matchedDriver = driverMatchingService.fetchNearestDriver(
-            riderDTO.getRiderId(),
-            riderDTO.getRiderPickupLocation(),
-            riderDTO.getRiderDropOffLocation(),
-            riderDTO.getPickupLatitude(),
-            riderDTO.getPickupLongitude(),
-            riderDTO.getDropoffLatitude(),
-            riderDTO.getDropoffLongitude(),
-            riderDTO.getPreferredVehicleType(),
-            riderDTO.isWillingToPool()
+                userId,
+                riderDTO.getRiderPickupLocation(),
+                riderDTO.getRiderDropOffLocation(),
+                riderDTO.getPickupLatitude(),
+                riderDTO.getPickupLongitude(),
+                riderDTO.getDropoffLatitude(),
+                riderDTO.getDropoffLongitude(),
+                riderDTO.getPreferredVehicleType(),
+                riderDTO.isWillingToPool()
         );
-        
-        // Send notifications
-        notificationService.notifyRider(riderDTO.getRiderId(), "Driver found: " + matchedDriver.getDriverName());
+
+        notificationService.notifyRider(userId, "Driver found: " + matchedDriver.getDriverName());
         notificationService.notifyDriver(matchedDriver.getDriverId(), "New ride request from " + riderDTO.getRiderName());
-        
+
         return matchedDriver;
     }
-    
-    public void cancelRideRequest(String riderId, String reason) {
-        // Implement ride cancellation logic
-        notificationService.notifyRider(riderId, "Ride cancelled: " + reason);
+
+    public void cancelRideRequest(UUID userId, String reason) {
+        notificationService.notifyRider(userId, "Ride cancelled: " + reason);
     }
-    
+
     public String generateRideId() {
         return "RIDE_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
-    
+
     private Rider mapToRider(RiderDTO riderDTO) {
         Rider rider = new Rider();
-        rider.setRiderId(riderDTO.getRiderId());
         rider.setRiderName(riderDTO.getRiderName());
         rider.setRiderPickupLocation(riderDTO.getRiderPickupLocation());
         rider.setRiderDropOffLocation(riderDTO.getRiderDropOffLocation());
