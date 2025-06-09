@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-06-08T18:44:08-0400",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
+    date = "2025-06-08T22:46:57-0400",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.42.0.v20250514-1000, environment: Java 21.0.7 (Eclipse Adoptium)"
 )
 @Component
 public class DriverMapperImpl implements DriverMapper {
@@ -23,15 +23,15 @@ public class DriverMapperImpl implements DriverMapper {
 
         DriverDTO.DriverDTOBuilder driverDTO = DriverDTO.builder();
 
-        driverDTO.driverName( driver.getDriverName() );
-        driverDTO.vehicleNo( driver.getVehicleNo() );
         driverDTO.driverId( driver.getDriverId() );
-        driverDTO.verifiedDriver( driver.isVerifiedDriver() );
         driverDTO.driverLocation( driver.getDriverLocation() );
-        driverDTO.vehicleType( driver.getVehicleType() );
+        driverDTO.driverName( driver.getDriverName() );
         driverDTO.fuelEfficiency( driver.getFuelEfficiency() );
-        driverDTO.trustScore( driver.getTrustScore() );
         driverDTO.totalCO2Saved( driver.getTotalCO2Saved() );
+        driverDTO.trustScore( driver.getTrustScore() );
+        driverDTO.vehicleNo( driver.getVehicleNo() );
+        driverDTO.vehicleType( driver.getVehicleType() );
+        driverDTO.verifiedDriver( driver.isVerifiedDriver() );
 
         return driverDTO.build();
     }
@@ -45,14 +45,14 @@ public class DriverMapperImpl implements DriverMapper {
         Driver driver = new Driver();
 
         driver.setDriverId( driverDTO.getDriverId() );
-        driver.setDriverName( driverDTO.getDriverName() );
-        driver.setVehicleNo( driverDTO.getVehicleNo() );
-        driver.setVerifiedDriver( driverDTO.isVerifiedDriver() );
         driver.setDriverLocation( driverDTO.getDriverLocation() );
-        driver.setVehicleType( driverDTO.getVehicleType() );
+        driver.setDriverName( driverDTO.getDriverName() );
         driver.setFuelEfficiency( driverDTO.getFuelEfficiency() );
-        driver.setTrustScore( driverDTO.getTrustScore() );
         driver.setTotalCO2Saved( driverDTO.getTotalCO2Saved() );
+        driver.setTrustScore( driverDTO.getTrustScore() );
+        driver.setVehicleNo( driverDTO.getVehicleNo() );
+        driver.setVehicleType( driverDTO.getVehicleType() );
+        driver.setVerifiedDriver( driverDTO.isVerifiedDriver() );
 
         return driver;
     }

@@ -28,4 +28,5 @@ public class TripDTO {
     private double estimatedEmission;
     private String ecoScore;
     private String feedback;
+    private String status; 
 }
