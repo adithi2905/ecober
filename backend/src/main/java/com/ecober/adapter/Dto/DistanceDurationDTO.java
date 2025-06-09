@@ -1,12 +1,10 @@
 package com.ecober.adapter.Dto;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Builder
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class DistanceDurationDTO {
     private double distanceKm;
     private long durationInMins;

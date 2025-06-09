@@ -1,28 +1,42 @@
 package com.ecober.domain.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import lombok.Data;
+import java.util.UUID;
 
-@Data
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Rider {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private String Id;
 
     private String riderName;
 
     private double pickupLatitude;
     private double pickupLongitude;
-
     private double dropoffLatitude;
     private double dropoffLongitude;
 
     private String riderPickupLocation;
     private String riderDropOffLocation;
 
-    @Id
-    private String riderId;
-    private String preferredVehicleType;
-    private boolean wilingToPool;
-    private double co2Saved;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 
+    private String preferredVehicleType;
+    private boolean willingToPool;
+    private double co2Saved;
 }

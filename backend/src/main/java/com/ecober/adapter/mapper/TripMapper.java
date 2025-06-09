@@ -10,12 +10,9 @@ import com.ecober.domain.model.Trip;
 
 @Mapper(componentModel = "spring")
 public interface TripMapper {
-
-    TripDTO toDto(Trip results);
+    TripDTO toDto(Trip trip);
     Trip toEntity(TripDTO tripDTO);
-
     List<TripDTO> toDtoList(List<Trip> trips);
     List<Trip> toEntityList(List<TripDTO> tripsDTO);
 }
-    
 
