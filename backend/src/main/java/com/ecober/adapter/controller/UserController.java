@@ -2,6 +2,7 @@ package com.ecober.adapter.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,10 +21,9 @@ import com.ecober.domain.service.UserRegistrationService;
 import com.ecober.infrastructure.repository.UserRepository;
 import com.ecober.security.JwtService;
 
-import jakarta.servlet.http.HttpSession;
-
 
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/user")
 public class UserController {
 
@@ -41,7 +41,7 @@ public class UserController {
 
     @Autowired
     UserRepository userRepository;
-    
+
     @Autowired
     AuthenticationManager authenticateManager;
 
@@ -74,9 +74,9 @@ public ResponseEntity<?> login(@RequestBody LoginRequestDTO login) {
 }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpSession session) {
-        session.invalidate();
-        return ResponseEntity.ok("Logged out");
+    public ResponseEntity<String> logout() {
+        return ResponseEntity.ok("Please clear token on client");
     }
+
 
 }

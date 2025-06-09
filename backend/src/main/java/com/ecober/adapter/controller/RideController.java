@@ -17,12 +17,14 @@ import com.ecober.domain.service.DriverMatchingService;
 import com.ecober.domain.service.RouteOptimizingService;
 import com.ecober.domain.service.TripService;
 import com.ecober.infrastructure.repository.TripRepository;
+import com.ecober.util.AuthUtil;
 
-import jakarta.servlet.http.HttpSession;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/ride")
+@SecurityRequirement(name = "bearerAuth") 
 public class RideController {
 
     @Autowired
@@ -38,8 +40,8 @@ public class RideController {
     private RouteOptimizingService routeOptimizingService;
 
     @PostMapping("/requestRide")
-    public ResponseEntity<DriverDTO> requestRide(@Valid @RequestBody RiderDTO riderDTO, HttpSession session) {
-        UUID riderId = (UUID) session.getAttribute("riderId");
+    public ResponseEntity<DriverDTO> requestRide(@Valid @RequestBody RiderDTO riderDTO) {
+        UUID riderId = AuthUtil.getCurrentUserId();
         if (riderId == null) {
             return ResponseEntity.status(401).build();
         }
@@ -61,16 +63,19 @@ public class RideController {
         return ResponseEntity.ok(matchedDriver);
     }
 
-    @GetMapping("/distanceDuration/{rideId}")
-    public ResponseEntity<DistanceDurationDTO> requestDistanceDuration(@PathVariable UUID tripId,HttpSession session) {
-        UUID riderId = (UUID) session.getAttribute("riderId");
+    @GetMapping("/distanceDuration/{tripId}")
+    public ResponseEntity<DistanceDurationDTO> requestDistanceDuration(@PathVariable UUID tripId) {
+        UUID riderId = AuthUtil.getCurrentUserId();
         if (riderId == null) {
             return ResponseEntity.status(401).body(null);
         }
 
         Trip userTrip = tripRepository.findByTripId(tripId);
-        UUID userid=userTrip.getUser().getId();
-        if (userTrip == null || !userid.equals(riderId)) {
+        if (userTrip == null) {
+            return ResponseEntity.status(404).body(null);
+        }
+
+        if (!userTrip.getUser().getId().equals(riderId)) {
             return ResponseEntity.status(403).body(null);
         }
 
@@ -80,13 +85,13 @@ public class RideController {
     }
 
     @GetMapping("/getTrips")
-    public ResponseEntity<List<TripDTO>> requestAllTrips(HttpSession session) {
-        UUID riderId = (UUID) session.getAttribute("riderId");
-        if (riderId == null) {
+    public ResponseEntity<List<TripDTO>> requestAllTrips() {
+        UUID userId = AuthUtil.getCurrentUserId();
+        if (userId == null) {
             return ResponseEntity.status(401).body(null);
         }
 
-        List<TripDTO> trips = tripService.fetchAllTrips(riderId);
+        List<TripDTO> trips = tripService.fetchAllTrips(userId);
         return ResponseEntity.ok(trips);
     }
 }

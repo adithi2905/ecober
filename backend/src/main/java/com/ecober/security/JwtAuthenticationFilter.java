@@ -37,14 +37,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         token = authHeader.substring(7);
-        userIdStr = jwtService.extractUserId(token); // ✅ Extract UUID as string
+        userIdStr = jwtService.extractUserId(token);
 
         if (userIdStr != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
                 UUID userId = UUID.fromString(userIdStr);
                 User user = userRepository.findById(userId).orElse(null);
 
-                if (user != null && jwtService.isTokenValid(token, userId)) {
+                if (user != null && jwtService.isTokenValid(token, user.getId())) {
                     CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword());
 
                     UsernamePasswordAuthenticationToken authToken =
@@ -53,11 +53,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
-
             } catch (IllegalArgumentException e) {
-                // Invalid UUID format
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
-                return;
+                // Optional: log or handle invalid UUID/token format
             }
         }
 

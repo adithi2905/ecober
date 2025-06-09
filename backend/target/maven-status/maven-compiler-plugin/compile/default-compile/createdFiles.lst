@@ -14,6 +14,7 @@ com\ecober\domain\model\Route$RouteBuilder.class
 com\ecober\domain\model\Driver.class
 com\ecober\infrastructure\repository\UserRepository.class
 com\ecober\adapter\mapper\DriverMapperImpl.class
+com\ecober\util\AuthUtil.class
 com\ecober\adapter\Dto\TripDTO.class
 com\ecober\adapter\Dto\CarbonDTO$CarbonDTOBuilder.class
 com\ecober\adapter\Dto\RouteDTO$RouteDTOBuilder.class
@@ -55,6 +56,7 @@ com\ecober\adapter\Dto\LoginResponseDTO.class
 com\ecober\domain\service\RideRequestService.class
 com\ecober\domain\model\Route.class
 com\ecober\domain\service\CarbonScoringService.class
+com\ecober\security\CustomUserDetails.class
 com\ecober\adapter\controller\UserController.class
 com\ecober\adapter\Dto\UserDTO$UserDTOBuilder.class
 com\ecober\domain\service\GeocodingService.class

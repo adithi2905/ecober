@@ -24,35 +24,29 @@ public class TripService {
     private TripRepository tripRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    TripMapper tripMapper;
+    private TripMapper tripMapper;
 
+    public void createTrip(UUID riderId, Driver best, Route route, double carbonEmission) {
+        User user = userRepository.findById(riderId)
+                .orElseThrow(() -> new RuntimeException("User not found with id " + riderId));
 
-    RiderDTO riderDTO;
-   public void createTrip(UUID riderId, Driver best, Route route, double carbonEmission) {
+        Trip trip = new Trip();
+        trip.setUser(user);
+        trip.setDriverId(best.getDriverId());
+        trip.setDriverName(best.getDriverName());
+        trip.setRoute(route);
+        trip.setStartTime(LocalDateTime.now());
+        trip.setEstimatedEmission(carbonEmission);
+        trip.setEcoScore("B+");
 
-    Trip trip = new Trip();
-    User user = userRepository.findById(riderId)
-    .orElseThrow(() -> new RuntimeException("User not found with id " + riderDTO.getRiderId()));
-    trip.setUser(user);
-    trip.setDriverId(best.getDriverId());
-    trip.setDriverName(best.getDriverName());
-    trip.setRoute(route);
-    trip.setStartTime(LocalDateTime.now());
-    trip.setEstimatedEmission(carbonEmission);
-    trip.setEcoScore("B+");
-    tripRepository.save(trip);
-
-}
-
-public List<TripDTO> fetchAllTrips(UUID riderID)
-    {
-        List<Trip>results=tripRepository.findByUserId(riderID);
-        List<TripDTO>trips=tripMapper.toDtoList(results);
-        return trips;
-        
+        tripRepository.save(trip);
     }
 
+    public List<TripDTO> fetchAllTrips(UUID riderID) {
+        List<Trip> results = tripRepository.findByUserId(riderID);
+        return tripMapper.toDtoList(results);
+    }
 }

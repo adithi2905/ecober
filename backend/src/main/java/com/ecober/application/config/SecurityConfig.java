@@ -36,23 +36,21 @@ public class SecurityConfig {
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(
-                "/user/auth/**",           // 👈 Allow login
-                "/user/registration",      // 👈 Allow registration
-                "/swagger-ui/**",
-                "/v3/api-docs/**",
-                "/swagger-resources/**",
-                "/webjars/**",
-                "/v2/api-docs",
-                "/favicon.ico",
-                "/", "/index.html", "/static/**"
+                "/user/auth/login",           
+    "/user/registration","/ride/**",         
+    "/swagger-ui/**",
+    "/v3/api-docs/**",
+    "/swagger-resources/**",
+    "/webjars/**",
+    "/v2/api-docs",
+    "/favicon.ico",
+    "/", "/index.html", "/static/**"
             ).permitAll()
             .anyRequest().authenticated()
         )
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
-
-
     }
 
     @Bean
