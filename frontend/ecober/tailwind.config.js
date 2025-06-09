@@ -1,5 +1,5 @@
 module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}"], // Needed for Tailwind to work
+  content: ["./src/**/*.{js,jsx,ts,tsx}"], 
   theme: {
     extend: {},
   },
