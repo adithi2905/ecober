@@ -7,10 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.ecober.domain.model.Trip;
 
-public interface TripRepository extends JpaRepository<Trip,String>{
+public interface TripRepository extends JpaRepository<Trip,UUID>{
     List<Trip> findByUserId(UUID userId);
 
-    List<Trip> findByDriverId(String driverid);
+    List<Trip> findByDriverId(UUID driverid);
     Trip findByTripId(UUID tripId);
 
 }

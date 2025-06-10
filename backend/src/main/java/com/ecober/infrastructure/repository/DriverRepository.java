@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.ecober.domain.model.Driver;
 
 @Repository
-public interface DriverRepository extends JpaRepository<Driver,String>{
+public interface DriverRepository extends JpaRepository<Driver,UUID>{
     List<Driver> findByDriverLocation(String driverLocation);
     @Query(value = """
     SELECT d.* FROM driver d 

@@ -2,6 +2,7 @@ C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\application\co
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\RouteOptimizingService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\infrastructure\repository\RiderRepository.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\LoginResponseDTO.java
+C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\DriverAuthenticationRequest.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\controller\DriverController.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\security\CustomUserDetails.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\LoginRequestDTO.java
@@ -34,6 +35,7 @@ C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\UserRegistrationService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\controller\RideController.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\DriverDTO.java
+C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\DriverRegistrationRequestDTO.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\UserDTO.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\IntentService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\Driver.java
