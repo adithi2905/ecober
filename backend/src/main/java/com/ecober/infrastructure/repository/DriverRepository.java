@@ -1,6 +1,7 @@
 package com.ecober.infrastructure.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +20,6 @@ public interface DriverRepository extends JpaRepository<Driver,String>{
     LIMIT 10
     """, nativeQuery = true)
 List<Driver> findNearestDrivers(double lat, double lng, double radiusKm, String vehicleType);
+
+    Optional<Driver> findByEmail(String email);
 }

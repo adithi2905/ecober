@@ -1,5 +1,7 @@
 package com.ecober.adapter.Dto;
 
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,8 +13,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class DriverDTO {
     private String driverName;
+    private String password;
     private String vehicleNo;
-    private String driverId;
+    private UUID driverId;
     private boolean verifiedDriver;
     private String driverLocation;
 

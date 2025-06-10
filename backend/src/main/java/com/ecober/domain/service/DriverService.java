@@ -4,9 +4,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ecober.adapter.Dto.DriverAuthenticationRequest;
 import com.ecober.adapter.Dto.DriverDTO;
+import com.ecober.adapter.Dto.DriverRegistrationRequestDTO;
 import com.ecober.adapter.mapper.DriverMapper;
 import com.ecober.domain.model.Driver;
 import com.ecober.domain.model.Trip;
@@ -24,6 +29,27 @@ public class DriverService {
     
     @Autowired
     private DriverMapper driverMapper;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+     public void register(DriverRegistrationRequestDTO request) {
+        Driver driver = new Driver();
+        driver.setDriverName(request.getName());
+        driver.setEmail(request.getEmail());
+        driver.setPassword(passwordEncoder.encode(request.getPassword()));
+        driverRepository.save(driver);
+    }
+
+    public Driver authenticate(DriverAuthenticationRequest request) {
+        Driver driver = driverRepository.findByEmail(request.getEmail())
+    .orElseThrow(() -> new UsernameNotFoundException("Driver not found"));
+
+        if (!passwordEncoder.matches(request.getPassword(), driver.getPassword())) {
+            throw new BadCredentialsException("Invalid password");
+        }
+        return driver;
+    }
     
     public List<DriverDTO> getAllDrivers() {
         List<Driver> drivers = driverRepository.findAll();
@@ -49,7 +75,6 @@ public class DriverService {
     public Optional<DriverDTO> updateDriver(String driverId, DriverDTO driverDTO) {
         return driverRepository.findById(driverId)
                 .map(existingDriver -> {
-                    // Update fields
                     existingDriver.setDriverName(driverDTO.getDriverName());
                     existingDriver.setVehicleNo(driverDTO.getVehicleNo());
                     existingDriver.setVerifiedDriver(driverDTO.isVerifiedDriver());

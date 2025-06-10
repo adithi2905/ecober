@@ -15,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TripDTO {
     private UUID riderId;
-    private String driverId;
+    private UUID driverId;
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;

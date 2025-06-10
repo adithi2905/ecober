@@ -7,11 +7,16 @@ import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ecober.adapter.Dto.DistanceDurationDTO;
+import com.ecober.adapter.Dto.DriverAuthenticationRequest;
 import com.ecober.adapter.Dto.DriverDTO;
+import com.ecober.adapter.Dto.DriverRegistrationRequestDTO;
 import com.ecober.adapter.mapper.DriverMapper;
 import com.ecober.domain.model.Driver;
 import com.ecober.domain.model.Location;
@@ -24,9 +29,6 @@ import com.ecober.util.GeoUtils;
 
 @Service
 public class DriverMatchingService {
-
-    @Autowired
-    DriverRepository driverRepository;
 
     @Autowired
     private TripService tripService;
@@ -43,6 +45,28 @@ public class DriverMatchingService {
     @Autowired
     private GeocodingService geocodingService;
 
+    @Autowired
+    private DriverRepository driverRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public void register(DriverRegistrationRequestDTO request) {
+        Driver driver = new Driver();
+        driver.setDriverName(request.getName());
+        driver.setEmail(request.getEmail());
+        driver.setPassword(passwordEncoder.encode(request.getPassword()));
+        driverRepository.save(driver);
+    }
+
+    public Driver authenticate(DriverAuthenticationRequest request) {
+        Driver driver = driverRepository.findByEmail(request.getEmail())
+            .orElseThrow(() -> new UsernameNotFoundException("Driver not found"));
+        if (!passwordEncoder.matches(request.getPassword(), driver.getPassword())) {
+            throw new BadCredentialsException("Invalid password");
+        }
+        return driver;
+    }
     public DriverDTO fetchNearestDriver(UUID riderId,
                                         String riderPickupAddress,
                                         String riderDropoffAddress,

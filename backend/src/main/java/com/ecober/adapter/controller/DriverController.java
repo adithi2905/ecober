@@ -1,6 +1,7 @@
 package com.ecober.adapter.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ecober.adapter.Dto.DriverAuthenticationRequest;
 import com.ecober.adapter.Dto.DriverDTO;
+import com.ecober.adapter.Dto.DriverRegistrationRequestDTO;
+import com.ecober.domain.model.Driver;
 import com.ecober.domain.service.DriverService;
+import com.ecober.security.JwtService;
 
 @RestController
 @RequestMapping("/driver")
@@ -22,6 +27,9 @@ public class DriverController {
 
     @Autowired
     private DriverService driverService;
+
+    @Autowired
+    private JwtService jwtService;
 
     @GetMapping("/all-drivers")
     public ResponseEntity<List<DriverDTO>> getAllDrivers() {
@@ -67,5 +75,18 @@ public class DriverController {
     @GetMapping("/{driverId}/trip-count")
     public ResponseEntity<Long> getDriverTripCount(@PathVariable String driverId) {
         return ResponseEntity.ok(driverService.getDriverTripCount(driverId));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody DriverRegistrationRequestDTO request) {
+        driverService.register(request);
+        return ResponseEntity.ok("Driver registered");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody DriverAuthenticationRequest request) {
+        Driver driver = driverService.authenticate(request);
+        String token = jwtService.generateToken(driver.getDriverId());
+        return ResponseEntity.ok(Map.of("token", token));
     }
 }

@@ -20,7 +20,7 @@ public class NotificationService {
         System.out.println("RIDER NOTIFICATION: " + notification);
     }
     
-    public void notifyDriver(String driverId, String message) {
+    public void notifyDriver(UUID driverId, String message) {
         String notification = String.format("[%s] Driver %s: %s", 
             LocalDateTime.now().toString(), driverId, message);
         lastNotifications.put("driver_" + driverId, notification);
@@ -28,7 +28,7 @@ public class NotificationService {
         System.out.println("DRIVER NOTIFICATION: " + notification);
     }
     
-    public void notifyBoth(UUID riderId, String driverId, String message) {
+    public void notifyBoth(UUID riderId, UUID driverId, String message) {
         notifyRider(riderId, message);
         notifyDriver(driverId, message);
     }
