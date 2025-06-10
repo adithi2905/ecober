@@ -4,11 +4,36 @@ function RiderBooking() {
   const [pickup, setPickup] = useState('');
   const [destination, setDestination] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert(`Booking ride from ${pickup} to ${destination}`);
-    // API call can go here
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const token = localStorage.getItem("token");
+
+  try {
+    const response = await fetch("http://localhost:8080/ride/requestRide", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        riderPickupLocation: pickup,
+        riderDropOffLocation: destination,
+        preferredVehicleType: "Car",
+        willingToPool: false,
+      })
+    });
+    if (response.ok) {
+      const data = await response.json();
+      alert(`Ride booked successfully! ${JSON.stringify(data)}`);
+    } else {
+      alert("Failed to book ride. Please check your token or login again.");
+    }
+  } catch (error) {
+    console.error("Error booking ride:", error);
+    alert("Something went wrong.");
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">

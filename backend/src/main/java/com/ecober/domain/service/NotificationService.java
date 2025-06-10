@@ -17,7 +17,6 @@ public class NotificationService {
             LocalDateTime.now().toString(), riderId.toString(), message);
         lastNotifications.put("rider_" + riderId, notification);
         
-        // In a real implementation, this would send push notifications, SMS, or emails
         System.out.println("RIDER NOTIFICATION: " + notification);
     }
     
@@ -26,7 +25,6 @@ public class NotificationService {
             LocalDateTime.now().toString(), driverId, message);
         lastNotifications.put("driver_" + driverId, notification);
         
-        // In a real implementation, this would send push notifications, SMS, or emails
         System.out.println("DRIVER NOTIFICATION: " + notification);
     }
     

@@ -23,7 +23,6 @@ import com.ecober.security.JwtService;
 
 
 @RestController
-@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/user")
 public class UserController {
 

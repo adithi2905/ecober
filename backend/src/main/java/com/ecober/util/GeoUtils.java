@@ -21,7 +21,6 @@ public class GeoUtils {
         return EARTH_RADIUS_KM * c;
     }
 
-    // Fallback if external APIs fail
     public static DistanceDurationDTO haversinDistanceandDuration(double lat1, double lon1, double lat2, double lon2) {
         double distanceKm = haversinDistance(lat1, lon1, lat2, lon2);
         int durationMins = (int) (distanceKm / 50.0 * 60); // Assuming avg 50 km/h
@@ -29,12 +28,10 @@ public class GeoUtils {
 
     }
 
-    // Overloaded for Location objects
     public static double distanceBetween(Location a,Location b) {
         return haversinDistance(a.getLatitude(), a.getLongitude(), b.getLatitude(), b.getLongitude());
     }
 
-    // CO2 Emission calculator
     public static double calculateEmissions(double distanceKm, String vehicleType) {
         // Emission rates in kg CO2/km
         return switch (vehicleType.toUpperCase()) {

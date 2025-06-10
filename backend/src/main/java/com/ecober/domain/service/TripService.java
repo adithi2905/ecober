@@ -49,4 +49,27 @@ public class TripService {
         List<Trip> results = tripRepository.findByUserId(riderID);
         return tripMapper.toDtoList(results);
     }
+
+        public void startTrip(UUID tripId, UUID userId) {
+        Trip trip = tripRepository.findByTripId(tripId);
+        if (trip.getUser().getId().equals(userId)) {
+            trip.setStartTime(LocalDateTime.now());
+            trip.setStatus("IN_PROGRESS");
+            tripRepository.save(trip);
+        } else {
+            throw new IllegalStateException("Not authorized");
+        }
+    }
+
+    public void endTrip(UUID tripId, UUID userId) {
+        Trip trip = tripRepository.findByTripId(tripId);
+        if (trip.getUser().getId().equals(userId)) {
+            trip.setEndTime(LocalDateTime.now());
+            trip.setStatus("COMPLETED");
+            tripRepository.save(trip);
+        } else {
+            throw new IllegalStateException("Not authorized");
+        }
+}
+
 }

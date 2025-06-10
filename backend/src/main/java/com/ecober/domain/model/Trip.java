@@ -33,6 +33,7 @@ public class Trip {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private double carbonEmissions;
+    private String status;
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
