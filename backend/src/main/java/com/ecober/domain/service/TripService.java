@@ -2,7 +2,7 @@ package com.ecober.domain.service;
 
 import com.ecober.adapter.Dto.RiderDTO;
 import com.ecober.adapter.Dto.TripDTO;
-import com.ecober.adapter.mapper.TripMapper;
+import com.ecober.adapter.mapper.TripperMapper;
 import com.ecober.domain.model.Driver;
 import com.ecober.domain.model.Route;
 import com.ecober.domain.model.Trip;
@@ -27,7 +27,7 @@ public class TripService {
     private UserRepository userRepository;
 
     @Autowired
-    private TripMapper tripMapper;
+    private TripperMapper tripMapper;
 
     public void createTrip(UUID riderId, Driver best, Route route, double carbonEmission) {
         User user = userRepository.findById(riderId)

@@ -37,6 +37,8 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
             .requestMatchers(
                 "/user/registration",
                 "/user/auth/login",
+                "/driver/register",
+                "/driver/login",
                 "/swagger-ui/**",
                 "/v3/api-docs/**",
                 "/swagger-resources/**",

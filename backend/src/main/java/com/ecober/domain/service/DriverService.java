@@ -39,6 +39,10 @@ public class DriverService {
         driver.setDriverName(request.getName());
         driver.setEmail(request.getEmail());
         driver.setPassword(passwordEncoder.encode(request.getPassword()));
+        driver.setDriverLocation(request.getLocation());
+        driver.setVerifiedDriver(request.isVerified());
+        driver.setVehicleNo(request.getVehicleNo());
+        driver.setVehicleType(request.getVehicleType());
         driverRepository.save(driver);
     }
 

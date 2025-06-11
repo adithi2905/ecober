@@ -7,12 +7,13 @@ import org.mapstruct.Mapper;
 import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.domain.model.Trip;
 
-
 @Mapper(componentModel = "spring")
-public interface TripMapper {
+public interface TripperMapper {
+
     TripDTO toDto(Trip trip);
+
     Trip toEntity(TripDTO tripDTO);
     List<TripDTO> toDtoList(List<Trip> trips);
-    List<Trip> toEntityList(List<TripDTO> tripsDTO);
-}
 
+    List<Trip> toEntityList(List<TripDTO> tripDTOs);
+}

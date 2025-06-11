@@ -26,11 +26,11 @@ C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\Di
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\Trip.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\RideRequestService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\mapper\UserMapper.java
+C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\mapper\TripperMapper.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\RideResponseDTO.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\RiderDTO.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\security\JwtAuthenticationFilter.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\application\config\SwaggerConfig.java
-C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\mapper\TripMapper.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\RouteService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\UserRegistrationService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\controller\RideController.java
