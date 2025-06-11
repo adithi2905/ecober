@@ -17,20 +17,18 @@ public class NotificationService {
             LocalDateTime.now().toString(), riderId.toString(), message);
         lastNotifications.put("rider_" + riderId, notification);
         
-        // In a real implementation, this would send push notifications, SMS, or emails
         System.out.println("RIDER NOTIFICATION: " + notification);
     }
     
-    public void notifyDriver(String driverId, String message) {
+    public void notifyDriver(UUID driverId, String message) {
         String notification = String.format("[%s] Driver %s: %s", 
             LocalDateTime.now().toString(), driverId, message);
         lastNotifications.put("driver_" + driverId, notification);
         
-        // In a real implementation, this would send push notifications, SMS, or emails
         System.out.println("DRIVER NOTIFICATION: " + notification);
     }
     
-    public void notifyBoth(UUID riderId, String driverId, String message) {
+    public void notifyBoth(UUID riderId, UUID driverId, String message) {
         notifyRider(riderId, message);
         notifyDriver(driverId, message);
     }

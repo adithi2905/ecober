@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function Profile() {
   const rider = {
@@ -7,9 +8,13 @@ function Profile() {
     totalRides: 12,
     totalCO2Saved: 24.7, // in kg
   };
-
+  const navigate=useNavigate();
   const averageCO2 = (rider.totalCO2Saved / rider.totalRides).toFixed(2);
   const ecoFriendly = averageCO2 >= 2.0;
+  const handleSubmit=()=>
+  {
+    navigate("/logout");
+  }
 
   return (
     <div className="max-w-xl mx-auto bg-white shadow-lg rounded-xl p-6 space-y-4">
@@ -28,6 +33,12 @@ function Profile() {
             <span className="text-yellow-600 font-semibold">⚠️ Needs Improvement</span>
           )}
         </p>
+      </div>
+      <div>
+      <form onSubmit={handleSubmit}>
+        <input className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring focus:ring-maroon-500"
+            type="submit" name="logout" value="logout"/>
+      </form>
       </div>
     </div>
   );

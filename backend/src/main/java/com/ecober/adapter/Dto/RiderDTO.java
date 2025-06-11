@@ -4,6 +4,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,13 +22,17 @@ public class RiderDTO {
 
     @NotNull
     private String riderPickupLocation;
+    @NotNull
     private String riderDropOffLocation;
     private double pickupLatitude;
     private double pickupLongitude;
     private double dropoffLatitude;
     private double dropoffLongitude;
     private UUID riderId;
+    @Nullable
     private String preferredVehicleType;
+    @Nullable
     private boolean willingToPool;
+    @Nullable
     private double co2Saved;
 }

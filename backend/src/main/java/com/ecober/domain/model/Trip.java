@@ -25,7 +25,7 @@ public class Trip {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
     @Column(name = "driver_id")
-    private String driverId;
+    private UUID driverId;
     private String driverName;
     private double estimatedEmission;
     private String ecoScore;
@@ -33,6 +33,7 @@ public class Trip {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private double carbonEmissions;
+    private String status;
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

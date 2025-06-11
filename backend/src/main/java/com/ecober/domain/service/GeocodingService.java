@@ -25,7 +25,6 @@ public  double[] getLatAndLong(String location) {
     ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
     JSONObject json = new JSONObject(response.getBody());
 
-    // Check for empty results array
     if (!json.has("results") || json.getJSONArray("results").isEmpty()) {
         throw new RuntimeException("No geocoding result found for: " + location);
     }
