@@ -2,9 +2,6 @@ package com.ecober.domain.model;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-
-import com.ecober.adapter.Dto.DriverDTO;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,6 +12,9 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
+
 
 @Entity
 @Data
@@ -27,14 +27,18 @@ public class Trip {
     @Column(name = "driver_id")
     private UUID driverId;
     private String driverName;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TripStatus status;
+
     private double estimatedEmission;
     private String ecoScore;
     private String feedback;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private double carbonEmissions;
-    private String status;
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "trip_id", updatable = false, nullable = false)

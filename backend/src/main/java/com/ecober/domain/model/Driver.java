@@ -35,5 +35,6 @@ public class Driver {
     private double fuelEfficiency;
     private double trustScore;
     private double totalCO2Saved;
+    private String role="DRIVER";
 
 }

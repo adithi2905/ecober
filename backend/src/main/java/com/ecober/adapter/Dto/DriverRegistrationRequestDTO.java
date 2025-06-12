@@ -13,4 +13,8 @@ public class DriverRegistrationRequestDTO {
     private String name;
     private String email;
     private String password;
+    private String location;
+    private String vehicleType;
+    private boolean isVerified;
+    private String vehicleNo;
 }
