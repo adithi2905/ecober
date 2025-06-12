@@ -1,13 +1,13 @@
 package com.ecober.security;
 
-import com.ecober.domain.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -17,10 +17,11 @@ public class CustomUserDetails implements UserDetails {
     private final UUID userId;
     private final String username;
     private final String password;
+    private final String role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList(); // Add roles if needed
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role));
     }
 
     @Override public boolean isAccountNonExpired() { return true; }

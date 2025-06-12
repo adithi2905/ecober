@@ -1,9 +1,11 @@
 package com.ecober.security;
 
-import com.ecober.infrastructure.repository.UserRepository;
 import com.ecober.domain.model.User;
+import com.ecober.infrastructure.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.*;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,8 +17,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-        return new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword());
+        return new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), user.getRole());
     }
 }

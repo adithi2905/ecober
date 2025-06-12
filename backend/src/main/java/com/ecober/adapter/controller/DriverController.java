@@ -76,8 +76,9 @@ public class DriverController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody DriverAuthenticationRequest request) {
+        String role = "DRIVER";
         Driver driver = driverService.authenticate(request);
-        String token = jwtService.generateToken(driver.getDriverId());
+        String token = jwtService.generateToken(driver.getDriverId(), role);
         return ResponseEntity.ok(Map.of("token", token));
     }
 }

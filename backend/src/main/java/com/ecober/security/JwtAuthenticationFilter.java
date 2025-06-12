@@ -45,7 +45,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 User user = userRepository.findById(userId).orElse(null);
 
                 if (user != null && jwtService.isTokenValid(token, user.getId())) {
-                    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword());
+                    String role = jwtService.extractUserRole(token);
+
+                    CustomUserDetails userDetails = new CustomUserDetails(
+                        user.getId(),
+                        user.getUsername(),
+                        user.getPassword(),
+                        role
+                    );
 
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -54,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             } catch (IllegalArgumentException e) {
-                // Optional: log or handle invalid UUID/token format
+                // log if needed
             }
         }
 

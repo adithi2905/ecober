@@ -67,8 +67,7 @@ public ResponseEntity<?> login(@RequestBody LoginRequestDTO login) {
     User user = userRepository.findByUsername(login.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        String token = jwtService.generateToken(user.getId());
-
+      String token = jwtService.generateToken(user.getId(), user.getRole());
         return ResponseEntity.ok(new LoginResponseDTO(token));
 }
 
