@@ -2,7 +2,6 @@ package com.ecober.adapter.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,6 +20,7 @@ import com.ecober.domain.service.UserRegistrationService;
 import com.ecober.infrastructure.repository.UserRepository;
 import com.ecober.security.JwtService;
 
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
@@ -45,36 +45,31 @@ public class UserController {
     AuthenticationManager authenticateManager;
 
     @PostMapping("/registration")
-    public ResponseEntity<String> registerUser(@RequestBody UserDTO userDto)
-    {
-        if(userDto.getPassword()!=null)
-        {
-        User user=userMapper.toEntity(userDto);
-        userRegService.createUser(user);
-        return ResponseEntity.ok("User Registered Successfully");
-        }
-        else
-        {
+    public ResponseEntity<String> registerUser(@RequestBody UserDTO userDto) {
+        if(userDto.getPassword() != null) {
+            User user = userMapper.toEntity(userDto);
+            userRegService.createUser(user);
+            return ResponseEntity.ok("User Registered Successfully");
+        } else {
             throw new IllegalArgumentException("Password is null");
         }
     }
 
     @PostMapping("/auth/login")
-public ResponseEntity<?> login(@RequestBody LoginRequestDTO login) {
-    authenticateManager.authenticate(
-        new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword())
-    );
-    User user = userRepository.findByUsername(login.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO login) {
+        authenticateManager.authenticate(
+            new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword())
+        );
+        User user = userRepository.findByUsername(login.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-      String token = jwtService.generateToken(user.getId(), user.getRole());
-        return ResponseEntity.ok(new LoginResponseDTO(token));
-}
+        // Use "RIDER" role consistently
+        String token = jwtService.generateToken(user.getId(), "RIDER");
+        return ResponseEntity.ok(Map.of("token", token, "role", "RIDER"));
+    }
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
         return ResponseEntity.ok("Please clear token on client");
     }
-
-
 }
