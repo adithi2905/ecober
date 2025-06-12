@@ -1,11 +1,11 @@
 package com.ecober.domain.service;
 
-import com.ecober.adapter.Dto.RiderDTO;
 import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.adapter.mapper.TripperMapper;
 import com.ecober.domain.model.Driver;
 import com.ecober.domain.model.Route;
 import com.ecober.domain.model.Trip;
+import com.ecober.domain.model.TripStatus;
 import com.ecober.domain.model.User;
 import com.ecober.infrastructure.repository.TripRepository;
 import com.ecober.infrastructure.repository.UserRepository;
@@ -14,8 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class TripService {
@@ -29,47 +28,62 @@ public class TripService {
     @Autowired
     private TripperMapper tripMapper;
 
-    public void createTrip(UUID riderId, Driver best, Route route, double carbonEmission) {
+    public void createTrip(UUID riderId, Driver bestDriver, Route route, double carbonEmission) {
         User user = userRepository.findById(riderId)
                 .orElseThrow(() -> new RuntimeException("User not found with id " + riderId));
 
         Trip trip = new Trip();
         trip.setUser(user);
-        trip.setDriverId(best.getDriverId());
-        trip.setDriverName(best.getDriverName());
+        trip.setDriverId(bestDriver.getDriverId());
+        trip.setDriverName(bestDriver.getDriverName());
         trip.setRoute(route);
         trip.setStartTime(LocalDateTime.now());
         trip.setEstimatedEmission(carbonEmission);
         trip.setEcoScore("B+");
+        trip.setStatus(TripStatus.ACCEPTED);
 
         tripRepository.save(trip);
     }
 
-    public List<TripDTO> fetchAllTrips(UUID riderID) {
-        List<Trip> results = tripRepository.findByUserId(riderID);
-        return tripMapper.toDtoList(results);
+    public List<TripDTO> fetchAllTrips(UUID riderId) {
+        List<Trip> trips = tripRepository.findByUserId(riderId);
+        return tripMapper.toDtoList(trips);
     }
 
-        public void startTrip(UUID tripId, UUID userId) {
-        Trip trip = tripRepository.findByTripId(tripId);
-        if (trip.getUser().getId().equals(userId)) {
+    public boolean startTrip(UUID driverId) {
+        Optional<Trip> tripOpt = tripRepository.findByDriverIdAndStatus(driverId, TripStatus.ACCEPTED)
+                                               .stream()
+                                               .findFirst();
+
+        if (tripOpt.isPresent()) {
+            Trip trip = tripOpt.get();
             trip.setStartTime(LocalDateTime.now());
-            trip.setStatus("IN_PROGRESS");
+            trip.setStatus(TripStatus.IN_PROGRESS);
             tripRepository.save(trip);
-        } else {
-            throw new IllegalStateException("Not authorized");
+            return true;
         }
+
+        return false;
     }
 
-    public void endTrip(UUID tripId, UUID userId) {
+    public boolean endTrip(UUID tripId, UUID driverId) {
         Trip trip = tripRepository.findByTripId(tripId);
-        if (trip.getUser().getId().equals(userId)) {
-            trip.setEndTime(LocalDateTime.now());
-            trip.setStatus("COMPLETED");
-            tripRepository.save(trip);
-        } else {
-            throw new IllegalStateException("Not authorized");
+        if (trip == null || !driverId.equals(trip.getDriverId())) {
+            return false;
         }
-}
 
+        if (trip.getStatus() != TripStatus.IN_PROGRESS) {
+            return false;
+        }
+
+        trip.setStatus(TripStatus.COMPLETED);
+        trip.setEndTime(LocalDateTime.now());
+        tripRepository.save(trip);
+        return true;
+    }
+
+    public Optional<UUID> getOngoingTripId(UUID driverId) {
+        return tripRepository.findOngoingTripByDriverId(driverId)
+                             .map(Trip::getTripId);
+    }
 }

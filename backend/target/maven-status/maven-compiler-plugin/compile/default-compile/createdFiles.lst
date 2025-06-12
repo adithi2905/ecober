@@ -37,6 +37,7 @@ com\ecober\adapter\Dto\RiderDTO$RiderDTOBuilder.class
 com\ecober\application\config\SwaggerConfig.class
 com\ecober\domain\service\DriverService.class
 com\ecober\domain\model\Rider.class
+com\ecober\domain\model\TripStatus.class
 com\ecober\domain\service\RouteService.class
 com\ecober\adapter\Dto\DistanceDurationDTO$DistanceDurationDTOBuilder.class
 com\ecober\infrastructure\repository\DriverRepository.class

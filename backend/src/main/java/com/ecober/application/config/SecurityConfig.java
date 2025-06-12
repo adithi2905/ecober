@@ -28,38 +28,33 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
+        http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/user/registration",
-                    "/user/auth/login",
-                    "/driver/register",
                     "/driver/login",
-                    "/swagger-ui/**",
+                    "/driver/register",
+                    "/user/login",
+                    "/user/register",
                     "/v3/api-docs/**",
-                    "/swagger-resources/**",
-                    "/webjars/**",
-                    "/v2/api-docs",
-                    "/favicon.ico",
-                    "/",
-                    "/index.html",
-                    "/static/**"
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
                 ).permitAll()
-                .requestMatchers("/ride/**").hasRole("RIDER")
-                .requestMatchers("/driver/**").hasRole("DRIVER")
+                .requestMatchers("/driver/**").hasAuthority("ROLE_DRIVER")
+                .requestMatchers("/user/**").hasAuthority("ROLE_USER")
                 .anyRequest().authenticated()
             )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-            .build();
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // adjust for frontend host
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization"));
@@ -76,7 +71,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticateManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }
