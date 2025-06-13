@@ -57,36 +57,23 @@ public class DriverController {
     }
 
     @PostMapping("/start-trip")
-@PreAuthorize("hasRole('DRIVER')")
+    @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<?> startTrip() {
-        log.info("🚗 Start trip endpoint called");
-        
         try {
             UUID driverId = AuthUtil.getCurrentUserId();
             String role = AuthUtil.getCurrentUserRole();
-            
-            log.info("👤 Driver ID: {}", driverId);
-            log.info("🎭 Current role: '{}'", role);
-            
-            // Fix: Check for both possible role formats
             boolean isDriver = "ROLE_DRIVER".equals(role) || "DRIVER".equals(role);
-            
-            log.info("✅ Is driver check: {}", isDriver);
-            
+
             if (!isDriver) {
-                log.warn("❌ Access denied. Expected DRIVER role, got: {}", role);
                 return ResponseEntity.status(403).body("Only drivers can perform this action. Current role: " + role);
             }
 
             boolean started = driverService.startTrip(driverId);
-            log.info("🚀 Trip started: {}", started);
-            
             return started
                 ? ResponseEntity.ok("Trip started successfully")
                 : ResponseEntity.status(404).body("No ACCEPTED trip found for this driver.");
-                
+
         } catch (Exception e) {
-            log.error("💥 Error in start-trip: {}", e.getMessage(), e);
             return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
         }
     }
@@ -96,24 +83,18 @@ public class DriverController {
         try {
             UUID driverId = AuthUtil.getCurrentUserId();
             String role = AuthUtil.getCurrentUserRole();
-            
-            log.info("🏁 End trip called by driver: {} with role: {}", driverId, role);
-            
-            // Fix: Check for both possible role formats
             boolean isDriver = "ROLE_DRIVER".equals(role) || "DRIVER".equals(role);
-            
+
             if (!isDriver) {
-                log.warn("❌ Access denied for end-trip. Expected DRIVER role, got: {}", role);
                 return ResponseEntity.status(403).body("Only drivers can perform this action. Current role: " + role);
             }
-            
+
             boolean ended = driverService.endTrip(tripId, driverId);
             return ended
                     ? ResponseEntity.ok("Trip ended successfully")
                     : ResponseEntity.status(403).body("Unauthorized or invalid trip");
-                    
+
         } catch (Exception e) {
-            log.error("💥 Error in end-trip: {}", e.getMessage(), e);
             return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
         }
     }
@@ -143,25 +124,19 @@ public class DriverController {
         try {
             UUID driverId = AuthUtil.getCurrentUserId();
             String role = AuthUtil.getCurrentUserRole();
-            
-            log.info("🔍 Get ongoing trip ID called by driver: {} with role: {}", driverId, role);
-
-            // Fix: Check for both possible role formats
             boolean isDriver = "ROLE_DRIVER".equals(role) || "DRIVER".equals(role);
-            
+
             if (!isDriver) {
-                log.warn("❌ Access denied for ongoing-trip-id. Expected DRIVER role, got: {}", role);
                 throw new AccessDeniedException("Only drivers can perform this action. Current role: " + role);
             }
 
             return tripService.getOngoingTripId(driverId)
                     .<ResponseEntity<?>>map(tripId -> ResponseEntity.ok(Map.of("tripId", tripId)))
                     .orElseGet(() -> ResponseEntity.status(404).body("No ongoing trip found"));
-                    
+
         } catch (AccessDeniedException e) {
-            throw e; // Re-throw AccessDeniedException
+            throw e;
         } catch (Exception e) {
-            log.error("💥 Error in get-ongoing-trip-id: {}", e.getMessage(), e);
             return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
         }
     }
@@ -174,42 +149,34 @@ public class DriverController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody DriverAuthenticationRequest request) {
-        log.info("🔐 Driver login attempt for: {}", request.getEmail());
-        
         try {
             Driver driver = driverService.authenticate(request);
-            log.info("✅ Driver authenticated: {}", driver.getDriverId());
-            
             String token = jwtService.generateToken(driver.getDriverId(), "DRIVER");
-            log.info("🎫 Token generated for driver with role: DRIVER");
-            
             return ResponseEntity.ok(Map.of(
-                "token", token, 
+                "token", token,
                 "role", "DRIVER",
                 "driverId", driver.getDriverId().toString()
             ));
-            
+
         } catch (Exception e) {
-            log.error("❌ Driver login failed: {}", e.getMessage());
             return ResponseEntity.status(401).body("Authentication failed: " + e.getMessage());
         }
     }
 
-    // Debug endpoint to check authentication
     @GetMapping("/debug/auth-info")
     public ResponseEntity<?> getDriverAuthInfo() {
         try {
             UUID driverId = AuthUtil.getCurrentUserId();
             String role = AuthUtil.getCurrentUserRole();
-            
+
             Map<String, Object> info = new HashMap<>();
             info.put("driverId", driverId.toString());
             info.put("role", role);
             info.put("roleWithPrefix", "ROLE_" + role);
             info.put("isDriverCheck", "ROLE_DRIVER".equals(role) || "DRIVER".equals(role));
-            
+
             return ResponseEntity.ok(info);
-            
+
         } catch (Exception e) {
             return ResponseEntity.status(403).body("Auth error: " + e.getMessage());
         }
