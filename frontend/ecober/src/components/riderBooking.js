@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
+
 
 function RiderBooking() {
   const [pickup, setPickup] = useState('');
   const [destination, setDestination] = useState('');
   const [preferredVehicleType, setPreferredVehicleType] = useState('Sedan');
   const [willingToPool, setWillingToPool] = useState(false);
+  const navigate=useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,13 +30,17 @@ function RiderBooking() {
 
       if (response.ok) {
         const data = await response.json();
-        alert(`Ride booked successfully! ${JSON.stringify(data)}`);
+        navigate("/bookingconfirmation",{state: {
+    driver: driverData,
+    pickup: pickupLocation,
+    destination: dropoffLocation,
+  },})
       } else {
-        alert("Failed to book ride. Please check your token or login again.");
+        alert("Failed to book ride");
       }
     } catch (error) {
       console.error("Error booking ride:", error);
-      alert("Something went wrong.");
+      alert("Something went wrong. ",error);
     }
   };
 

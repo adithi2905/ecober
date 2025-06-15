@@ -23,4 +23,7 @@ public interface TripRepository extends JpaRepository<Trip, UUID> {
 
     @Query("SELECT t FROM Trip t WHERE t.driver.driverId = :driverId AND t.status = 'IN_PROGRESS'")
     Optional<Trip> findOngoingTripByDriverId(@Param("driverId") UUID driverId);
+
+    @Query("SELECT t FROM Trip t WHERE t.user.userId=:riderId AND t.status='ACCEPTED'")
+    Trip findCurrentTrip(UUID riderId);
 }

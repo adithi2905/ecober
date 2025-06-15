@@ -13,7 +13,6 @@ import com.ecober.adapter.Dto.DriverDTO;
 import com.ecober.adapter.Dto.DriverRegistrationRequestDTO;
 import com.ecober.adapter.Dto.RideRequestDTO;
 import com.ecober.domain.model.Driver;
-import com.ecober.domain.model.RideRequest;
 import com.ecober.domain.service.DriverService;
 import com.ecober.domain.service.TripService;
 import com.ecober.security.JwtService;
@@ -42,7 +41,7 @@ public class DriverController {
         return ResponseEntity.ok(driverService.getAllDrivers());
     }
 
-    @GetMapping("/me")
+    @GetMapping("/me/getProfile")
     public ResponseEntity<DriverDTO> getMyProfile() {
         UUID driverId = AuthUtil.getCurrentUserId();
         return driverService.getDriverById(driverId)
@@ -50,7 +49,7 @@ public class DriverController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/me")
+    @PutMapping("/me/update")
     public ResponseEntity<DriverDTO> updateMyProfile(@RequestBody DriverDTO driverDTO) {
         UUID driverId = AuthUtil.getCurrentUserId();
         return driverService.updateDriver(driverId, driverDTO)
@@ -101,7 +100,7 @@ public class DriverController {
         }
     }
 
-    @DeleteMapping("/me")
+    @DeleteMapping("/me/delete")
     public ResponseEntity<Void> deleteMyAccount() {
         UUID driverId = AuthUtil.getCurrentUserId();
         return driverService.deleteDriver(driverId)
@@ -191,8 +190,15 @@ public class DriverController {
         {
         UUID driverUuid=AuthUtil.getCurrentUserId();
         String role=AuthUtil.getCurrentUserRole();
+        if((driverUuid!=null)&&(("DRIVER".equals(role))||("ROLE_DRIVER".equals(role))))
+        {
         List<RideRequestDTO>availableRides=driverService.getNearbyAvailableTrips(driverUuid);
         return ResponseEntity.ok(availableRides);
+        }
+        else
+        {
+            return ResponseEntity.status(403).body("User is not a valid driver");
+        }
         }
         catch(Exception ex)
         {

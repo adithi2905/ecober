@@ -6,6 +6,7 @@ import com.ecober.domain.model.*;
 import com.ecober.infrastructure.repository.TripRepository;
 import com.ecober.infrastructure.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -55,6 +56,13 @@ public class TripService {
             return true;
         }
         return false;
+    }
+
+    public TripDTO fetchCurrentTrip(UUID riderId)
+    {
+        Trip currentTrip= tripRepository.findCurrentTrip(riderId);
+        return tripMapper.toDto(currentTrip);
+
     }
 
     public boolean endTrip(UUID tripId, UUID driverId) {

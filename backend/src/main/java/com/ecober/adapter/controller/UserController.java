@@ -5,22 +5,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ecober.adapter.Dto.LoginRequestDTO;
-import com.ecober.adapter.Dto.LoginResponseDTO;
+import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.adapter.Dto.UserDTO;
 import com.ecober.adapter.mapper.UserMapper;
 import com.ecober.domain.model.User;
+import com.ecober.domain.service.TripService;
 import com.ecober.domain.service.UserLoginService;
 import com.ecober.domain.service.UserRegistrationService;
 import com.ecober.infrastructure.repository.UserRepository;
 import com.ecober.security.JwtService;
+import com.ecober.util.AuthUtil;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/user")
@@ -44,6 +48,9 @@ public class UserController {
     @Autowired
     AuthenticationManager authenticateManager;
 
+    @Autowired
+    TripService tripService;
+
     @PostMapping("/registration")
     public ResponseEntity<String> registerUser(@RequestBody UserDTO userDto) {
         if(userDto.getPassword() != null) {
@@ -66,6 +73,28 @@ public class UserController {
         String token = jwtService.generateToken(user.getUserId(), "RIDER");
         return ResponseEntity.ok(Map.of("token", token, "role", "RIDER"));
     }
+
+    @GetMapping("/trip/current")
+    public ResponseEntity<?>fetchCurrentTrips()
+    {
+        
+        UUID riderId=AuthUtil.getCurrentUserId();
+        String role=AuthUtil.getCurrentUserRole();
+        boolean isRider=((riderId!=null) && ("RIDER".equals(role)||("ROLE_RIDER".equals(role))));
+        if (!isRider) {
+        return ResponseEntity.status(403).body("User is not authenticated as a rider");
+    }
+       
+        TripDTO currentTrip=tripService.fetchCurrentTrip(riderId);
+        
+        if(currentTrip!=null)
+        return ResponseEntity.ok(currentTrip);
+        else
+        {
+            return ResponseEntity.status(404).body("No trips found");
+        }
+       }
+           
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
