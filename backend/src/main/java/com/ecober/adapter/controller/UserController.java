@@ -63,8 +63,7 @@ public class UserController {
         User user = userRepository.findByUsername(login.getUsername())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Use "RIDER" role consistently
-        String token = jwtService.generateToken(user.getId(), "RIDER");
+        String token = jwtService.generateToken(user.getUserId(), "RIDER");
         return ResponseEntity.ok(Map.of("token", token, "role", "RIDER"));
     }
 

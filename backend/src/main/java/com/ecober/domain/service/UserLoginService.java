@@ -26,7 +26,7 @@ public class UserLoginService {
             User user = userRepositoryResults.get();
 
             if (passwordEncoder.matches(userDetails.getPassword(), user.getPassword())) {
-                session.setAttribute("riderId", user.getId());
+                session.setAttribute("riderId", user.getUserId());
                 return ResponseEntity.ok("Successfully logged in");
             } else {
                 return ResponseEntity.badRequest().body("Invalid password");

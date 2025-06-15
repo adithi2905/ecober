@@ -19,8 +19,6 @@ public class AuthUtil {
         if (principal instanceof CustomUserDetails) {
             return ((CustomUserDetails) principal).getUserId();
         }
-        
-        // Fallback to parsing from name if needed
         try {
             return UUID.fromString(authentication.getName());
         } catch (IllegalArgumentException e) {
@@ -29,6 +27,20 @@ public class AuthUtil {
     }
 
     public static String getCurrentUserRole() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getAuthorities() == null) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        String role = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No role found"));
+        
+        return role.startsWith("ROLE_") ? role.substring(5) : role;
+    }
+    
+    public static String getCurrentUserRoleWithPrefix() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getAuthorities() == null) {
             throw new RuntimeException("Unauthorized");

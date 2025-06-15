@@ -1,5 +1,4 @@
 package com.ecober.domain.service;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -21,10 +20,7 @@ import com.ecober.adapter.mapper.DriverMapper;
 import com.ecober.domain.model.Driver;
 import com.ecober.domain.model.Location;
 import com.ecober.domain.model.Route;
-import com.ecober.domain.model.Trip;
 import com.ecober.infrastructure.repository.DriverRepository;
-import com.ecober.infrastructure.repository.RouteRepository;
-import com.ecober.infrastructure.repository.TripRepository;
 import com.ecober.util.GeoUtils;
 
 @Service
@@ -33,9 +29,7 @@ public class DriverMatchingService {
     @Autowired
     private TripService tripService;
 
-    @Autowired
-    private RouteRepository routeRepository;
-
+    
     @Autowired
     private DriverMapper driverMapper;
 
@@ -68,61 +62,54 @@ public class DriverMatchingService {
         return driver;
     }
     public DriverDTO fetchNearestDriver(UUID riderId,
-                                        String riderPickupAddress,
-                                        String riderDropoffAddress,
-                                        double pickupLatitude,
-                                        double pickupLongitude,
-                                        double dropoffLatitude,
-                                        double dropoffLongitude,
-                                        String preferredVehicleType,
-                                        boolean willingToPool) {
+                                    String riderPickupAddress,
+                                    String riderDropoffAddress,
+                                    double pickupLatitude,
+                                    double pickupLongitude,
+                                    double dropoffLatitude,
+                                    double dropoffLongitude,
+                                    String preferredVehicleType,
+                                    boolean willingToPool) {
 
-        Logger.getLogger(DriverMatchingService.class.getName()).info("Matching driver for: " + riderPickupAddress);
+    Logger.getLogger(DriverMatchingService.class.getName()).info("Matching driver for: " + riderPickupAddress);
 
-        Location pickup = new Location(pickupLatitude, pickupLongitude, riderPickupAddress, 0.0);
-        Location dropoff = new Location(dropoffLatitude, dropoffLongitude, riderDropoffAddress, 0.0);
+    Location pickup = new Location(pickupLatitude, pickupLongitude, riderPickupAddress, 0.0);
+    Location dropoff = new Location(dropoffLatitude, dropoffLongitude, riderDropoffAddress, 0.0);
 
-        DistanceDurationDTO distanceDTO;
-        try {
-            distanceDTO = routeOptimizingService.getDistanceAndETA(pickup, dropoff);
-        } catch (Exception ex) {
-            distanceDTO = GeoUtils.haversinDistanceandDuration(
-                    pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude
-            );
-        }
-
-        double carbonEmission = GeoUtils.calculateEmissions(distanceDTO.getDistanceKm(), preferredVehicleType);
-
-        Route route = routeRepository.findByCoordinates(
-                pickup.getLatitude(), pickup.getLongitude(),
-                dropoff.getLatitude(), dropoff.getLongitude()
-        ).orElse(null);
-
-        if (route == null) {
-            route = Route.builder()
-                    .routeID(UUID.randomUUID().toString())
-                    .source(pickup)
-                    .destination(dropoff)
-                    .distanceKm(distanceDTO.getDistanceKm())
-                    .carbonCost(carbonEmission)
-                    .estimatedTime(distanceDTO.getDurationInMins())
-                    .isPooledEligible(willingToPool)
-                    .carbonEmission(carbonEmission)
-                    .build();
-            route = routeRepository.save(route);
-        }
-
-        List<Driver> drivers = driverRepository.findAll(); 
-        Driver best = drivers.stream()
-    .min(Comparator.comparingDouble(d -> {
-        double[] coords = geocodingService.getLatAndLong(d.getDriverLocation());
-        return GeoUtils.haversinDistance(pickup.getLatitude(), pickup.getLongitude(), coords[0], coords[1]);
-    }))
-    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable driver found"));
-
-        tripService.createTrip(riderId, best, route, carbonEmission);
-    return driverMapper.toDto(best);
+    DistanceDurationDTO distanceDTO;
+    try {
+        distanceDTO = routeOptimizingService.getDistanceAndETA(pickup, dropoff);
+    } catch (Exception ex) {
+        distanceDTO = GeoUtils.haversinDistanceandDuration(
+                pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude
+        );
     }
+
+    double carbonEmission = GeoUtils.calculateEmissions(distanceDTO.getDistanceKm(), preferredVehicleType);
+
+    Route route = Route.builder()
+            .source(pickup)
+            .destination(dropoff)
+            .distanceKm(distanceDTO.getDistanceKm())
+            .carbonCost(carbonEmission)
+            .estimatedTime(distanceDTO.getDurationInMins())
+            .isPooledEligible(willingToPool)
+            .carbonEmission(carbonEmission)
+            .build();
+
+    List<Driver> drivers = driverRepository.findAll(); 
+    Driver best = drivers.stream()
+        .min(Comparator.comparingDouble(d -> {
+            double[] coords = geocodingService.getLatAndLong(d.getDriverLocation());
+            return GeoUtils.haversinDistance(pickup.getLatitude(), pickup.getLongitude(), coords[0], coords[1]);
+        }))
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable driver found"));
+
+    tripService.createTrip(riderId, best, route, carbonEmission);
+
+    return driverMapper.toDto(best);
+}
+
 
 }
 

@@ -21,7 +21,6 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Ensure role has ROLE_ prefix
         String roleWithPrefix = role.startsWith("ROLE_") ? role : "ROLE_" + role;
         return List.of(new SimpleGrantedAuthority(roleWithPrefix));
     }

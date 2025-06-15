@@ -32,7 +32,7 @@ public class Co2AnalyticsServiceTest {
 
     private Trip createTrip(double emissions) {
         Trip trip = new Trip();
-        trip.setCarbonEmissions(emissions); 
+        trip.setEstimatedEmission(emissions); 
         return trip;
     }
 
@@ -44,8 +44,8 @@ public class Co2AnalyticsServiceTest {
             createTrip(10.0),
             createTrip(3.0)
         );
-        when(tripRepository.findByUserId(riderID)).thenReturn(mockTrips);
-        CarbonDTO result = co2AnalyticsService.getRiderCarbonEmission(riderID.toString());
+        when(tripRepository.findByUser_UserId(riderID)).thenReturn(mockTrips);
+        CarbonDTO result = co2AnalyticsService.getRiderCarbonEmission(riderID);
 
         assertEquals("🌿 Green Rider", result.getEcoBadge()); 
         assertEquals(18.0, result.getTotalEmissions());
@@ -60,8 +60,8 @@ public class Co2AnalyticsServiceTest {
             createTrip(30.0),
             createTrip(40.0)
         );
-        when(tripRepository.findByUserId(riderId)).thenReturn(mockTrips);
-        CarbonDTO result = co2AnalyticsService.getRiderCarbonEmission(riderId.toString());
+        when(tripRepository.findByUser_UserId(riderId)).thenReturn(mockTrips);
+        CarbonDTO result = co2AnalyticsService.getRiderCarbonEmission(riderId);
 
         assertEquals("🚗 Frequent Rider", result.getEcoBadge()); 
     }

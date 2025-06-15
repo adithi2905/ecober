@@ -13,7 +13,7 @@ import Registration from './components/Registration';
 import Login from './components/Login';
 import Logout from './components/Logout';
 import DriverRegistration from './components/DriverRegistration';
-import DriverLogin from './components/DriverLogin'; //
+import DriverLogin from './components/DriverLogin'; 
 
 function App() {
   return (

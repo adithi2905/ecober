@@ -1,5 +1,7 @@
 package com.ecober.adapter.Dto;
 
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CarbonDTO {
-    String riderId;
+    UUID riderId;
     double totalEmissions;
     int totalTrips;
     double averageEmissionPerTrip;

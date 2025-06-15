@@ -38,8 +38,10 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/user/registration", "/user/auth/login", "/driver/register", "/driver/login").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+            .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", 
+                        "/swagger-resources/**", "/webjars/**").permitAll().
+                requestMatchers("/user/registration", "/user/auth/login", "/driver/register", "/driver/login").
+                permitAll()
                 .requestMatchers("/ride/**").hasRole("RIDER")
                 .requestMatchers("/driver/**").hasRole("DRIVER")
                 .anyRequest().authenticated()
@@ -54,7 +56,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Allow your frontend origin
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080",    // Swagger UI (same as your Spring Boot app)
+        "http://127.0.0.1:8080")); 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization"));

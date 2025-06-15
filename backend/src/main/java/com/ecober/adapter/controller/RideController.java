@@ -5,17 +5,15 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.ecober.adapter.Dto.DistanceDurationDTO;
 import com.ecober.adapter.Dto.DriverDTO;
-import com.ecober.adapter.Dto.RiderDTO;
+import com.ecober.adapter.Dto.RideRequestDTO;
 import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.domain.model.Route;
 import com.ecober.domain.model.Trip;
-import com.ecober.domain.service.DriverMatchingService;
-import com.ecober.domain.service.GeocodingService;
+import com.ecober.domain.service.RideRequestService;
 import com.ecober.domain.service.RouteOptimizingService;
 import com.ecober.domain.service.TripService;
 import com.ecober.infrastructure.repository.TripRepository;
@@ -26,8 +24,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/ride")
-@PreAuthorize("hasRole('RIDER')")
-@SecurityRequirement(name = "bearerAuth") 
+@SecurityRequirement(name = "bearerAuth")
 public class RideController {
 
     @Autowired
@@ -37,89 +34,82 @@ public class RideController {
     private TripRepository tripRepository;
 
     @Autowired
-    private DriverMatchingService driverMatchingService;
+    private RideRequestService rideRequestService;
 
     @Autowired
     private RouteOptimizingService routeOptimizingService;
 
-    @Autowired
-    GeocodingService geocodingService;
-
-   // @Autowired
-    //private RedisTemplate<String, String> redisTemplate;
-
-    @PostMapping("/requestRide")
-    public ResponseEntity<?> requestRide(@Valid @RequestBody RiderDTO riderDTO) {
-        UUID riderId = AuthUtil.getCurrentUserId();
-        if (riderId == null) {
-            return ResponseEntity.status(401).build();
-        }
-
-       // String rideKey="Ride in progress "+riderId;
-       // if(Boolean.TRUE.equals(redisTemplate.hasKey(rideKey)))
-       // {
-        //    return ResponseEntity.status(409).body("Ride already in progress.Please wait");
-
-       // }
-        //redisTemplate.opsForValue().set(rideKey,"LOCKED",Duration.ofMinutes(5));
-        riderDTO.setRiderId(riderId);
-        double[]pickuplatlong=geocodingService.getLatAndLong(riderDTO.getRiderPickupLocation());
-        double[]dropofflatlong=geocodingService.getLatAndLong(riderDTO.getRiderDropOffLocation());
-
-        riderDTO.setPickupLatitude(pickuplatlong[0]);
-        riderDTO.setPickupLongitude(pickuplatlong[1]);
-        riderDTO.setDropoffLatitude(dropofflatlong[0]);
-        riderDTO.setDropoffLongitude(dropofflatlong[1]);
     
-        DriverDTO matchedDriver = driverMatchingService.fetchNearestDriver(
-                riderDTO.getRiderId(),
-                riderDTO.getRiderPickupLocation(),
-                riderDTO.getRiderDropOffLocation(),
-                riderDTO.getPickupLatitude(),
-                riderDTO.getPickupLongitude(),
-                riderDTO.getDropoffLatitude(),
-                riderDTO.getDropoffLongitude(),
-                riderDTO.getPreferredVehicleType(),
-                riderDTO.isWillingToPool()
-        );
+    @PostMapping("/requestRide")
+    public ResponseEntity<?> requestRide(@Valid @RequestBody RideRequestDTO rideDTO) {
+        try {
+            UUID userId = AuthUtil.getCurrentUserId();
+            String role = AuthUtil.getCurrentUserRole();
+            
+            // Debug logging - remove after fixing
+            System.out.println("User ID: " + userId);
+            System.out.println("User Role: " + role);
+            
+            // Check if user is a rider - role is now normalized without ROLE_ prefix
+            boolean isRider = "RIDER".equals(role);
 
-        if (matchedDriver == null) {
-        return ResponseEntity.status(404).body("No driver available at the moment.");
+            if (!isRider) {
+                return ResponseEntity.status(403).body("Forbidden: Only riders can request rides. Current role: " + role);
+            }
+
+            DriverDTO matchedDriver = rideRequestService.processRideRequest(rideDTO, userId);
+            if (matchedDriver == null) {
+                return ResponseEntity.status(404).body("No driver available at the moment.");
+            }
+
+            return ResponseEntity.ok(matchedDriver);
+            
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("Unauthorized")) {
+                return ResponseEntity.status(401).body("Unauthorized: " + e.getMessage());
+            }
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
         }
-        //redisTemplate.opsForValue().set(rideKey, "LOCKED", Duration.ofMinutes(5));
-        return ResponseEntity.ok(matchedDriver);
-
     }
 
     @GetMapping("/distanceDuration/{tripId}")
-    public ResponseEntity<DistanceDurationDTO> requestDistanceDuration(@PathVariable UUID tripId) {
-        UUID riderId = AuthUtil.getCurrentUserId();
-        if (riderId == null) {
-            return ResponseEntity.status(401).body(null);
-        }
+    public ResponseEntity<?> requestDistanceDuration(@PathVariable UUID tripId) {
+        try {
+            UUID userId = AuthUtil.getCurrentUserId();
 
-        Trip userTrip = tripRepository.findByTripId(tripId);
-        if (userTrip == null) {
-            return ResponseEntity.status(404).body(null);
-        }
+            Trip trip = tripRepository.findByTripId(tripId);
+            if (trip == null) {
+                return ResponseEntity.status(404).body("Trip not found");
+            }
 
-        if (!userTrip.getUser().getId().equals(riderId)) {
-            return ResponseEntity.status(403).body(null);
-        }
+            if (!trip.getUser().getUserId().equals(userId)) {
+                return ResponseEntity.status(403).body("Forbidden: You are not the owner of this trip");
+            }
 
-        Route route = userTrip.getRoute();
-        DistanceDurationDTO dto = routeOptimizingService.getDistanceAndETA(route.getSource(), route.getDestination());
-        return ResponseEntity.ok(dto);
+            Route route = trip.getRoute();
+            DistanceDurationDTO dto = routeOptimizingService.getDistanceAndETA(route.getSource(), route.getDestination());
+            return ResponseEntity.ok(dto);
+            
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("Unauthorized")) {
+                return ResponseEntity.status(401).body("Unauthorized: " + e.getMessage());
+            }
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+        }
     }
 
     @GetMapping("/getTrips")
-    public ResponseEntity<List<TripDTO>> requestAllTrips() {
-        UUID userId = AuthUtil.getCurrentUserId();
-        if (userId == null) {
-            return ResponseEntity.status(401).body(null);
+    public ResponseEntity<?> getAllRiderTrips() {
+        try {
+            UUID userId = AuthUtil.getCurrentUserId();
+            List<TripDTO> trips = tripService.fetchAllTrips(userId);
+            return ResponseEntity.ok(trips);
+            
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("Unauthorized")) {
+                return ResponseEntity.status(401).body("Unauthorized: " + e.getMessage());
+            }
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
         }
-
-        List<TripDTO> trips = tripService.fetchAllTrips(userId);
-        return ResponseEntity.ok(trips);
     }
 }

@@ -1,6 +1,6 @@
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\application\config\AppConfig.java
+C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\RideRequestStatus.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\RouteOptimizingService.java
-C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\infrastructure\repository\RiderRepository.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\LoginResponseDTO.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\DriverAuthenticationRequest.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\controller\DriverController.java
@@ -11,13 +11,14 @@ C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\security\JwtSe
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\RouteDTO.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\DriverMatchingService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\NotificationService.java
-C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\Rider.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\mapper\DriverMapper.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\CarbonScoringService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\infrastructure\repository\DriverRepository.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\DriverService.java
+C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\RideRequest.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\controller\UserController.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\infrastructure\repository\TripRepository.java
+C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\mapper\RideRequestMapper.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\EcoberApplication.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\Route.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\CarbonDTO.java
@@ -29,7 +30,7 @@ C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\mapper\UserMapper.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\mapper\TripperMapper.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\RideResponseDTO.java
-C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\RiderDTO.java
+C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\RideRequestDTO.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\TripStatus.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\security\JwtAuthenticationFilter.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\application\config\SwaggerConfig.java
@@ -44,11 +45,11 @@ C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\D
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\UserLoginService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\infrastructure\repository\UserRepository.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\User.java
+C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\infrastructure\repository\RideRequestRepository.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\security\CustomUserDetailsService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\Location.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\Co2AnalyticsService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\TripService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\application\config\SecurityConfig.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\GeocodingService.java
-C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\infrastructure\repository\RouteRepository.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\TripDTO.java

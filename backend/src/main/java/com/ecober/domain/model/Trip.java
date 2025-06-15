@@ -1,50 +1,42 @@
 package com.ecober.domain.model;
 
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
-
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Trip {
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
-    @Column(name = "driver_id")
-    private UUID driverId;
-    private String driverName;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TripStatus status;
-
-    private double estimatedEmission;
-    private String ecoScore;
-    private String feedback;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private double carbonEmissions;
-    
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "trip_id", updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID tripId;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "route_id")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "request_id")
+    private RideRequest request;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "driver_id")
+    private Driver driver;
+
+    @Embedded
     private Route route;
+
+    private double estimatedEmission; // Calculated using GeoUtils
+    private String ecoScore;
+
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @Enumerated(EnumType.STRING)
+    private TripStatus status; // ACCEPTED, IN_PROGRESS, COMPLETED
 }

@@ -1,18 +1,18 @@
 package com.ecober.domain.service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ecober.adapter.Dto.DriverDTO;
-import com.ecober.adapter.Dto.RiderDTO;
-import com.ecober.domain.model.Rider;
+import com.ecober.adapter.Dto.RideRequestDTO;
+import com.ecober.domain.model.RideRequest;
+import com.ecober.domain.model.RideRequestStatus;
 import com.ecober.domain.model.User;
-import com.ecober.infrastructure.repository.RiderRepository;
+import com.ecober.infrastructure.repository.RideRequestRepository;
 import com.ecober.infrastructure.repository.UserRepository;
-
-import jakarta.servlet.http.HttpSession;
 
 @Service
 public class RideRequestService {
@@ -21,41 +21,54 @@ public class RideRequestService {
     private DriverMatchingService driverMatchingService;
 
     @Autowired
-    private RiderRepository riderRepository;
+    private RideRequestRepository rideRequestRepository;
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
+    GeocodingService geocodingService;
+
+    @Autowired
     private NotificationService notificationService;
 
-    public DriverDTO processRideRequest(RiderDTO riderDTO, HttpSession session) {
-        UUID userId = (UUID) session.getAttribute("riderId");
+    public DriverDTO processRideRequest(RideRequestDTO dto, UUID userId) {
         if (userId == null) {
             throw new IllegalStateException("Rider is not logged in or session expired.");
         }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalStateException("User not found with ID: " + userId));
+        
+        if (dto.getPickupLocation() == null || dto.getDropoffLocation() == null) {
+    throw new IllegalArgumentException("Pickup and dropoff locations must not be null.");
+}
 
-        Rider rider = mapToRider(riderDTO);
-        rider.setUser(user);
-        riderRepository.save(rider);
+
+        RideRequest request = mapToRideRequest(dto, user);
+        rideRequestRepository.save(request);
+
+        double[]pickuplatlong=geocodingService.getLatAndLong(dto.getPickupLocation());
+        double[]dropofflatlong=geocodingService.getLatAndLong(dto.getDropoffLocation());
 
         DriverDTO matchedDriver = driverMatchingService.fetchNearestDriver(
                 userId,
-                riderDTO.getRiderPickupLocation(),
-                riderDTO.getRiderDropOffLocation(),
-                riderDTO.getPickupLatitude(),
-                riderDTO.getPickupLongitude(),
-                riderDTO.getDropoffLatitude(),
-                riderDTO.getDropoffLongitude(),
-                riderDTO.getPreferredVehicleType(),
-                riderDTO.isWillingToPool()
+                dto.getPickupLocation(),
+                dto.getDropoffLocation(),
+                pickuplatlong[0],
+                pickuplatlong[1],
+                dropofflatlong[0],
+                dropofflatlong[1],
+                dto.getPreferredVehicleType(),
+                dto.isWillingToPool()
         );
 
-        notificationService.notifyRider(userId, "Driver found: " + matchedDriver.getDriverName());
-        notificationService.notifyDriver(matchedDriver.getDriverId(), "New ride request from " + riderDTO.getRiderName());
+        if (matchedDriver != null) {
+            notificationService.notifyRider(userId, "Driver found: " + matchedDriver.getDriverName());
+            notificationService.notifyDriver(matchedDriver.getDriverId(), "New ride request from your area.");
+        } else {
+            notificationService.notifyRider(userId, "No available drivers right now. Try again later.");
+        }
 
         return matchedDriver;
     }
@@ -68,18 +81,15 @@ public class RideRequestService {
         return "RIDE_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
-    private Rider mapToRider(RiderDTO riderDTO) {
-        Rider rider = new Rider();
-        rider.setRiderName(riderDTO.getRiderName());
-        rider.setRiderPickupLocation(riderDTO.getRiderPickupLocation());
-        rider.setRiderDropOffLocation(riderDTO.getRiderDropOffLocation());
-        rider.setPickupLatitude(riderDTO.getPickupLatitude());
-        rider.setPickupLongitude(riderDTO.getPickupLongitude());
-        rider.setDropoffLatitude(riderDTO.getDropoffLatitude());
-        rider.setDropoffLongitude(riderDTO.getDropoffLongitude());
-        rider.setPreferredVehicleType(riderDTO.getPreferredVehicleType());
-        rider.setWillingToPool(riderDTO.isWillingToPool());
-        rider.setCo2Saved(riderDTO.getCo2Saved());
-        return rider;
+    private RideRequest mapToRideRequest(RideRequestDTO dto, User user) {
+        return RideRequest.builder()
+                .user(user)
+                .pickupLocation(dto.getPickupLocation())
+                .dropoffLocation(dto.getDropoffLocation())
+                .preferredVehicleType(dto.getPreferredVehicleType())
+                .willingToPool(dto.isWillingToPool())
+                .requestedTime(LocalDateTime.now())
+                .status(RideRequestStatus.REQUESTED)
+                .build();
     }
 }

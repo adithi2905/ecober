@@ -12,13 +12,15 @@ import com.ecober.domain.model.Trip;
 import com.ecober.domain.model.TripStatus;
 
 public interface TripRepository extends JpaRepository<Trip, UUID> {
-    List<Trip> findByUserId(UUID userId);
-    List<Trip> findByDriverId(UUID driverId);
+
+    List<Trip> findByUser_UserId(UUID riderId);
+
+    List<Trip> findByDriver_DriverId(UUID driverId);
+
+    List<Trip> findByDriver_DriverIdAndStatus(UUID driverId, TripStatus status);
+
     Trip findByTripId(UUID tripId);
 
-    @Query("SELECT t FROM Trip t WHERE t.driverId = :driverId AND t.status = 'IN_PROGRESS'")
+    @Query("SELECT t FROM Trip t WHERE t.driver.driverId = :driverId AND t.status = 'IN_PROGRESS'")
     Optional<Trip> findOngoingTripByDriverId(@Param("driverId") UUID driverId);
-
-    List<Trip> findByDriverIdAndStatus(UUID driverId, TripStatus status);
-
 }

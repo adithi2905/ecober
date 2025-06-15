@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         // Try USER first
         return userRepository.findByUsername(username)
             .<UserDetails>map(user -> new CustomUserDetails(
-                user.getId(), 
+                user.getUserId(), 
                 user.getUsername(), 
                 user.getPassword(), 
                 "RIDER" // Changed from "USER" to "RIDER" to match your role checks

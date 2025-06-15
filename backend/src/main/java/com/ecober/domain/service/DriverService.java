@@ -3,11 +3,18 @@ package com.ecober.domain.service;
 import com.ecober.adapter.Dto.DriverAuthenticationRequest;
 import com.ecober.adapter.Dto.DriverDTO;
 import com.ecober.adapter.Dto.DriverRegistrationRequestDTO;
+import com.ecober.adapter.Dto.RideRequestDTO;
+import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.adapter.mapper.DriverMapper;
+import com.ecober.adapter.mapper.RideRequestMapper;
+import com.ecober.adapter.mapper.TripperMapper;
 import com.ecober.domain.model.Driver;
+import com.ecober.domain.model.RideRequest;
+import com.ecober.domain.model.RideRequestStatus;
 import com.ecober.domain.model.Trip;
 import com.ecober.domain.model.TripStatus;
 import com.ecober.infrastructure.repository.DriverRepository;
+import com.ecober.infrastructure.repository.RideRequestRepository;
 import com.ecober.infrastructure.repository.TripRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +44,14 @@ public class DriverService {
     @Autowired
     private TripService tripService;
 
+    @Autowired
+    private RideRequestMapper rideRequestMapper;
+
+    @Autowired
+    RideRequestRepository rideRequestRepository;
+        
+
+    // Registration
     public void register(DriverRegistrationRequestDTO request) {
         Driver driver = new Driver();
         driver.setDriverName(request.getName());
@@ -49,6 +64,7 @@ public class DriverService {
         driverRepository.save(driver);
     }
 
+    // Authentication
     public Driver authenticate(DriverAuthenticationRequest request) {
         Driver driver = driverRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Driver not found"));
@@ -58,6 +74,7 @@ public class DriverService {
         return driver;
     }
 
+    // CRUD & Profile Operations
     public List<DriverDTO> getAllDrivers() {
         return driverMapper.toDtoList(driverRepository.findAll());
     }
@@ -100,20 +117,15 @@ public class DriverService {
         return false;
     }
 
-    public double calculateDriverCO2Impact(UUID driverId) {
-        return tripRepository.findByDriverId(driverId)
-                .stream()
-                .mapToDouble(Trip::getCarbonEmissions)
-                .sum();
-    }
-
+    // Trip Operations
     public boolean startTrip(UUID driverId) {
-    return tripService.startTrip(driverId); 
-}
+        return tripService.startTrip(driverId);
+    }
 
     public boolean endTrip(UUID tripId, UUID driverId) {
         Trip trip = tripRepository.findByTripId(tripId);
-        if (trip != null && driverId.equals(trip.getDriverId())) {
+        if (trip != null && trip.getDriver() != null &&
+            driverId.equals(trip.getDriver().getDriverId())) {
             trip.setEndTime(LocalDateTime.now());
             trip.setStatus(TripStatus.COMPLETED);
             tripRepository.save(trip);
@@ -122,14 +134,32 @@ public class DriverService {
         return false;
     }
 
+    public List<RideRequestDTO> getNearbyAvailableTrips(UUID driverId) {
+        Driver driver = driverRepository.findByDriverId(driverId)
+                .orElseThrow(() -> new RuntimeException("Driver not found"));
+        String location = driver.getDriverLocation();
+        String vehicleType = driver.getVehicleType();
+        List<RideRequest> availableTrips = rideRequestRepository.findNearbyRideRequests(location, vehicleType,RideRequestStatus.REQUESTED);
+        return rideRequestMapper.toDtoList(availableTrips);
+    }
+
     public long getDriverTripCount(UUID driverId) {
-        return tripRepository.findByDriverId(driverId).size();
+        return tripRepository.findByDriver_DriverId(driverId).size();
     }
 
     public double getDriverAverageEmissionPerTrip(UUID driverId) {
-        List<Trip> trips = tripRepository.findByDriverId(driverId);
+        List<Trip> trips = tripRepository.findByDriver_DriverId(driverId);
         if (trips.isEmpty()) return 0.0;
-        double totalEmissions = trips.stream().mapToDouble(Trip::getCarbonEmissions).sum();
+        double totalEmissions = trips.stream()
+        .mapToDouble(Trip::getEstimatedEmission)
+        .sum();
         return totalEmissions / trips.size();
+    }
+
+    public double calculateDriverCO2Impact(UUID driverId) {
+        return tripRepository.findByDriver_DriverId(driverId)
+                .stream()
+                .mapToDouble(Trip::getEstimatedEmission)
+                .sum();
     }
 }

@@ -1,20 +1,16 @@
 package com.ecober.adapter.Dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
-@Builder
+import java.util.UUID;
+
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserDTO {
-
-    @NotBlank(message = "Username must not be empty")
     private String username;
-
-    @NotBlank(message = "Password must not be empty")
-    private String password;
+    private String password; 
+    private boolean enabled;
 }

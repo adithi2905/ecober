@@ -26,14 +26,14 @@ public class Co2AnalyticsService
         return "🚗 Frequent Rider";
     }
 
-    public CarbonDTO getRiderCarbonEmission(String riderID)
+    public CarbonDTO getRiderCarbonEmission(UUID riderID)
     {
-        List<Trip>trips=tripRepository.findByUserId(UUID.fromString(riderID));
+        List<Trip>trips=tripRepository.findByUser_UserId(riderID);
         int totalTrips=trips.size();
         double totalEmissions=0.0;
         for(int i=0;i<trips.size();i++)
         {
-            totalEmissions+=trips.get(i).getCarbonEmissions();
+            totalEmissions+=trips.get(i).getEstimatedEmission();
         }
         String badge=determineBadge(totalEmissions);
         double averageEmissionPerTrip=totalEmissions/totalTrips;
