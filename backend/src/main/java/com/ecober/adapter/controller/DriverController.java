@@ -12,6 +12,7 @@ import com.ecober.adapter.Dto.DriverAuthenticationRequest;
 import com.ecober.adapter.Dto.DriverDTO;
 import com.ecober.adapter.Dto.DriverRegistrationRequestDTO;
 import com.ecober.adapter.Dto.RideRequestDTO;
+import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.domain.model.Driver;
 import com.ecober.domain.service.DriverService;
 import com.ecober.domain.service.TripService;
@@ -36,11 +37,7 @@ public class DriverController {
     @Autowired
     private TripService tripService;
 
-    @GetMapping("/all")
-    public ResponseEntity<List<DriverDTO>> getAllDrivers() {
-        return ResponseEntity.ok(driverService.getAllDrivers());
-    }
-
+    
     @GetMapping("/me/getProfile")
     public ResponseEntity<DriverDTO> getMyProfile() {
         UUID driverId = AuthUtil.getCurrentUserId();
@@ -205,4 +202,27 @@ public class DriverController {
             return ResponseEntity.status(401).body(ex.getMessage());
         }
     }
+
+    @PostMapping("/acceptRide/{rideRequestId}")
+    public ResponseEntity<?> acceptRide(@PathVariable UUID rideRequestId) {
+        try {
+            UUID driverId = AuthUtil.getCurrentUserId();
+            String role = AuthUtil.getCurrentUserRole();
+
+            if (driverId == null || !"DRIVER".equalsIgnoreCase(role)) {
+                return ResponseEntity.status(403).body("Only authenticated drivers can accept rides.");
+            }
+
+            TripDTO trip = driverService.acceptRide(rideRequestId, driverId);
+            return ResponseEntity.ok(trip);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid ride request: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).body("Ride already accepted or no longer available: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error accepting ride: " + e.getMessage());
+        }
+    }
+
 }

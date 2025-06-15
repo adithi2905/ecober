@@ -36,7 +36,6 @@ public class TripService {
         trip.setEstimatedEmission(carbonEmission);
         trip.setEcoScore("B+");
         trip.setStatus(TripStatus.ACCEPTED);
-
         tripRepository.save(trip);
     }
 
@@ -83,4 +82,13 @@ public class TripService {
         return tripRepository.findOngoingTripByDriverId(driverId)
                              .map(Trip::getTripId);
     }
+
+    public Trip getTripByIdForUser(UUID tripId, UUID userId) {
+    Trip trip = tripRepository.findByTripId(tripId);
+    if (trip != null && trip.getUser() != null && trip.getUser().getUserId().equals(userId)) {
+        return trip;
+    }
+    return null;
+}
+
 }

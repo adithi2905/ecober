@@ -41,6 +41,7 @@ com\ecober\domain\model\RideRequest.class
 com\ecober\domain\service\DriverService.class
 com\ecober\domain\model\TripStatus.class
 com\ecober\domain\service\RouteService.class
+com\ecober\domain\service\BroadcastingService.class
 com\ecober\adapter\Dto\DistanceDurationDTO$DistanceDurationDTOBuilder.class
 com\ecober\infrastructure\repository\DriverRepository.class
 com\ecober\adapter\controller\RideController.class
@@ -63,6 +64,7 @@ com\ecober\domain\service\RideRequestService.class
 com\ecober\domain\model\Route.class
 com\ecober\domain\service\CarbonScoringService.class
 com\ecober\security\CustomUserDetails.class
+com\ecober\domain\model\Trip$TripBuilder.class
 com\ecober\adapter\controller\UserController.class
 com\ecober\adapter\Dto\DriverRegistrationRequestDTO$DriverRegistrationRequestDTOBuilder.class
 com\ecober\adapter\Dto\UserDTO$UserDTOBuilder.class
