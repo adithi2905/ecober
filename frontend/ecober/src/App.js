@@ -14,6 +14,7 @@ import Login from './components/Login';
 import Logout from './components/Logout';
 import DriverRegistration from './components/DriverRegistration';
 import DriverLogin from './components/DriverLogin'; 
+import AvailableRides from './components/DriverAvailabletrips';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/registration" element={<Registration />} />
+        <Route path="/availableRides" element={<AvailableRides/>}></Route>
         
         <Route element={<DashboardLayout />}>
           <Route path="/rideBooking" element={<RiderBooking />} />

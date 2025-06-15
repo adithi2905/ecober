@@ -54,28 +54,7 @@ public class RideController {
         }
     }
 
-    @PostMapping("/acceptRide/{rideRequestId}")
-    public ResponseEntity<?> acceptRide(@PathVariable UUID rideRequestId) {
-        try {
-            UUID driverId = AuthUtil.getCurrentUserId();
-            String role = AuthUtil.getCurrentUserRole();
-
-            if (driverId == null || !"DRIVER".equalsIgnoreCase(role)) {
-                return ResponseEntity.status(403).body("Only authenticated drivers can accept rides.");
-            }
-
-            TripDTO trip = rideRequestService.acceptRide(rideRequestId, driverId);
-            return ResponseEntity.ok(trip);
-
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid ride request: " + e.getMessage());
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(409).body("Ride already accepted or no longer available: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error accepting ride: " + e.getMessage());
-        }
-    }
-
+    
     @GetMapping("/getTrips")
     public ResponseEntity<?> getAllRiderTrips() {
         try {

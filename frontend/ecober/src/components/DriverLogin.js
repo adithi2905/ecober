@@ -24,7 +24,8 @@ function DriverLogin() {
         const data = await response.json();
         localStorage.setItem("token", data.token);
         alert("Login successful!");
-       } else {
+        navigate("/availableRides")
+      } else {
         alert("Login failed.");
       }
     } catch (error) {
