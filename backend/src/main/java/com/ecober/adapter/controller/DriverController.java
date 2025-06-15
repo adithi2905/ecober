@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import com.ecober.adapter.Dto.DriverAuthenticationRequest;
 import com.ecober.adapter.Dto.DriverDTO;
 import com.ecober.adapter.Dto.DriverRegistrationRequestDTO;
+import com.ecober.adapter.Dto.RideRequestDTO;
 import com.ecober.domain.model.Driver;
+import com.ecober.domain.model.RideRequest;
 import com.ecober.domain.service.DriverService;
 import com.ecober.domain.service.TripService;
 import com.ecober.security.JwtService;
@@ -179,6 +181,22 @@ public class DriverController {
 
         } catch (Exception e) {
             return ResponseEntity.status(403).body("Auth error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/fetchRides")
+    public ResponseEntity<?> fetchAllRideRequestDTOs()
+    {
+        try
+        {
+        UUID driverUuid=AuthUtil.getCurrentUserId();
+        String role=AuthUtil.getCurrentUserRole();
+        List<RideRequestDTO>availableRides=driverService.getNearbyAvailableTrips(driverUuid);
+        return ResponseEntity.ok(availableRides);
+        }
+        catch(Exception ex)
+        {
+            return ResponseEntity.status(401).body(ex.getMessage());
         }
     }
 }
