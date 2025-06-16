@@ -7,6 +7,7 @@ const navLinks = [
 { name: 'Profile', path: '/profile' },
    { name: 'Eco History', path: '/ecoReport' },
     { name: 'Green Goals', path: '/goals' },
+    {name: 'Current Rides',path: '/currentRide'}
 ];
 
 function DashboardLayout() {

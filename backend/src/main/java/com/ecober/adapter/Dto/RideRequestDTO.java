@@ -2,6 +2,8 @@ package com.ecober.adapter.Dto;
 
 import lombok.*;
 
+import java.util.UUID;
+
 import jakarta.validation.constraints.NotBlank;
 
 @Getter
@@ -10,6 +12,8 @@ import jakarta.validation.constraints.NotBlank;
 @AllArgsConstructor
 @Builder
 public class RideRequestDTO {
+
+    private UUID rideRequestId;
 
     @NotBlank(message = "Pickup location is required")
     private String pickupLocation;

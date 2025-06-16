@@ -15,6 +15,7 @@ import Logout from './components/Logout';
 import DriverRegistration from './components/DriverRegistration';
 import DriverLogin from './components/DriverLogin'; 
 import AvailableRides from './components/DriverAvailabletrips';
+import CurrentRide from './components/CurrentRide';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/ecoReport" element={<EcoReport />} />
           <Route path="/goals" element={<GreenGoals />} />
+          <Route path="/currentRide" element={<CurrentRide/>}/>
         </Route>
       </Routes>
     </BrowserRouter>

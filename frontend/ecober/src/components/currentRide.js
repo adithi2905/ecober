@@ -1,7 +1,7 @@
 import React,{useEffect,useState} from "react";
 import { useNavigate } from "react-router-dom";
 
-function currentRide()
+function CurrentRide()
 {
     const [ride,setRide]=useState(null);
     const [loading,setLoading]=useState(true);
@@ -14,7 +14,7 @@ function currentRide()
             const token=localStorage.getItem("token");
             try
             {
-                const res=await fetch("http://localhsot:8080/user/trip/current",
+                const res=await fetch("http://localhost:8080/user/trip/current",
                     {
                         headers: {
                             "Authorization": `Bearer ${token}`},
@@ -48,10 +48,10 @@ return (
         {ride ? (
           <>
             <h2 className="text-xl font-bold mb-4 text-[#800000]">Your Ride is In Progress</h2>
-            <p><strong>Driver:</strong> {ride.driverName}</p>
-            <p><strong>Vehicle:</strong> {ride.vehicleType}</p>
-            <p><strong>Pickup:</strong> {ride.pickupLocation}</p>
-            <p><strong>Dropoff:</strong> {ride.dropoffLocation}</p>
+            <p><strong>Driver:</strong> {ride.driver.driverName}</p>
+            <p><strong>Vehicle:</strong> {ride.driver.vehicleType}</p>
+            <p><strong>Pickup:</strong> {ride.user.pickupLocation}</p>
+            <p><strong>Dropoff:</strong> {ride.user.dropoffLocation}</p>
             <p><strong>Status:</strong> {ride.status}</p>
           </>
         ) : (
@@ -70,6 +70,6 @@ return (
   );
 }
 
-export default currentRide;
+export default CurrentRide;
 
 

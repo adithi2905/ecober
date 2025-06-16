@@ -66,8 +66,8 @@ function DriverAvailabletrips() {
               <p><strong>Dropoff:</strong> {ride.dropoffLocation}</p>
               <p><strong>Vehicle Type:</strong> {ride.preferredVehicleType}</p>
               <p><strong>Willing to Pool:</strong> {ride.willingToPool ? "Yes" : "No"}</p>
-              <p><strong>Requested Time:</strong> {new Date(ride.requestedTime).toLocaleString()}</p>
-              <p><strong>Status:</strong> {ride.status}</p>
+              <p><strong>Rider id:</strong> {ride.rideRequestId}</p>
+              
               <button
                 onClick={() => handleAcceptRide(ride.rideRequestId)}
                 className="mt-3 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
