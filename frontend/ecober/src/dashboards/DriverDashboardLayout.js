@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import AvailableRides from '../components/DriverAvailabletrips';
 import DriverCurrentTrip from '../components/DriverCurrentTrip';
-import Profile from '../components/Profile';
+import DriverProfile from '../components/DriverProfile'; 
 import EcoReport from '../components/ecoReport';
 import GreenGoals from '../components/greenGoals';
-import DriverTripHistory from '../components/DriverTripHistory'; // ✅ Add this import
+import DriverTripHistory from '../components/DriverTripHistory';
 
 const tabs = [
   { name: 'Available Rides', key: 'available' },
@@ -12,7 +12,7 @@ const tabs = [
   { name: 'Profile', key: 'profile' },
   { name: 'Carbon Impact', key: 'eco' },
   { name: 'Trip Count', key: 'goals' },
-  { name: 'Trip History', key: 'history' } // ✅ Fixed syntax here
+  { name: 'Trip History', key: 'history' }
 ];
 
 function DriverDashboardPage() {
@@ -25,13 +25,13 @@ function DriverDashboardPage() {
       case 'current':
         return <DriverCurrentTrip />;
       case 'profile':
-        return <Profile />;
+        return <DriverProfile />; 
       case 'eco':
         return <EcoReport />;
       case 'goals':
         return <GreenGoals />;
       case 'history':
-        return <DriverTripHistory />; // ✅ Add rendering logic
+        return <DriverTripHistory />;
       default:
         return <AvailableRides />;
     }
@@ -74,7 +74,9 @@ function DriverDashboardPage() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6">{renderContent()}</main>
+        <main className="flex-1 overflow-y-auto p-6">
+          {renderContent()}
+        </main>
       </div>
     </div>
   );
