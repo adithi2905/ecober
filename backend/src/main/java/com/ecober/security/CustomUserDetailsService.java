@@ -21,10 +21,20 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // Try USER first
         return userRepository.findByUsername(username)
-            .<UserDetails>map(user -> new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), "USER"))
+            .<UserDetails>map(user -> new CustomUserDetails(
+                user.getUserId(), 
+                user.getUsername(), 
+                user.getPassword(), 
+                "RIDER" // Changed from "USER" to "RIDER" to match your role checks
+            ))
             // Then try DRIVER if not found
             .orElseGet(() -> driverRepository.findByEmail(username)
-                .map(driver -> new CustomUserDetails(driver.getDriverId(), driver.getEmail(), driver.getPassword(), "DRIVER"))
+                .map(driver -> new CustomUserDetails(
+                    driver.getDriverId(), 
+                    driver.getEmail(), 
+                    driver.getPassword(), 
+                    "DRIVER"
+                ))
                 .orElseThrow(() -> new UsernameNotFoundException("No user or driver found for: " + username)));
     }
 }

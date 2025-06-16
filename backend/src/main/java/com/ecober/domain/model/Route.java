@@ -3,16 +3,13 @@ package com.ecober.domain.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Entity
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Embeddable
 public class Route {
-
-    @Id
-    private String routeID;
 
     @Embedded
     @AttributeOverrides({

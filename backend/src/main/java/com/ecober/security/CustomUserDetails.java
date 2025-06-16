@@ -20,13 +20,14 @@ public class CustomUserDetails implements UserDetails {
     private final String role;
 
     @Override
-public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
-}
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        String roleWithPrefix = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+        return List.of(new SimpleGrantedAuthority(roleWithPrefix));
+    }
     
-
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
     @Override public boolean isEnabled() { return true; }
 }
+

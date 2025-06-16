@@ -1,39 +1,48 @@
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
+
 
 function RiderBooking() {
   const [pickup, setPickup] = useState('');
   const [destination, setDestination] = useState('');
+  const [preferredVehicleType, setPreferredVehicleType] = useState('Sedan');
+  const [willingToPool, setWillingToPool] = useState(false);
+  const navigate=useNavigate();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    const token = localStorage.getItem("token");
 
-  const token = localStorage.getItem("token");
+    try {
+      const response = await fetch("http://localhost:8080/ride/requestRide", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          pickupLocation: pickup,
+          dropoffLocation: destination,
+          preferredVehicleType: preferredVehicleType,
+          willingToPool: willingToPool,
+        })
+      });
 
-  try {
-    const response = await fetch("http://localhost:8080/ride/requestRide", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        riderPickupLocation: pickup,
-        riderDropOffLocation: destination,
-        preferredVehicleType: "Car",
-        willingToPool: false,
-      })
-    });
-    if (response.ok) {
-      const data = await response.json();
-      alert(`Ride booked successfully! ${JSON.stringify(data)}`);
-    } else {
-      alert("Failed to book ride. Please check your token or login again.");
+      if (response.ok) {
+        const data = await response.json();
+        navigate("/bookingconfirmation",{state: {
+    driver: driverData,
+    pickup: pickupLocation,
+    destination: dropoffLocation,
+  },})
+      } else {
+        alert("Failed to book ride");
+      }
+    } catch (error) {
+      console.error("Error booking ride:", error);
+      alert("Something went wrong. ",error);
     }
-  } catch (error) {
-    console.error("Error booking ride:", error);
-    alert("Something went wrong.");
-  }
-};
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -61,6 +70,28 @@ function RiderBooking() {
               placeholder="Enter destination"
               required
             />
+          </div>
+          <div>
+            <label className="block mb-1 text-gray-700">Preferred Vehicle Type:</label>
+            <select
+              value={preferredVehicleType}
+              onChange={(e) => setPreferredVehicleType(e.target.value)}
+              className="w-full border border-gray-300 p-2 rounded focus:outline-none"
+            >
+              <option value="Sedan">Sedan</option>
+              <option value="SUV">SUV</option>
+              <option value="Van">Van</option>
+              <option value="Electric">Electric</option>
+            </select>
+          </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              checked={willingToPool}
+              onChange={(e) => setWillingToPool(e.target.checked)}
+              className="mr-2"
+            />
+            <label className="text-gray-700">Willing to Pool</label>
           </div>
           <button
             type="submit"

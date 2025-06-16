@@ -28,6 +28,7 @@ public class UserRegistrationService {
             throw new RuntimeException("User already exists with username: " + user.getUsername());
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole("RIDER");
         userRepository.save(user);
         }
 }

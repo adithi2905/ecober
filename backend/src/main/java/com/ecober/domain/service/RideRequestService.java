@@ -1,36 +1,62 @@
 package com.ecober.domain.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ecober.adapter.Dto.DistanceDurationDTO;
 import com.ecober.adapter.Dto.DriverDTO;
-import com.ecober.adapter.Dto.RiderDTO;
-import com.ecober.domain.model.Rider;
+import com.ecober.adapter.Dto.RideRequestDTO;
+import com.ecober.adapter.Dto.TripDTO;
+import com.ecober.adapter.mapper.TripperMapper;
+import com.ecober.domain.model.Driver;
+import com.ecober.domain.model.Location;
+import com.ecober.domain.model.RideRequest;
+import com.ecober.domain.model.RideRequestStatus;
+import com.ecober.domain.model.Route;
+import com.ecober.domain.model.Trip;
+import com.ecober.domain.model.TripStatus;
 import com.ecober.domain.model.User;
-import com.ecober.infrastructure.repository.RiderRepository;
+import com.ecober.infrastructure.repository.DriverRepository;
+import com.ecober.infrastructure.repository.RideRequestRepository;
+import com.ecober.infrastructure.repository.TripRepository;
 import com.ecober.infrastructure.repository.UserRepository;
-
-import jakarta.servlet.http.HttpSession;
+import com.ecober.util.GeoUtils;
 
 @Service
 public class RideRequestService {
 
     @Autowired
-    private DriverMatchingService driverMatchingService;
-
-    @Autowired
-    private RiderRepository riderRepository;
+    private RideRequestRepository rideRequestRepository;
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
+    private TripRepository tripRepository;
+
+    @Autowired
+    private DriverRepository driverRepository;
+
+    @Autowired
+    private RouteOptimizingService routeOptimizingService;
+
+    @Autowired
+    private TripperMapper tripMapper;
+
+    @Autowired
+    private GeocodingService geocodingService;
+
+    @Autowired
     private NotificationService notificationService;
 
-    public DriverDTO processRideRequest(RiderDTO riderDTO, HttpSession session) {
-        UUID userId = (UUID) session.getAttribute("riderId");
+    @Autowired
+    private BroadcastingService broadcastingService;
+
+    public void processRideRequest(RideRequestDTO dto, UUID userId) {
         if (userId == null) {
             throw new IllegalStateException("Rider is not logged in or session expired.");
         }
@@ -38,26 +64,31 @@ public class RideRequestService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalStateException("User not found with ID: " + userId));
 
-        Rider rider = mapToRider(riderDTO);
-        rider.setUser(user);
-        riderRepository.save(rider);
+        if (dto.getPickupLocation() == null || dto.getDropoffLocation() == null) {
+            throw new IllegalArgumentException("Pickup and dropoff locations must not be null.");
+        }
 
-        DriverDTO matchedDriver = driverMatchingService.fetchNearestDriver(
-                userId,
-                riderDTO.getRiderPickupLocation(),
-                riderDTO.getRiderDropOffLocation(),
-                riderDTO.getPickupLatitude(),
-                riderDTO.getPickupLongitude(),
-                riderDTO.getDropoffLatitude(),
-                riderDTO.getDropoffLongitude(),
-                riderDTO.getPreferredVehicleType(),
-                riderDTO.isWillingToPool()
+        RideRequest request = mapToRideRequest(dto, user);
+        rideRequestRepository.save(request);
+
+        double[] pickupLatLong = geocodingService.getLatAndLong(dto.getPickupLocation());
+
+        List<DriverDTO> drivers = broadcastingService.findAndNotifyTopDrivers(
+                pickupLatLong[0],
+                pickupLatLong[1],
+                dto.getPreferredVehicleType(),
+                4
         );
 
-        notificationService.notifyRider(userId, "Driver found: " + matchedDriver.getDriverName());
-        notificationService.notifyDriver(matchedDriver.getDriverId(), "New ride request from " + riderDTO.getRiderName());
-
-        return matchedDriver;
+        if (drivers.isEmpty()) {
+            notificationService.notifyRider(userId, "No available drivers right now. Try again later.");
+        } else {
+            for (DriverDTO driver : drivers) {
+                notificationService.notifyDriver(driver.getDriverId(), 
+                    "New ride request from " + dto.getPickupLocation() + " to " + dto.getDropoffLocation());
+            }
+            notificationService.notifyRider(userId, "Ride request sent to nearby drivers.");
+        }
     }
 
     public void cancelRideRequest(UUID userId, String reason) {
@@ -68,18 +99,16 @@ public class RideRequestService {
         return "RIDE_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
-    private Rider mapToRider(RiderDTO riderDTO) {
-        Rider rider = new Rider();
-        rider.setRiderName(riderDTO.getRiderName());
-        rider.setRiderPickupLocation(riderDTO.getRiderPickupLocation());
-        rider.setRiderDropOffLocation(riderDTO.getRiderDropOffLocation());
-        rider.setPickupLatitude(riderDTO.getPickupLatitude());
-        rider.setPickupLongitude(riderDTO.getPickupLongitude());
-        rider.setDropoffLatitude(riderDTO.getDropoffLatitude());
-        rider.setDropoffLongitude(riderDTO.getDropoffLongitude());
-        rider.setPreferredVehicleType(riderDTO.getPreferredVehicleType());
-        rider.setWillingToPool(riderDTO.isWillingToPool());
-        rider.setCo2Saved(riderDTO.getCo2Saved());
-        return rider;
+    private RideRequest mapToRideRequest(RideRequestDTO dto, User user) {
+        return RideRequest.builder()
+                .user(user)
+                .pickupLocation(dto.getPickupLocation())
+                .dropoffLocation(dto.getDropoffLocation())
+                .preferredVehicleType(dto.getPreferredVehicleType())
+                .willingToPool(dto.isWillingToPool())
+                .requestedTime(LocalDateTime.now())
+                .status(RideRequestStatus.REQUESTED)
+                .build();
     }
+
 }

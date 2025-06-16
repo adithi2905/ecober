@@ -1,49 +1,43 @@
 package com.ecober.domain.service;
+
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-import com.ecober.adapter.Dto.DistanceDurationDTO;
 import com.ecober.adapter.Dto.DriverAuthenticationRequest;
-import com.ecober.adapter.Dto.DriverDTO;
 import com.ecober.adapter.Dto.DriverRegistrationRequestDTO;
-import com.ecober.adapter.mapper.DriverMapper;
+import com.ecober.adapter.Dto.RideRequestDTO;
 import com.ecober.domain.model.Driver;
 import com.ecober.domain.model.Location;
-import com.ecober.domain.model.Route;
-import com.ecober.domain.model.Trip;
+import com.ecober.domain.model.RideRequest;
+import com.ecober.domain.model.RideRequestStatus;
+import com.ecober.domain.model.User;
 import com.ecober.infrastructure.repository.DriverRepository;
-import com.ecober.infrastructure.repository.RouteRepository;
-import com.ecober.infrastructure.repository.TripRepository;
+import com.ecober.infrastructure.repository.RideRequestRepository;
+import com.ecober.infrastructure.repository.UserRepository;
 import com.ecober.util.GeoUtils;
 
 @Service
 public class DriverMatchingService {
 
     @Autowired
-    private TripService tripService;
+    private RideRequestRepository rideRequestRepository;
 
     @Autowired
-    private RouteRepository routeRepository;
-
-    @Autowired
-    private DriverMapper driverMapper;
-
-    @Autowired
-    private RouteOptimizingService routeOptimizingService;
+    private UserRepository userRepository;
 
     @Autowired
     private GeocodingService geocodingService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Autowired
     private DriverRepository driverRepository;
@@ -67,62 +61,56 @@ public class DriverMatchingService {
         }
         return driver;
     }
-    public DriverDTO fetchNearestDriver(UUID riderId,
-                                        String riderPickupAddress,
-                                        String riderDropoffAddress,
-                                        double pickupLatitude,
-                                        double pickupLongitude,
-                                        double dropoffLatitude,
-                                        double dropoffLongitude,
-                                        String preferredVehicleType,
-                                        boolean willingToPool) {
 
-        Logger.getLogger(DriverMatchingService.class.getName()).info("Matching driver for: " + riderPickupAddress);
-
-        Location pickup = new Location(pickupLatitude, pickupLongitude, riderPickupAddress, 0.0);
-        Location dropoff = new Location(dropoffLatitude, dropoffLongitude, riderDropoffAddress, 0.0);
-
-        DistanceDurationDTO distanceDTO;
-        try {
-            distanceDTO = routeOptimizingService.getDistanceAndETA(pickup, dropoff);
-        } catch (Exception ex) {
-            distanceDTO = GeoUtils.haversinDistanceandDuration(
-                    pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude
-            );
+    public void broadcastRideRequest(RideRequestDTO dto, UUID riderId) {
+        if (riderId == null) {
+            throw new IllegalStateException("Rider is not logged in or session expired.");
         }
 
-        double carbonEmission = GeoUtils.calculateEmissions(distanceDTO.getDistanceKm(), preferredVehicleType);
+        User user = userRepository.findById(riderId)
+                .orElseThrow(() -> new IllegalStateException("User not found"));
 
-        Route route = routeRepository.findByCoordinates(
-                pickup.getLatitude(), pickup.getLongitude(),
-                dropoff.getLatitude(), dropoff.getLongitude()
-        ).orElse(null);
-
-        if (route == null) {
-            route = Route.builder()
-                    .routeID(UUID.randomUUID().toString())
-                    .source(pickup)
-                    .destination(dropoff)
-                    .distanceKm(distanceDTO.getDistanceKm())
-                    .carbonCost(carbonEmission)
-                    .estimatedTime(distanceDTO.getDurationInMins())
-                    .isPooledEligible(willingToPool)
-                    .carbonEmission(carbonEmission)
-                    .build();
-            route = routeRepository.save(route);
+        if (dto.getPickupLocation() == null || dto.getDropoffLocation() == null) {
+            throw new IllegalArgumentException("Pickup and dropoff locations must not be null.");
         }
 
-        List<Driver> drivers = driverRepository.findAll(); 
-        Driver best = drivers.stream()
-    .min(Comparator.comparingDouble(d -> {
-        double[] coords = geocodingService.getLatAndLong(d.getDriverLocation());
-        return GeoUtils.haversinDistance(pickup.getLatitude(), pickup.getLongitude(), coords[0], coords[1]);
-    }))
-    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable driver found"));
+        RideRequest rideRequest = RideRequest.builder()
+                .user(user)
+                .pickupLocation(dto.getPickupLocation())
+                .dropoffLocation(dto.getDropoffLocation())
+                .preferredVehicleType(dto.getPreferredVehicleType())
+                .willingToPool(dto.isWillingToPool())
+                .requestedTime(LocalDateTime.now())
+                .status(RideRequestStatus.REQUESTED)
+                .build();
 
-        tripService.createTrip(riderId, best, route, carbonEmission);
-    return driverMapper.toDto(best);
+        rideRequestRepository.save(rideRequest);
+
+        double[] pickupLatLong = geocodingService.getLatAndLong(dto.getPickupLocation());
+
+        List<Driver> nearbyDrivers = findTopNearbyDrivers(
+                pickupLatLong[0],
+                pickupLatLong[1],
+                dto.getPreferredVehicleType(),
+                4
+        );
+
+        for (Driver driver : nearbyDrivers) {
+            notificationService.notifyDriver(driver.getDriverId(),
+                    "New ride request from " + dto.getPickupLocation() + " to " + dto.getDropoffLocation());
+        }
     }
 
-}
+    public List<Driver> findTopNearbyDrivers(double pickupLat, double pickupLng, String vehicleType, int limit) {
+        List<Driver> allDrivers = driverRepository.findAll();
 
+        return allDrivers.stream()
+                .filter(d -> vehicleType.equalsIgnoreCase(d.getVehicleType()))
+                .sorted(Comparator.comparingDouble(d -> {
+                    double[] coords = geocodingService.getLatAndLong(d.getDriverLocation());
+                    return GeoUtils.haversinDistance(pickupLat, pickupLng, coords[0], coords[1]);
+                }))
+                .limit(limit)
+                .toList();
+    }
+}

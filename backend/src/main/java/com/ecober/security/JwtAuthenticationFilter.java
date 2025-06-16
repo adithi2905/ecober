@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -35,32 +34,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        final String token = authHeader.substring(7);
-        String userIdStr = jwtService.extractUserId(token);
-        String role = jwtService.extractUserRole(token);
+        try {
+            final String token = authHeader.substring(7);
+            String userIdStr = jwtService.extractUserId(token);
+            String role = jwtService.extractUserRole(token);
 
-        if (userIdStr != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UUID userId = UUID.fromString(userIdStr);
-            if (jwtService.isTokenValid(token, userId)) {
-                CustomUserDetails userDetails = new CustomUserDetails(
-                        userId,
-                        userId.toString(), // username (not used here)
-                        "",                // password not needed
-                        role
-                );
+            if (userIdStr != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UUID userId = UUID.fromString(userIdStr);
+                if (jwtService.isTokenValid(token, userId)) {
+                    CustomUserDetails userDetails = new CustomUserDetails(
+                            userId,
+                            userId.toString(),
+                            "",
+                            role // Role without ROLE_ prefix, will be added in getAuthorities()
+                    );
 
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
 
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (Exception e) {
+            // Log the error but don't break the filter chain
+            System.err.println("JWT Authentication error: " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);

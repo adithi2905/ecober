@@ -1,4 +1,5 @@
 package com.ecober.adapter.Dto;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -14,19 +15,24 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TripDTO {
+
+    private UUID tripId;
     private UUID riderId;
     private UUID driverId;
+
+    private String driverName;
+    private DriverDTO driver;
+    private UserDTO user;
+
+    private RouteDTO route;
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
-    private double carbonEmissions;
-
-    private RouteDTO routedto;
-    private DriverDTO driver;
-    private String driverName;
     private double estimatedEmission;
+    private double actualEmission;
     private String ecoScore;
+
     private String feedback;
     private String status; 
 }
