@@ -1,25 +1,36 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function DriverCurrentTrip() {
   const [trip, setTrip] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    const fetchTrip = async () => {
-      const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:8080/driver/me/current-trip", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setTrip(data);
-      }
+    const passedTrip = location.state?.trip;
+    if (passedTrip) {
+      setTrip(passedTrip);
       setLoading(false);
-    };
-    fetchTrip();
-  }, []);
+    } else {
+      const fetchTrip = async () => {
+        const token = localStorage.getItem("token");
+        const res = await fetch("http://localhost:8080/driver/me/current-trip", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setTrip(data);
+        } else {
+          const msg = await res.text();
+          setError("Could not load trip: " + msg);
+        }
+        setLoading(false);
+      };
+      fetchTrip();
+    }
+  }, [location.state]);
 
   const handleStartTrip = async () => {
     const token = localStorage.getItem("token");
@@ -27,9 +38,11 @@ function DriverCurrentTrip() {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
     });
+
     if (res.ok) {
       alert("Trip started!");
-      window.location.reload();
+      const updatedTrip = { ...trip, status: "IN_PROGRESS" };
+      setTrip(updatedTrip);
     } else {
       alert("Failed to start trip.");
     }
@@ -41,15 +54,18 @@ function DriverCurrentTrip() {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
     });
+
     if (res.ok) {
       alert("Trip ended.");
       setTrip(null);
+      navigate("/availableRides");
     } else {
       alert("Failed to end trip.");
     }
   };
 
   if (loading) return <div>Loading...</div>;
+  if (error) return <div className="text-red-600">{error}</div>;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">

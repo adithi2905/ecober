@@ -2,7 +2,7 @@ import './App.css';
 import './index.css'; 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import RiderBooking from './components/riderBooking';
+import RiderBooking from './components/RiderBooking';
 import BookingConfirmation from './components/bookingConfirmation';
 import DashboardLayout from './dashboards/dashboardLayout';
 import TripHistory from './components/tripsHistory';

@@ -42,10 +42,14 @@ public class TripService {
         List<Trip> trips = tripRepository.findByUser_UserId(riderId);
         return tripMapper.toDtoList(trips);
     }
+    public List<TripDTO>fetchAllDriverTrips(UUID driverUuid)
+    {
+        List<Trip>trips= tripRepository.findByDriver_DriverIdAndStatus(driverUuid, TripStatus.COMPLETED);
+        return tripMapper.toDtoList(trips);
+    }
 
     public boolean startTrip(UUID driverId) {
-        List<TripStatus> acceptedOnly = Collections.singletonList(TripStatus.ACCEPTED);
-        Trip trip = tripRepository.findByDriver_DriverIdAndStatusIn(driverId, acceptedOnly);
+        Trip trip = tripRepository.findAcceptedRide(driverId, TripStatus.ACCEPTED);
         if (trip != null) {
             trip.setStartTime(LocalDateTime.now());
             trip.setStatus(TripStatus.IN_PROGRESS);

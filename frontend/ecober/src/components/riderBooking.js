@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 
-
 function RiderBooking() {
   const [pickup, setPickup] = useState('');
   const [destination, setDestination] = useState('');
   const [preferredVehicleType, setPreferredVehicleType] = useState('Sedan');
   const [willingToPool, setWillingToPool] = useState(false);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,18 +28,31 @@ function RiderBooking() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        navigate("/bookingconfirmation",{state: {
-    driver: driverData,
-    pickup: pickupLocation,
-    destination: dropoffLocation,
-  },})
+        const contentType = response.headers.get("content-type");
+        let message = "Ride booked successfully.";
+
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          message = data.message || message;
+        } else if (contentType && contentType.includes("text/plain")) {
+          message = await response.text();
+        }
+
+        navigate("/bookingconfirmation", {
+          state: {
+            driver: null,
+            pickup: pickup,
+            destination: destination,
+            status: message,
+          },
+        });
       } else {
-        alert("Failed to book ride");
+        const errorText = await response.text();
+        alert(errorText || "Failed to book ride");
       }
     } catch (error) {
       console.error("Error booking ride:", error);
-      alert("Something went wrong. ",error);
+      alert("Something went wrong. " + error.message);
     }
   };
 

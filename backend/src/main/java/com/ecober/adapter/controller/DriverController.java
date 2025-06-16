@@ -1,11 +1,9 @@
 package com.ecober.adapter.controller;
 
-import java.nio.file.AccessDeniedException;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.ecober.adapter.Dto.DriverAuthenticationRequest;
@@ -37,7 +35,6 @@ public class DriverController {
     @Autowired
     private TripService tripService;
 
-    
     @GetMapping("/me/getProfile")
     public ResponseEntity<DriverDTO> getMyProfile() {
         UUID driverId = AuthUtil.getCurrentUserId();
@@ -54,22 +51,21 @@ public class DriverController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    
     @PostMapping("/end-trip/{tripId}")
     public ResponseEntity<?> endTrip(@PathVariable UUID tripId) {
         try {
             UUID driverId = AuthUtil.getCurrentUserId();
             String role = AuthUtil.getCurrentUserRole();
-            boolean isDriver = "ROLE_DRIVER".equals(role) || "DRIVER".equals(role);
-
-            if (!isDriver) {
+            if (!"DRIVER".equalsIgnoreCase(role)) {
                 return ResponseEntity.status(403).body("Only drivers can perform this action. Current role: " + role);
             }
 
             boolean ended = driverService.endTrip(tripId, driverId);
-            return ended
-                    ? ResponseEntity.ok("Trip ended successfully")
-                    : ResponseEntity.status(403).body("Unauthorized or invalid trip");
+            if (ended) {
+                return ResponseEntity.ok("Trip ended successfully");
+            } else {
+                return ResponseEntity.status(403).body("Unauthorized or invalid trip");
+            }
 
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
@@ -95,44 +91,58 @@ public class DriverController {
         UUID driverId = AuthUtil.getCurrentUserId();
         return ResponseEntity.ok(driverService.getDriverTripCount(driverId));
     }
-    
-   @GetMapping("/trip/{tripId}")
-public ResponseEntity<?> getTripDetails(@PathVariable UUID tripId) {
-    try {
-        Optional<TripDTO> tripOpt = tripService.getTripById(tripId);
+
+    @GetMapping("/trip/{tripId}")
+    public ResponseEntity<?> getTripDetails(@PathVariable UUID tripId) {
+        try {
+            Optional<TripDTO> tripOpt = tripService.getTripById(tripId);
+            if (tripOpt.isPresent()) {
+                return ResponseEntity.ok(tripOpt.get());
+            } else {
+                return ResponseEntity.status(404).body("Trip not found");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error retrieving trip: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/me/current-trip")
+    public ResponseEntity<?> getCurrentTrip() {
+        UUID driverId = AuthUtil.getCurrentUserId();
+        String role = AuthUtil.getCurrentUserRole();
+        if (!"DRIVER".equalsIgnoreCase(role)) {
+            return ResponseEntity.status(403).body("Only drivers can access current trip.");
+        }
+        Optional<TripDTO> tripOpt = driverService.getCurrentTripForDriver(driverId);
 
         if (tripOpt.isPresent()) {
             return ResponseEntity.ok(tripOpt.get());
         } else {
-            return ResponseEntity.status(404).body("Trip not found");
+            return ResponseEntity.status(404).body("Booking details not available. Please book a ride first.");
         }
-    } catch (Exception e) {
-        return ResponseEntity.status(500).body("Error retrieving trip: " + e.getMessage());
     }
-}
 
-@GetMapping("/me/current-trip")
-public ResponseEntity<?> getCurrentTrip() {
-    UUID driverId = AuthUtil.getCurrentUserId();
-    Optional<TripDTO> tripOpt = driverService.getCurrentTripForDriver(driverId);
-
-    if (tripOpt.isPresent()) {
-        return ResponseEntity.ok(tripOpt.get());
-    } else {
-        return ResponseEntity.status(404).body("No current trip found");
+    @GetMapping("/me/past-trips")
+    public ResponseEntity<?> getDriverPastTrips() {
+        UUID driverId = AuthUtil.getCurrentUserId();
+        String role = AuthUtil.getCurrentUserRole();
+        if (!"DRIVER".equalsIgnoreCase(role)) {
+            return ResponseEntity.status(403).body("Only drivers can view past trips.");
+        }
+        List<TripDTO> pastTrips = tripService.fetchAllDriverTrips(driverId);
+        return ResponseEntity.ok(pastTrips);
     }
-}
 
-
-@PostMapping("/start-trip/{tripId}")
-public ResponseEntity<?> startTrip(@PathVariable UUID tripId) {
-    UUID driverId = AuthUtil.getCurrentUserId();
-    boolean success = driverService.startTrip(tripId, driverId);
-    return success ? ResponseEntity.ok("Trip started") : ResponseEntity.status(403).body("Cannot start this trip");
-}
-
-
-
+    @PostMapping("/start-trip/{tripId}")
+    public ResponseEntity<?> startTrip(@PathVariable UUID tripId) {
+        try {
+            UUID driverId = AuthUtil.getCurrentUserId();
+            TripDTO startedTrip = driverService.startTrip(tripId, driverId);
+            return ResponseEntity.ok(startedTrip);
+        } catch (Exception e) {
+            return ResponseEntity.status(403).body("Cannot start this trip: " + e.getMessage());
+        }
+    }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody DriverRegistrationRequestDTO request) {
@@ -146,9 +156,9 @@ public ResponseEntity<?> startTrip(@PathVariable UUID tripId) {
             Driver driver = driverService.authenticate(request);
             String token = jwtService.generateToken(driver.getDriverId(), "DRIVER");
             return ResponseEntity.ok(Map.of(
-                "token", token,
-                "role", "DRIVER",
-                "driverId", driver.getDriverId().toString()
+                    "token", token,
+                    "role", "DRIVER",
+                    "driverId", driver.getDriverId().toString()
             ));
 
         } catch (Exception e) {
@@ -175,29 +185,6 @@ public ResponseEntity<?> startTrip(@PathVariable UUID tripId) {
         }
     }
 
-    @GetMapping("/tripsHistory")
-    public ResponseEntity<?> fetchAllRideRequestDTOs()
-    {
-        try
-        {
-        UUID driverUuid=AuthUtil.getCurrentUserId();
-        String role=AuthUtil.getCurrentUserRole();
-        if((driverUuid!=null)&&(("DRIVER".equals(role))||("ROLE_DRIVER".equals(role))))
-        {
-        List<RideRequestDTO>availableRides=driverService.getNearbyAvailableTrips(driverUuid);
-        return ResponseEntity.ok(availableRides);
-        }
-        else
-        {
-            return ResponseEntity.status(403).body("User is not a valid driver");
-        }
-        }
-        catch(Exception ex)
-        {
-            return ResponseEntity.status(401).body(ex.getMessage());
-        }
-    }
-
     @PostMapping("/acceptRide/{rideRequestId}")
     public ResponseEntity<?> acceptRide(@PathVariable UUID rideRequestId) {
         try {
@@ -220,4 +207,20 @@ public ResponseEntity<?> startTrip(@PathVariable UUID tripId) {
         }
     }
 
+    @GetMapping("/fetchRides")
+    public ResponseEntity<?> getNearbyAvailableTrips() {
+        try {
+            UUID driverId = AuthUtil.getCurrentUserId();
+            String role = AuthUtil.getCurrentUserRole();
+
+            if (driverId == null || !"DRIVER".equalsIgnoreCase(role)) {
+                return ResponseEntity.status(403).body(Map.of("error", "Only authenticated drivers can view available trips."));
+            }
+
+            List<RideRequestDTO> trips = driverService.getNearbyAvailableTrips(driverId);
+            return ResponseEntity.ok(trips);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to fetch nearby trips: " + e.getMessage()));
+        }
+    }
 }

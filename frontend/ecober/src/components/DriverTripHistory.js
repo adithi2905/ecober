@@ -9,7 +9,7 @@ function DriverTripHistory() {
       try {
         const token = localStorage.getItem('token');
 
-        const response = await fetch('http://localhost:8080/driver/tripsHistory', {
+        const response = await fetch('http://localhost:8080/driver/driverTripsHistory', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
