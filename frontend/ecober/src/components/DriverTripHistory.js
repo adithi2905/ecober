@@ -3,13 +3,14 @@ import React, { useEffect, useState } from 'react';
 function DriverTripHistory() {
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchDriverTrips = async () => {
       try {
         const token = localStorage.getItem('token');
 
-        const response = await fetch('http://localhost:8080/driver/driverTripsHistory', {
+        const response = await fetch('http://localhost:8080/driver/me/past-trips', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -19,10 +20,12 @@ function DriverTripHistory() {
           const data = await response.json();
           setTrips(data);
         } else {
-          console.error('Failed to fetch driver trip history');
+          const errorText = await response.text();
+          setError('Failed to fetch driver trip history: ' + errorText);
         }
       } catch (err) {
         console.error('Error:', err);
+        setError('Network error occurred');
       } finally {
         setLoading(false);
       }
@@ -33,6 +36,10 @@ function DriverTripHistory() {
 
   if (loading) {
     return <div className="text-center py-10">Loading your past trips...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-10 text-red-600">{error}</div>;
   }
 
   return (
@@ -46,12 +53,14 @@ function DriverTripHistory() {
         ) : (
           trips.map((trip) => (
             <div key={trip.tripId} className="bg-white p-4 rounded-xl shadow-md border-l-4 border-[#800000]">
-              <p><strong>Date:</strong> {trip.endTime?.split('T')[0] || 'N/A'}</p>
-              <p><strong>Passenger:</strong> {trip.user?.riderName || 'Unknown'}</p>
+              <p><strong>Trip ID:</strong> {trip.tripId}</p>
+              <p><strong>Date:</strong> {trip.endTime?.split('T')[0] || trip.startTime?.split('T')[0] || 'N/A'}</p>
+              <p><strong>Passenger:</strong> {trip.riderName || trip.user?.riderName || 'Unknown'}</p>
               <p><strong>From:</strong> {trip.pickupLocation}</p>
               <p><strong>To:</strong> {trip.dropoffLocation}</p>
               <p><strong>Status:</strong> {trip.status}</p>
               <p><strong>CO₂ Saved:</strong> {trip.co2Saved?.toFixed(2) || 0} kg</p>
+              {trip.fare && <p><strong>Fare:</strong> ${trip.fare.toFixed(2)}</p>}
             </div>
           ))
         )}
