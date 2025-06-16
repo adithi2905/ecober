@@ -24,6 +24,7 @@ import com.ecober.infrastructure.repository.UserRepository;
 import com.ecober.security.JwtService;
 import com.ecober.util.AuthUtil;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -101,6 +102,18 @@ public class UserController {
     public ResponseEntity<String> logout() {
         return ResponseEntity.ok("Please clear token on client");
     }
+
+    @GetMapping("/tripsHistory")
+    public ResponseEntity<?> getAllRiderTrips() {
+        try {
+            UUID userId = AuthUtil.getCurrentUserId();
+            List<TripDTO> trips = tripService.fetchAllTrips(userId);
+            return ResponseEntity.ok(trips);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Failed to fetch trips: " + e.getMessage());
+        }
+    }
+
 
     
 }

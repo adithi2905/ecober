@@ -54,28 +54,7 @@ public class DriverController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/start-trip")
-    @PreAuthorize("hasRole('DRIVER')")
-    public ResponseEntity<?> startTrip() {
-        try {
-            UUID driverId = AuthUtil.getCurrentUserId();
-            String role = AuthUtil.getCurrentUserRole();
-            boolean isDriver = "ROLE_DRIVER".equals(role) || "DRIVER".equals(role);
-
-            if (!isDriver) {
-                return ResponseEntity.status(403).body("Only drivers can perform this action. Current role: " + role);
-            }
-
-            boolean started = driverService.startTrip(driverId);
-            return started
-                ? ResponseEntity.ok("Trip started successfully")
-                : ResponseEntity.status(404).body("No ACCEPTED trip found for this driver.");
-
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
-        }
-    }
-
+    
     @PostMapping("/end-trip/{tripId}")
     public ResponseEntity<?> endTrip(@PathVariable UUID tripId) {
         try {
@@ -116,28 +95,44 @@ public class DriverController {
         UUID driverId = AuthUtil.getCurrentUserId();
         return ResponseEntity.ok(driverService.getDriverTripCount(driverId));
     }
+    
+   @GetMapping("/trip/{tripId}")
+public ResponseEntity<?> getTripDetails(@PathVariable UUID tripId) {
+    try {
+        Optional<TripDTO> tripOpt = tripService.getTripById(tripId);
 
-    @GetMapping("/me/ongoing-trip-id")
-    public ResponseEntity<?> getOngoingTripId() throws AccessDeniedException {
-        try {
-            UUID driverId = AuthUtil.getCurrentUserId();
-            String role = AuthUtil.getCurrentUserRole();
-            boolean isDriver = "ROLE_DRIVER".equals(role) || "DRIVER".equals(role);
-
-            if (!isDriver) {
-                throw new AccessDeniedException("Only drivers can perform this action. Current role: " + role);
-            }
-
-            return tripService.getOngoingTripId(driverId)
-                    .<ResponseEntity<?>>map(tripId -> ResponseEntity.ok(Map.of("tripId", tripId)))
-                    .orElseGet(() -> ResponseEntity.status(404).body("No ongoing trip found"));
-
-        } catch (AccessDeniedException e) {
-            throw e;
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+        if (tripOpt.isPresent()) {
+            return ResponseEntity.ok(tripOpt.get());
+        } else {
+            return ResponseEntity.status(404).body("Trip not found");
         }
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error retrieving trip: " + e.getMessage());
     }
+}
+
+@GetMapping("/me/current-trip")
+public ResponseEntity<?> getCurrentTrip() {
+    UUID driverId = AuthUtil.getCurrentUserId();
+    Optional<TripDTO> tripOpt = driverService.getCurrentTripForDriver(driverId);
+
+    if (tripOpt.isPresent()) {
+        return ResponseEntity.ok(tripOpt.get());
+    } else {
+        return ResponseEntity.status(404).body("No current trip found");
+    }
+}
+
+
+@PostMapping("/start-trip/{tripId}")
+public ResponseEntity<?> startTrip(@PathVariable UUID tripId) {
+    UUID driverId = AuthUtil.getCurrentUserId();
+    boolean success = driverService.startTrip(tripId, driverId);
+    return success ? ResponseEntity.ok("Trip started") : ResponseEntity.status(403).body("Cannot start this trip");
+}
+
+
+
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody DriverRegistrationRequestDTO request) {
@@ -180,7 +175,7 @@ public class DriverController {
         }
     }
 
-    @GetMapping("/fetchRides")
+    @GetMapping("/tripsHistory")
     public ResponseEntity<?> fetchAllRideRequestDTOs()
     {
         try

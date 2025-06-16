@@ -130,9 +130,27 @@ public class DriverService {
         return false;
     }
 
-    public boolean startTrip(UUID driverId) {
-        return tripService.startTrip(driverId);
+    //Trip related functions
+
+    public Optional<TripDTO> getCurrentTripForDriver(UUID driverId) {
+    Trip trip = tripRepository.findByDriver_DriverIdAndStatusIn(driverId, List.of(TripStatus.ACCEPTED, TripStatus.IN_PROGRESS));
+    return Optional.ofNullable(tripMapper.toDto(trip));
+}
+
+public boolean startTrip(UUID tripId, UUID driverId) {
+    Trip trip = tripRepository.findByTripId(tripId);
+    if (trip != null && trip.getDriver() != null &&
+        driverId.equals(trip.getDriver().getDriverId()) &&
+        trip.getStatus() == TripStatus.ACCEPTED) {
+
+        trip.setStartTime(LocalDateTime.now());
+        trip.setStatus(TripStatus.IN_PROGRESS);
+        tripRepository.save(trip);
+        return true;
     }
+    return false;
+}
+
 
     public boolean endTrip(UUID tripId, UUID driverId) {
         Trip trip = tripRepository.findByTripId(tripId);
@@ -159,7 +177,7 @@ public class DriverService {
         return tripRepository.findByDriver_DriverId(driverId).size();
     }
 
-        public TripDTO acceptRide(UUID rideRequestId, UUID driverId) {
+    public TripDTO acceptRide(UUID rideRequestId, UUID driverId) {
     RideRequest rideRequest = rideRequestRepository.findById(rideRequestId)
             .orElseThrow(() -> new IllegalArgumentException("Ride request not found."));
 
