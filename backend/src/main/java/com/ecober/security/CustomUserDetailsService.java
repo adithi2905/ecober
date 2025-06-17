@@ -25,9 +25,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.getUserId(), 
                 user.getUsername(), 
                 user.getPassword(), 
-                "RIDER" // Changed from "USER" to "RIDER" to match your role checks
+                "RIDER" 
             ))
-            // Then try DRIVER if not found
             .orElseGet(() -> driverRepository.findByEmail(username)
                 .map(driver -> new CustomUserDetails(
                     driver.getDriverId(), 

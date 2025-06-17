@@ -46,7 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             userId,
                             userId.toString(),
                             "",
-                            role // Role without ROLE_ prefix, will be added in getAuthorities()
+                            role 
                     );
 
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(

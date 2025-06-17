@@ -1,36 +1,77 @@
 package com.ecober.domain.service;
 
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import com.ecober.domain.model.User;
 import com.ecober.infrastructure.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
+import java.util.Optional;
+import java.util.UUID;
 
-@Service
-public class UserRegistrationService {
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-    @Autowired
+class UserRegistrationServiceTest {
+
     private UserRepository userRepository;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
+    private UserRegistrationService userRegistrationService;
 
-    public void createUser(User user)
-    {
-        Optional<User> result=userRepository.findByUsername(user.getUsername());
-        if(result.isPresent())
-        {
-            
-            throw new RuntimeException("User already exists with username: " + user.getUsername());
+    @BeforeEach
+    void setUp() {
+        userRepository = mock(UserRepository.class);
+        passwordEncoder = mock(PasswordEncoder.class);
+        userRegistrationService = new UserRegistrationService();
+
+        inject(userRegistrationService, "userRepository", userRepository);
+        inject(userRegistrationService, "passwordEncoder", passwordEncoder);
+    }
+
+    private void inject(Object target, String field, Object value) {
+        try {
+            var f = target.getClass().getDeclaredField(field);
+            f.setAccessible(true);
+            f.set(target, value);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole("RIDER");
-        userRepository.save(user);
-        }
+    }
+
+    @Test
+    void testCreateUser_Success() {
+        User newUser = new User();
+        newUser.setUsername("testuser");
+        newUser.setPassword("plain-password");
+
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode("plain-password")).thenReturn("hashed-password");
+
+        userRegistrationService.createUser(newUser);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+
+        User saved = userCaptor.getValue();
+        assertEquals("hashed-password", saved.getPassword());
+        assertEquals("RIDER", saved.getRole());
+    }
+
+    @Test
+    void testCreateUser_AlreadyExists() {
+        User existing = new User();
+        existing.setUsername("testuser");
+
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(existing));
+
+        User duplicate = new User();
+        duplicate.setUsername("testuser");
+        duplicate.setPassword("some-password");
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                userRegistrationService.createUser(duplicate));
+
+        assertTrue(ex.getMessage().contains("User already exists"));
+        verify(userRepository, never()).save(any());
+    }
 }
-    
-

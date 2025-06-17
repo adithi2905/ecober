@@ -4,13 +4,14 @@ import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Getter
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Data
 public class DriverDTO {
     private String driverName;
     private String password;

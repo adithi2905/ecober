@@ -19,7 +19,7 @@ public Route getOrCreateRoute(Location pickup, Location dropoff, String vehicleT
     try {
         distanceDuration = routeOptimizingService.getDistanceAndETA(pickup, dropoff);
     } catch (Exception e) {
-        distanceDuration = GeoUtils.haversinDistanceandDuration(
+        distanceDuration = GeoUtils.calculateDistanceAndDuration(
                 pickup.getLatitude(), pickup.getLongitude(),
                 dropoff.getLatitude(), dropoff.getLongitude());
     }

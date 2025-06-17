@@ -1,68 +1,93 @@
 package com.ecober.domain.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
 import com.ecober.adapter.Dto.CarbonDTO;
 import com.ecober.domain.model.Trip;
 import com.ecober.infrastructure.repository.TripRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class Co2AnalyticsServiceTest {
+import java.util.List;
+import java.util.UUID;
 
-    @Mock
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class Co2AnalyticsServiceTest {
+
     private TripRepository tripRepository;
-
-    @InjectMocks
     private Co2AnalyticsService co2AnalyticsService;
 
     @BeforeEach
-    public void setup() {
-        MockitoAnnotations.openMocks(this); 
+    void setUp() {
+        tripRepository = mock(TripRepository.class);
+        co2AnalyticsService = new Co2AnalyticsService();
+        inject(co2AnalyticsService, "tripRepository", tripRepository);
     }
 
-    private Trip createTrip(double emissions) {
-        Trip trip = new Trip();
-        trip.setEstimatedEmission(emissions); 
-        return trip;
-    }
-
-    @Test
-    public void testGetRiderCarbonEmission_GreenRider() {
-        UUID riderID = UUID.randomUUID();
-        List<Trip> mockTrips = Arrays.asList(
-            createTrip(5.0),
-            createTrip(10.0),
-            createTrip(3.0)
-        );
-        when(tripRepository.findByUser_UserId(riderID)).thenReturn(mockTrips);
-        CarbonDTO result = co2AnalyticsService.getRiderCarbonEmission(riderID);
-
-        assertEquals("🌿 Green Rider", result.getEcoBadge()); 
-        assertEquals(18.0, result.getTotalEmissions());
-        assertEquals(3, result.getTotalTrips());
-        assertEquals(6.0, result.getAverageEmissionPerTrip());
+    private void inject(Object target, String fieldName, Object value) {
+        try {
+            var field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(target, value);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
-    public void testGetRiderCarbonEmission_FrequentRider() {
+    void testGetRiderCarbonEmission_EcoChampion() {
         UUID riderId = UUID.randomUUID();
-        List<Trip> mockTrips = Arrays.asList(
-            createTrip(30.0),
-            createTrip(40.0)
-        );
-        when(tripRepository.findByUser_UserId(riderId)).thenReturn(mockTrips);
-        CarbonDTO result = co2AnalyticsService.getRiderCarbonEmission(riderId);
+        Trip trip1 = new Trip(); trip1.setEstimatedEmission(6.0);
+        Trip trip2 = new Trip(); trip2.setEstimatedEmission(8.0);
 
-        assertEquals("🚗 Frequent Rider", result.getEcoBadge()); 
+        when(tripRepository.findByUser_UserId(riderId)).thenReturn(List.of(trip1, trip2));
+
+        CarbonDTO dto = co2AnalyticsService.getRiderCarbonEmission(riderId);
+
+        assertEquals(riderId, dto.getRiderId());
+        assertEquals(2, dto.getTotalTrips());
+        assertEquals(14.0, dto.getTotalEmissions(), 0.001);
+        assertEquals(7.0, dto.getAverageEmissionPerTrip(), 0.001);
+        assertEquals("♻ Eco Champion", dto.getEcoBadge());
+    }
+
+    @Test
+    void testGetRiderCarbonEmission_SustainableCommuter() {
+        UUID riderId = UUID.randomUUID();
+        Trip trip1 = new Trip(); trip1.setEstimatedEmission(20.0);
+        Trip trip2 = new Trip(); trip2.setEstimatedEmission(25.0);
+
+        when(tripRepository.findByUser_UserId(riderId)).thenReturn(List.of(trip1, trip2));
+
+        CarbonDTO dto = co2AnalyticsService.getRiderCarbonEmission(riderId);
+
+        assertEquals("⚖ Sustainable Commuter", dto.getEcoBadge());
+    }
+
+    @Test
+    void testGetRiderCarbonEmission_ActiveExplorer() {
+        UUID riderId = UUID.randomUUID();
+        Trip trip1 = new Trip(); trip1.setEstimatedEmission(35.0);
+        Trip trip2 = new Trip(); trip2.setEstimatedEmission(30.0);
+
+        when(tripRepository.findByUser_UserId(riderId)).thenReturn(List.of(trip1, trip2));
+
+        CarbonDTO dto = co2AnalyticsService.getRiderCarbonEmission(riderId);
+
+        assertEquals("✈ Active Explorer", dto.getEcoBadge());
+    }
+
+    @Test
+    void testGetRiderCarbonEmission_NoTrips() {
+        UUID riderId = UUID.randomUUID();
+
+        when(tripRepository.findByUser_UserId(riderId)).thenReturn(List.of());
+
+        CarbonDTO dto = co2AnalyticsService.getRiderCarbonEmission(riderId);
+
+        assertEquals(0.0, dto.getTotalEmissions(), 0.001);
+        assertEquals(0, dto.getTotalTrips());
+        assertEquals(0.0, dto.getAverageEmissionPerTrip(), 0.001);
+        assertEquals("♻ Eco Champion", dto.getEcoBadge()); // default since 0 < 20
     }
 }

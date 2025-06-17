@@ -2,7 +2,6 @@ package com.ecober.adapter.Dto;
 
 import lombok.*;
 
-import java.util.UUID;
 
 @Getter
 @Setter
