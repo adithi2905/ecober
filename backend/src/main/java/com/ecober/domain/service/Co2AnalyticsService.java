@@ -18,7 +18,7 @@ public class Co2AnalyticsService {
 
     private String determineBadge(double totalCarbonEmission) {
         if (totalCarbonEmission < 20)
-            return "♻ Eco Champion";             
+            return "♻ Eco Champion";             // Cleanest footprint
         else if (totalCarbonEmission < 50)
             return "⚖ Sustainable Commuter";     
         else

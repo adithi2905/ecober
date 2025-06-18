@@ -5,12 +5,10 @@ C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\LoginResponseDTO.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\DriverAuthenticationRequest.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\controller\DriverController.java
-C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\controller\TripController.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\security\CustomUserDetails.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\LoginRequestDTO.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\security\JwtService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\RouteDTO.java
-C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\DriverMatchingService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\NotificationService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\mapper\DriverMapper.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\CarbonScoringService.java
@@ -26,6 +24,7 @@ C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\Ca
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\util\AuthUtil.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\util\GeoUtils.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\DistanceDurationDTO.java
+C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\DriverScoringService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\Trip.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\RideRequestService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\mapper\UserMapper.java
