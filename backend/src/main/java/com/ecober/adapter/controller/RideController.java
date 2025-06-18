@@ -1,6 +1,7 @@
 package com.ecober.adapter.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,37 +36,26 @@ public class RideController {
     private RouteOptimizingService routeOptimizingService;
 
     @PostMapping("/requestRide")
-    public ResponseEntity<?> requestRide(@Valid @RequestBody RideRequestDTO rideDTO) {
-        try {
-            UUID userId = AuthUtil.getCurrentUserId();
-            String role = AuthUtil.getCurrentUserRole();
+public ResponseEntity<?> requestRide(@Valid @RequestBody RideRequestDTO rideDTO) {
+    try {
+        UUID userId = AuthUtil.getCurrentUserId();
+        String role = AuthUtil.getCurrentUserRole();
 
-            if (userId == null || !"RIDER".equalsIgnoreCase(role)) {
-                return ResponseEntity.status(403).body("Only authenticated riders can request rides.");
-            }
-
-            rideRequestService.processRideRequest(rideDTO, userId);
-            return ResponseEntity.ok("Ride request broadcasted to nearby drivers.");
-
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid input: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error processing ride request: " + e.getMessage());
+        if (userId == null || !"RIDER".equalsIgnoreCase(role)) {
+            return ResponseEntity.status(403).body(Map.of("error", "Only authenticated riders can request rides."));
         }
+
+        rideRequestService.processRideRequest(rideDTO, userId);
+        return ResponseEntity.ok(Map.of("message", "Ride request broadcasted to nearby drivers."));
+
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(Map.of("error", "Invalid input: " + e.getMessage()));
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body(Map.of("error", "Error processing ride request: " + e.getMessage()));
     }
+}
 
     
-    @GetMapping("/getTrips")
-    public ResponseEntity<?> getAllRiderTrips() {
-        try {
-            UUID userId = AuthUtil.getCurrentUserId();
-            List<TripDTO> trips = tripService.fetchAllTrips(userId);
-            return ResponseEntity.ok(trips);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Failed to fetch trips: " + e.getMessage());
-        }
-    }
-
     @GetMapping("/distanceDuration/{tripId}")
     public ResponseEntity<?> requestDistanceDuration(@PathVariable UUID tripId) {
         try {

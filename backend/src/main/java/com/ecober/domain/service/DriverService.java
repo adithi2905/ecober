@@ -1,26 +1,10 @@
 package com.ecober.domain.service;
 
-import com.ecober.adapter.Dto.DistanceDurationDTO;
-import com.ecober.adapter.Dto.DriverAuthenticationRequest;
-import com.ecober.adapter.Dto.DriverDTO;
-import com.ecober.adapter.Dto.DriverRegistrationRequestDTO;
-import com.ecober.adapter.Dto.RideRequestDTO;
-import com.ecober.adapter.Dto.TripDTO;
-import com.ecober.adapter.mapper.DriverMapper;
-import com.ecober.adapter.mapper.RideRequestMapper;
-import com.ecober.adapter.mapper.TripperMapper;
-import com.ecober.domain.model.Driver;
-import com.ecober.domain.model.Location;
-import com.ecober.domain.model.RideRequest;
-import com.ecober.domain.model.RideRequestStatus;
-import com.ecober.domain.model.Route;
-import com.ecober.domain.model.Trip;
-import com.ecober.domain.model.TripStatus;
-import com.ecober.infrastructure.repository.DriverRepository;
-import com.ecober.infrastructure.repository.RideRequestRepository;
-import com.ecober.infrastructure.repository.TripRepository;
+import com.ecober.adapter.Dto.*;
+import com.ecober.adapter.mapper.*;
+import com.ecober.domain.model.*;
+import com.ecober.infrastructure.repository.*;
 import com.ecober.util.GeoUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -33,51 +17,30 @@ import java.util.*;
 @Service
 public class DriverService {
 
-    @Autowired
-    private DriverRepository driverRepository;
+    @Autowired private DriverRepository driverRepository;
+    @Autowired private TripRepository tripRepository;
+    @Autowired private DriverMapper driverMapper;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private RouteOptimizingService routeOptimizingService;
+    @Autowired private GeocodingService geocodingService;
+    @Autowired private TripperMapper tripMapper;
+    @Autowired private TripService tripService;
+    @Autowired private RideRequestMapper rideRequestMapper;
+    @Autowired private RideRequestRepository rideRequestRepository;
 
-    @Autowired
-    private TripRepository tripRepository;
-
-    @Autowired
-    private DriverMapper driverMapper;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private RouteOptimizingService routeOptimizingService;
-
-    @Autowired
-    private GeocodingService geocodingService;
-
-    @Autowired
-    private TripperMapper tripMapper;
-
-    @Autowired
-    private TripService tripService;
-
-    @Autowired
-    private RideRequestMapper rideRequestMapper;
-
-    @Autowired
-    RideRequestRepository rideRequestRepository;
-        
-
-    // Registration
     public void register(DriverRegistrationRequestDTO request) {
-        Driver driver = new Driver();
-        driver.setDriverName(request.getName());
-        driver.setEmail(request.getEmail());
-        driver.setPassword(passwordEncoder.encode(request.getPassword()));
-        driver.setDriverLocation(request.getLocation());
-        driver.setVerifiedDriver(request.isVerified());
-        driver.setVehicleNo(request.getVehicleNo());
-        driver.setVehicleType(request.getVehicleType());
+        Driver driver = Driver.builder()
+                .driverName(request.getName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .driverLocation(request.getLocation())
+                .verifiedDriver(request.isVerified())
+                .vehicleNo(request.getVehicleNo())
+                .vehicleType(request.getVehicleType())
+                .build();
         driverRepository.save(driver);
     }
 
-    // Authentication
     public Driver authenticate(DriverAuthenticationRequest request) {
         Driver driver = driverRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Driver not found"));
@@ -87,14 +50,12 @@ public class DriverService {
         return driver;
     }
 
-    // CRUD & Profile Operations
     public List<DriverDTO> getAllDrivers() {
         return driverMapper.toDtoList(driverRepository.findAll());
     }
 
     public Optional<DriverDTO> getDriverById(UUID driverId) {
-        return driverRepository.findByDriverId(driverId)
-                .map(driverMapper::toDto);
+        return driverRepository.findByDriverId(driverId).map(driverMapper::toDto);
     }
 
     public List<DriverDTO> getDriversByLocation(String location) {
@@ -102,24 +63,22 @@ public class DriverService {
     }
 
     public DriverDTO createDriver(DriverDTO driverDTO) {
-        Driver driver = driverMapper.toEntity(driverDTO);
-        Driver savedDriver = driverRepository.save(driver);
+        Driver savedDriver = driverRepository.save(driverMapper.toEntity(driverDTO));
         return driverMapper.toDto(savedDriver);
     }
 
     public Optional<DriverDTO> updateDriver(UUID driverId, DriverDTO driverDTO) {
-        return driverRepository.findById(driverId)
-                .map(existingDriver -> {
-                    existingDriver.setDriverName(driverDTO.getDriverName());
-                    existingDriver.setVehicleNo(driverDTO.getVehicleNo());
-                    existingDriver.setVerifiedDriver(driverDTO.isVerifiedDriver());
-                    existingDriver.setDriverLocation(driverDTO.getDriverLocation());
-                    existingDriver.setVehicleType(driverDTO.getVehicleType());
-                    existingDriver.setFuelEfficiency(driverDTO.getFuelEfficiency());
-                    existingDriver.setTrustScore(driverDTO.getTrustScore());
-                    existingDriver.setTotalCO2Saved(driverDTO.getTotalCO2Saved());
-                    return driverMapper.toDto(driverRepository.save(existingDriver));
-                });
+        return driverRepository.findById(driverId).map(driver -> {
+            driver.setDriverName(driverDTO.getDriverName());
+            driver.setVehicleNo(driverDTO.getVehicleNo());
+            driver.setVerifiedDriver(driverDTO.isVerifiedDriver());
+            driver.setDriverLocation(driverDTO.getDriverLocation());
+            driver.setVehicleType(driverDTO.getVehicleType());
+            driver.setFuelEfficiency(driverDTO.getFuelEfficiency());
+            driver.setTrustScore(driverDTO.getTrustScore());
+            driver.setTotalCO2Saved(driverDTO.getTotalCO2Saved());
+            return driverMapper.toDto(driverRepository.save(driver));
+        });
     }
 
     public boolean deleteDriver(UUID driverId) {
@@ -130,13 +89,28 @@ public class DriverService {
         return false;
     }
 
-    public boolean startTrip(UUID driverId) {
-        return tripService.startTrip(driverId);
+    public Optional<TripDTO> getCurrentTripForDriver(UUID driverId) {
+        return Optional.ofNullable(tripService.fetchCurrentTrip(driverId));
+    }
+
+    public TripDTO startTrip(UUID tripId, UUID driverId) {
+        Trip trip = tripRepository.findByTripId(tripId);
+        if (trip != null &&
+            trip.getDriver() != null &&
+            driverId.equals(trip.getDriver().getDriverId()) &&
+            trip.getStatus() == TripStatus.ACCEPTED) {
+
+            trip.setStartTime(LocalDateTime.now());
+            trip.setStatus(TripStatus.IN_PROGRESS);
+            return tripMapper.toDto(tripRepository.save(trip));
+        }
+        throw new IllegalStateException("Trip cannot be started");
     }
 
     public boolean endTrip(UUID tripId, UUID driverId) {
         Trip trip = tripRepository.findByTripId(tripId);
-        if (trip != null && trip.getDriver() != null &&
+        if (trip != null &&
+            trip.getDriver() != null &&
             driverId.equals(trip.getDriver().getDriverId())) {
             trip.setEndTime(LocalDateTime.now());
             trip.setStatus(TripStatus.COMPLETED);
@@ -149,75 +123,69 @@ public class DriverService {
     public List<RideRequestDTO> getNearbyAvailableTrips(UUID driverId) {
         Driver driver = driverRepository.findByDriverId(driverId)
                 .orElseThrow(() -> new RuntimeException("Driver not found"));
-        String location = driver.getDriverLocation();
-        String vehicleType = driver.getVehicleType();
-        List<RideRequest> availableTrips = rideRequestRepository.findNearbyRideRequests(location, vehicleType,RideRequestStatus.REQUESTED);
-        return rideRequestMapper.toDtoList(availableTrips);
+        List<RideRequest> nearby = rideRequestRepository.findNearbyRideRequests(
+                driver.getDriverLocation(),
+                driver.getVehicleType(),
+                RideRequestStatus.REQUESTED
+        );
+        return rideRequestMapper.toDtoList(nearby);
     }
 
     public long getDriverTripCount(UUID driverId) {
         return tripRepository.findByDriver_DriverId(driverId).size();
     }
 
-        public TripDTO acceptRide(UUID rideRequestId, UUID driverId) {
-    RideRequest rideRequest = rideRequestRepository.findById(rideRequestId)
-            .orElseThrow(() -> new IllegalArgumentException("Ride request not found."));
+    public TripDTO acceptRide(UUID rideRequestId, UUID driverId) {
+        RideRequest request = rideRequestRepository.findById(rideRequestId)
+                .orElseThrow(() -> new IllegalArgumentException("Ride request not found."));
 
-    if (rideRequest.getStatus() != RideRequestStatus.REQUESTED) {
-        throw new IllegalStateException("Ride has already been accepted or is no longer available.");
+        if (request.getStatus() != RideRequestStatus.REQUESTED)
+            throw new IllegalStateException("Ride already accepted or unavailable.");
+
+        Driver driver = driverRepository.findById(driverId)
+                .orElseThrow(() -> new IllegalArgumentException("Driver not found."));
+
+        double[] pickup = geocodingService.getLatAndLong(request.getPickupLocation());
+        double[] dropoff = geocodingService.getLatAndLong(request.getDropoffLocation());
+
+        DistanceDurationDTO distance;
+        try {
+            distance = routeOptimizingService.getDistanceAndETA(
+                    new Location(pickup[0], pickup[1], request.getPickupLocation(), 0),
+                    new Location(dropoff[0], dropoff[1], request.getDropoffLocation(), 0)
+            );
+        } catch (Exception e) {
+            distance = GeoUtils.calculateDistanceAndDuration(pickup[0], pickup[1], dropoff[0], dropoff[1]);
+        }
+
+        double emission = GeoUtils.calculateEmissions(distance.getDistanceKm(), request.getPreferredVehicleType());
+
+        Trip trip = Trip.builder()
+                .user(request.getUser())
+                .driver(driver)
+                .request(request)
+                .route(Route.builder()
+                        .source(new Location(pickup[0], pickup[1], request.getPickupLocation(), 0))
+                        .destination(new Location(dropoff[0], dropoff[1], request.getDropoffLocation(), 0))
+                        .distanceKm(distance.getDistanceKm())
+                        .estimatedTime(distance.getDurationInMins())
+                        .carbonEmission(emission)
+                        .isPooledEligible(request.isWillingToPool())
+                        .build())
+                .status(TripStatus.ACCEPTED)
+                .estimatedEmission(emission)
+                .build();
+
+        tripRepository.save(trip);
+        rideRequestRepository.delete(request);
+
+        return tripMapper.toDto(trip);
     }
-
-    Driver driver = driverRepository.findById(driverId)
-            .orElseThrow(() -> new IllegalArgumentException("Driver not found."));
-
-    double[] pickupLatLong = geocodingService.getLatAndLong(rideRequest.getPickupLocation());
-    double[] dropoffLatLong = geocodingService.getLatAndLong(rideRequest.getDropoffLocation());
-
-    DistanceDurationDTO distanceDTO;
-    try {
-        distanceDTO = routeOptimizingService.getDistanceAndETA(
-                new Location(pickupLatLong[0], pickupLatLong[1], rideRequest.getPickupLocation(), 0),
-                new Location(dropoffLatLong[0], dropoffLatLong[1], rideRequest.getDropoffLocation(), 0)
-        );
-    } catch (Exception ex) {
-        distanceDTO = GeoUtils.haversinDistanceandDuration(
-                pickupLatLong[0], pickupLatLong[1], dropoffLatLong[0], dropoffLatLong[1]
-        );
-    }
-
-    double carbonEmission = GeoUtils.calculateEmissions(distanceDTO.getDistanceKm(), rideRequest.getPreferredVehicleType());
-
-    Route route = Route.builder()
-            .source(new Location(pickupLatLong[0], pickupLatLong[1], rideRequest.getPickupLocation(), 0))
-            .destination(new Location(dropoffLatLong[0], dropoffLatLong[1], rideRequest.getDropoffLocation(), 0))
-            .distanceKm(distanceDTO.getDistanceKm())
-            .estimatedTime(distanceDTO.getDurationInMins())
-            .carbonEmission(carbonEmission)
-            .isPooledEligible(rideRequest.isWillingToPool())
-            .build();
-
-    Trip trip = Trip.builder()
-            .user(rideRequest.getUser())
-            .driver(driver)
-            .route(route)
-            .status(TripStatus.IN_PROGRESS)
-            .startTime(LocalDateTime.now())
-            .estimatedEmission(carbonEmission)
-            .build();
-
-    tripRepository.save(trip);
-    rideRequestRepository.delete(rideRequest);
-
-    return tripMapper.toDto(trip);
-}
 
     public double getDriverAverageEmissionPerTrip(UUID driverId) {
         List<Trip> trips = tripRepository.findByDriver_DriverId(driverId);
         if (trips.isEmpty()) return 0.0;
-        double totalEmissions = trips.stream()
-        .mapToDouble(Trip::getEstimatedEmission)
-        .sum();
-        return totalEmissions / trips.size();
+        return trips.stream().mapToDouble(Trip::getEstimatedEmission).average().orElse(0.0);
     }
 
     public double calculateDriverCO2Impact(UUID driverId) {

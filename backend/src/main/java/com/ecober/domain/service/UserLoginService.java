@@ -1,38 +1,36 @@
 package com.ecober.domain.service;
 
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import com.ecober.domain.model.User;
 import com.ecober.infrastructure.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
 @Service
 public class UserLoginService {
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public ResponseEntity<String> userLogin(@RequestBody User userDetails,HttpSession session) {
-        Optional<User> userRepositoryResults = userRepository.findByUsername(userDetails.getUsername());
+    public String login(String username, String password, HttpSession session) {
+        Optional<User> userOpt = userRepository.findByUsername(username);
 
-        if (userRepositoryResults.isPresent()) {
-            User user = userRepositoryResults.get();
-
-            if (passwordEncoder.matches(userDetails.getPassword(), user.getPassword())) {
-                session.setAttribute("riderId", user.getUserId());
-                return ResponseEntity.ok("Successfully logged in");
-            } else {
-                return ResponseEntity.badRequest().body("Invalid password");
-            }
+        if (userOpt.isEmpty()) {
+            return "Invalid username";
         }
 
-        return ResponseEntity.badRequest().body("Invalid username");
+        User user = userOpt.get();
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            return "Invalid password";
+        }
+
+        session.setAttribute("riderId", user.getUserId());
+        return "SUCCESS";
     }
 }

@@ -36,18 +36,6 @@ public class RideRequestService {
     private UserRepository userRepository;
 
     @Autowired
-    private TripRepository tripRepository;
-
-    @Autowired
-    private DriverRepository driverRepository;
-
-    @Autowired
-    private RouteOptimizingService routeOptimizingService;
-
-    @Autowired
-    private TripperMapper tripMapper;
-
-    @Autowired
     private GeocodingService geocodingService;
 
     @Autowired

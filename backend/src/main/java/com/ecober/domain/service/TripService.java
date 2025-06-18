@@ -6,7 +6,6 @@ import com.ecober.domain.model.*;
 import com.ecober.infrastructure.repository.TripRepository;
 import com.ecober.infrastructure.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -43,12 +42,15 @@ public class TripService {
         List<Trip> trips = tripRepository.findByUser_UserId(riderId);
         return tripMapper.toDtoList(trips);
     }
+    public List<TripDTO>fetchAllDriverTrips(UUID driverUuid)
+    {
+        List<Trip>trips= tripRepository.findByDriver_DriverIdAndStatus(driverUuid, TripStatus.COMPLETED);
+        return tripMapper.toDtoList(trips);
+    }
 
     public boolean startTrip(UUID driverId) {
-        Optional<Trip> tripOpt = tripRepository.findByDriver_DriverIdAndStatus(driverId, TripStatus.ACCEPTED)
-                                               .stream().findFirst();
-        if (tripOpt.isPresent()) {
-            Trip trip = tripOpt.get();
+        Trip trip = tripRepository.findAcceptedRide(driverId, TripStatus.ACCEPTED);
+        if (trip != null) {
             trip.setStartTime(LocalDateTime.now());
             trip.setStatus(TripStatus.IN_PROGRESS);
             tripRepository.save(trip);
@@ -57,11 +59,9 @@ public class TripService {
         return false;
     }
 
-    public TripDTO fetchCurrentTrip(UUID riderId)
-    {
-        Trip currentTrip= tripRepository.findCurrentTrip(riderId);
-        return tripMapper.toDto(currentTrip);
-
+    public TripDTO fetchCurrentTrip(UUID riderId) {
+        Trip currentTrip = tripRepository.findCurrentTrip(riderId);
+        return (currentTrip != null) ? tripMapper.toDto(currentTrip) : null;
     }
 
     public boolean endTrip(UUID tripId, UUID driverId) {
@@ -78,17 +78,16 @@ public class TripService {
         return true;
     }
 
-    public Optional<UUID> getOngoingTripId(UUID driverId) {
-        return tripRepository.findOngoingTripByDriverId(driverId)
-                             .map(Trip::getTripId);
-    }
-
     public Trip getTripByIdForUser(UUID tripId, UUID userId) {
-    Trip trip = tripRepository.findByTripId(tripId);
-    if (trip != null && trip.getUser() != null && trip.getUser().getUserId().equals(userId)) {
-        return trip;
+        Trip trip = tripRepository.findByTripId(tripId);
+        if (trip != null && trip.getUser() != null && trip.getUser().getUserId().equals(userId)) {
+            return trip;
+        }
+        return null;
     }
-    return null;
-}
 
+    public Optional<TripDTO> getTripById(UUID tripId) {
+        Trip trip = tripRepository.findByTripId(tripId);
+        return (trip != null) ? Optional.of(tripMapper.toDto(trip)) : Optional.empty();
+    }
 }

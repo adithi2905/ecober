@@ -3,11 +3,17 @@ package com.ecober.util;
 import com.ecober.adapter.Dto.DistanceDurationDTO;
 import com.ecober.domain.model.Location;
 
-public class GeoUtils {
+public final class GeoUtils {
 
     private static final int EARTH_RADIUS_KM = 6371;
+    private static final double AVERAGE_SPEED_KMH = 50.0;
 
-    // Haversine formula
+    // Private constructor to prevent instantiation
+    private GeoUtils() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
+    // Haversine formula to calculate distance in kilometers
     public static double haversinDistance(double lat1, double lon1, double lat2, double lon2) {
         double latDistance = Math.toRadians(lat2 - lat1);
         double lonDistance = Math.toRadians(lon2 - lon1);
@@ -21,26 +27,27 @@ public class GeoUtils {
         return EARTH_RADIUS_KM * c;
     }
 
-    public static DistanceDurationDTO haversinDistanceandDuration(double lat1, double lon1, double lat2, double lon2) {
+    // Calculate distance and estimated duration assuming average speed
+    public static DistanceDurationDTO calculateDistanceAndDuration(double lat1, double lon1, double lat2, double lon2) {
         double distanceKm = haversinDistance(lat1, lon1, lat2, lon2);
-        int durationMins = (int) (distanceKm / 50.0 * 60); // Assuming avg 50 km/h
+        int durationMins = (int) (distanceKm / AVERAGE_SPEED_KMH * 60);
         return new DistanceDurationDTO(distanceKm, durationMins, durationMins * 60);
-
     }
 
-    public static double distanceBetween(Location a,Location b) {
+    // Overloaded method using Location objects
+    public static double distanceBetween(Location a, Location b) {
         return haversinDistance(a.getLatitude(), a.getLongitude(), b.getLatitude(), b.getLongitude());
     }
 
+    // Calculate estimated emissions in kg CO2 based on vehicle type
     public static double calculateEmissions(double distanceKm, String vehicleType) {
-        // Emission rates in kg CO2/km
         return switch (vehicleType.toUpperCase()) {
-            case "EV" -> distanceKm * 0.18;
+            case "EV"     -> distanceKm * 0.18;
             case "HYBRID" -> distanceKm * 0.104;
-            case "SEDAN" -> distanceKm * 0.173;
-            case "SUV" -> distanceKm * 0.231;
-            case "BIKE" -> 0.0;
-            default -> distanceKm * 0.18; // fallback
+            case "SEDAN"  -> distanceKm * 0.173;
+            case "SUV"    -> distanceKm * 0.231;
+            case "BIKE"   -> 0.0;
+            default       -> distanceKm * 0.18; // fallback emission factor
         };
     }
 }

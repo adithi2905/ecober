@@ -1,41 +1,63 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-const pastRides = [
-  {
-    id: 1,
-    driver: "Kiran Desai",
-    rating: 4.6,
-    pickup: "Koramangala",
-    drop: "Electronic City",
-    date: "2025-05-26",
-  },
-  {
-    id: 2,
-    driver: "Ravi Shankar",
-    rating: 4.9,
-    pickup: "HSR Layout",
-    drop: "Whitefield",
-    date: "2025-05-20",
-  },
-];
+function TripHistory() {
+  const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-function tripHistory() {
+  useEffect(() => {
+    const fetchTrips = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch("http://localhost:8080/user/tripsHistory", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setTrips(data);
+        } else {
+          console.error("Failed to fetch trips");
+        }
+      } catch (error) {
+        console.error("Error fetching trips:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrips();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-10">Loading trip history...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10">
-      <h1 className="text-3xl font-bold mb-6">Your Past Rides</h1>
+      <h1 className="text-3xl font-bold mb-6 text-[#800000]">Your Past Rides</h1>
       <div className="w-full max-w-2xl space-y-4">
-        {pastRides.map((ride) => (
-          <div key={ride.id} className="bg-white p-4 rounded-xl shadow-md border-l-4 border-maroon-700">
-            <p><strong>Date:</strong> {ride.date}</p>
-            <p><strong>Driver:</strong> {ride.driver}</p>
-            <p><strong>Rating:</strong> ⭐ {ride.rating}</p>
-            <p><strong>From:</strong> {ride.pickup}</p>
-            <p><strong>To:</strong> {ride.drop}</p>
+        {trips.length === 0 ? (
+          <div className="bg-white p-6 rounded-lg shadow text-center">
+            No past rides found.
           </div>
-        ))}
+        ) : (
+          trips.map((ride) => (
+            <div key={ride.tripId} className="bg-white p-4 rounded-xl shadow-md border-l-4 border-[#800000]">
+              <p><strong>Date:</strong> {ride.endTime?.split("T")[0] || "N/A"}</p>
+              <p><strong>Driver:</strong> {ride.driver?.driverName || "Unknown"}</p>
+              <p><strong>Vehicle:</strong> {ride.driver?.vehicleType || "N/A"}</p>
+              <p><strong>From:</strong> {ride.pickupLocation}</p>
+              <p><strong>To:</strong> {ride.dropoffLocation}</p>
+              <p><strong>Status:</strong> {ride.status}</p>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
 }
 
-export default tripHistory;
+export default TripHistory;

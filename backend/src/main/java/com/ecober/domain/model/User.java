@@ -8,10 +8,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Builder
 @Table(name = "users")
 @Data
 @NoArgsConstructor
@@ -20,7 +22,7 @@ public class User {
 
 @Id
 @GeneratedValue(strategy = GenerationType.UUID)
-@Column(name = "id", updatable = false, nullable = false)
+@Column(name = "user_id", updatable = false, nullable = false)
     private UUID userId;
 
     @Column(unique = true, nullable = false)
