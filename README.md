@@ -1,7 +1,3 @@
-Here is the cleaned-up, professional version of your EcoRide documentation without the emojis or informal icons:
-
----
-
 # EcoRide - Smart Ride-Sharing Platform
 
 A sophisticated ride-sharing platform that optimizes driver matching through multi-objective algorithms, real-time traffic integration, and environmental impact scoring.
