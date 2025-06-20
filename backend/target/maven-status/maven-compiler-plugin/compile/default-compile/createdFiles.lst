@@ -17,12 +17,16 @@ com\ecober\util\AuthUtil.class
 com\ecober\adapter\mapper\RideRequestMapperImpl.class
 com\ecober\adapter\mapper\TripperMapper.class
 com\ecober\adapter\Dto\TripDTO.class
+com\ecober\adapter\mapper\LocationMapperImpl.class
 com\ecober\adapter\Dto\CarbonDTO$CarbonDTOBuilder.class
 com\ecober\adapter\Dto\RouteDTO$RouteDTOBuilder.class
+com\ecober\adapter\mapper\RouteMapperImpl.class
 com\ecober\util\GeoUtils.class
 com\ecober\domain\model\Driver$DriverBuilder.class
 com\ecober\domain\service\UserLoginService.class
 com\ecober\adapter\Dto\RideResponseDTO$RideResponseDTOBuilder.class
+com\ecober\adapter\mapper\LocationMapper.class
+com\ecober\adapter\mapper\RouteMapper.class
 com\ecober\adapter\Dto\RideRequestDTO$RideRequestDTOBuilder.class
 com\ecober\adapter\mapper\UserMapper.class
 com\ecober\application\config\AppConfig.class
@@ -33,6 +37,7 @@ com\ecober\security\JwtService.class
 com\ecober\adapter\Dto\UserDTO.class
 com\ecober\infrastructure\repository\RideRequestRepository.class
 com\ecober\adapter\mapper\DriverMapper.class
+com\ecober\adapter\Dto\LocationDTO$LocationDTOBuilder.class
 com\ecober\adapter\Dto\TripDTO$TripDTOBuilder.class
 com\ecober\adapter\mapper\UserMapperImpl.class
 com\ecober\adapter\Dto\DriverRegistrationRequestDTO.class
@@ -52,10 +57,10 @@ com\ecober\adapter\Dto\LoginRequestDTO.class
 com\ecober\adapter\Dto\RideRequestDTO.class
 com\ecober\domain\model\User.class
 com\ecober\domain\service\Co2AnalyticsService.class
-com\ecober\domain\service\IntentService.class
 com\ecober\domain\service\TripService.class
 com\ecober\domain\service\RouteOptimizingService.class
 com\ecober\domain\service\UserRegistrationService.class
+com\ecober\adapter\Dto\LocationDTO.class
 com\ecober\security\JwtAuthenticationFilter.class
 com\ecober\adapter\Dto\DriverDTO.class
 com\ecober\adapter\controller\DriverController.class

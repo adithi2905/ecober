@@ -44,10 +44,14 @@ const DriverProfile = () => {
       <div className="mb-6">
         <h3 className="text-xl font-semibold text-gray-700 mb-2">Personal Information</h3>
         <div className="space-y-1 text-gray-600">
-          <p><strong>Name:</strong> {driver.name || 'N/A'}</p>
-          <p><strong>Email:</strong> {driver.email || 'N/A'}</p>
-          <p><strong>Phone:</strong> {driver.phone || 'N/A'}</p>
-          <p><strong>Location:</strong> {driver.location || 'N/A'}</p>
+          <p><strong>Name:</strong> {driver.driverName || 'N/A'}</p>
+          <p><strong>Vehicle No:</strong> {driver.vehicleNo|| 'N/A'}</p>
+          <p><strong>Vehicle Type:</strong> {driver.vehicleType || 'N/A'}</p>
+          <p><strong>Fuel Efficiency:</strong> {driver.fuelEfficiency || 'N/A'}</p>
+          <p><strong>Trust Score:</strong> {driver.trustScore || 'N/A'}</p>
+          <p><strong>Total co2 Saved:</strong> {driver.totalCo2Saved || 'N/A'}</p>
+      
+      
         </div>
       </div>
 

@@ -63,7 +63,9 @@ public class DriverService {
     }
 
     public DriverDTO createDriver(DriverDTO driverDTO) {
-        Driver savedDriver = driverRepository.save(driverMapper.toEntity(driverDTO));
+        Driver driver=driverMapper.toEntity(driverDTO);
+        driver.setRole("DRIVER");
+        Driver savedDriver = driverRepository.save(driver);
         return driverMapper.toDto(savedDriver);
     }
 
@@ -90,7 +92,7 @@ public class DriverService {
     }
 
     public Optional<TripDTO> getCurrentTripForDriver(UUID driverId) {
-        return Optional.ofNullable(tripService.fetchCurrentTrip(driverId));
+        return Optional.ofNullable(tripMapper.toDto(tripRepository.findAcceptedRide(driverId)));
     }
 
     public TripDTO startTrip(UUID tripId, UUID driverId) {

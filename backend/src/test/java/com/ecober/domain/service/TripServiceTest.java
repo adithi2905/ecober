@@ -95,7 +95,7 @@ public class TripServiceTest {
         List<Trip> tripList = List.of(mockTrip);
         TripDTO tripDTO = new TripDTO();
 
-        when(tripRepository.findByDriver_DriverIdAndStatus(driverId, TripStatus.COMPLETED)).thenReturn(tripList);
+        when(tripRepository.findCompletedTripsWithUser(driverId, TripStatus.COMPLETED)).thenReturn(tripList);
         when(tripperMapper.toDtoList(tripList)).thenReturn(List.of(tripDTO));
 
         List<TripDTO> result = tripService.fetchAllDriverTrips(driverId);
@@ -105,7 +105,7 @@ public class TripServiceTest {
 
     @Test
     void testStartTrip_success() {
-        when(tripRepository.findAcceptedRide(driverId, TripStatus.ACCEPTED)).thenReturn(mockTrip);
+        when(tripRepository.findAcceptedRide(driverId)).thenReturn(mockTrip);
 
         boolean started = tripService.startTrip(driverId);
 
@@ -116,7 +116,7 @@ public class TripServiceTest {
 
     @Test
     void testStartTrip_failIfNotFound() {
-        when(tripRepository.findAcceptedRide(driverId, TripStatus.ACCEPTED)).thenReturn(null);
+        when(tripRepository.findAcceptedRide(driverId)).thenReturn(null);
         boolean result = tripService.startTrip(driverId);
         assertThat(result).isFalse();
     }

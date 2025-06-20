@@ -44,12 +44,12 @@ public class TripService {
     }
     public List<TripDTO>fetchAllDriverTrips(UUID driverUuid)
     {
-        List<Trip>trips= tripRepository.findByDriver_DriverIdAndStatus(driverUuid, TripStatus.COMPLETED);
+        List<Trip>trips= tripRepository.findCompletedTripsWithUser(driverUuid, TripStatus.COMPLETED);
         return tripMapper.toDtoList(trips);
     }
 
     public boolean startTrip(UUID driverId) {
-        Trip trip = tripRepository.findAcceptedRide(driverId, TripStatus.ACCEPTED);
+        Trip trip = tripRepository.findAcceptedRide(driverId);
         if (trip != null) {
             trip.setStartTime(LocalDateTime.now());
             trip.setStatus(TripStatus.IN_PROGRESS);
@@ -60,7 +60,7 @@ public class TripService {
     }
 
     public TripDTO fetchCurrentTrip(UUID riderId) {
-        Trip currentTrip = tripRepository.findCurrentTrip(riderId);
+        Trip currentTrip = tripRepository.findAcceptedRide(riderId);
         return (currentTrip != null) ? tripMapper.toDto(currentTrip) : null;
     }
 

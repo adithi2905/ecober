@@ -1,40 +1,45 @@
 package com.ecober.domain.service;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
-public class GeocodingService {
-
-    private final RestTemplate restTemplate;
+public class GeocodingService
+{
+    @Value("${gmap.api.key}")
+    private String gmapKey;
 
     @Autowired
-    public GeocodingService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    RestTemplate restTemplate;
+public  double[] getLatAndLong(String location) {
+    String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" +
+            URLEncoder.encode(location, StandardCharsets.UTF_8) +
+            "&key=" + gmapKey;
+
+    ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+    JSONObject json = new JSONObject(response.getBody());
+
+    // Check for empty results array
+    if (!json.has("results") || json.getJSONArray("results").isEmpty()) {
+        throw new RuntimeException("No geocoding result found for: " + location);
     }
 
-    public double[] getLatAndLong(String location) {
-        String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + location + "&key=YOUR_API_KEY";
-        String response = restTemplate.getForObject(url, String.class);
+    JSONObject jsonLocation = json.getJSONArray("results")
+            .getJSONObject(0)
+            .getJSONObject("geometry")
+            .getJSONObject("location");
 
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            var node = mapper.readTree(response);
-            var results = node.path("results");
+    double lat = jsonLocation.getDouble("lat");
+    double lng = jsonLocation.getDouble("lng");
 
-            if (results.isArray() && results.size() > 0) {
-                var loc = results.get(0).path("geometry").path("location");
-                return new double[]{
-                        loc.path("lat").asDouble(),
-                        loc.path("lng").asDouble()
-                };
-            } else {
-                throw new RuntimeException("No geocoding result for: " + location);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error parsing geocoding response", e);
-        }
-    }
+    return new double[]{lat, lng};
 }
+
+
+    }

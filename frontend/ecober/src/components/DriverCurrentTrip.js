@@ -73,9 +73,9 @@ function DriverCurrentTrip() {
         {trip ? (
           <>
             <h2 className="text-xl font-bold text-[#800000] mb-4">Trip Status: {trip.status}</h2>
-            <p><strong>Rider:</strong> {trip.riderName}</p>
-            <p><strong>From:</strong> {trip.pickupLocation}</p>
-            <p><strong>To:</strong> {trip.dropoffLocation}</p>
+            <p><strong>Rider:</strong> {trip.user?.username}</p>
+            <p><strong>From:</strong> {trip.route?.source.address}</p>
+            <p><strong>To:</strong> {trip.route?.destination.address}</p>
             {trip.status === "ACCEPTED" && (
               <button onClick={handleStartTrip} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                 Start Trip

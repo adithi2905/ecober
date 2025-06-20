@@ -15,7 +15,7 @@ class GeocodingServiceTest {
     @BeforeEach
     void setUp() {
         restTemplate = mock(RestTemplate.class);
-        geocodingService = new GeocodingService(restTemplate);
+        geocodingService = new GeocodingService();
     }
 
     @Test

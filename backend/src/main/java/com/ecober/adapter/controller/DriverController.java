@@ -12,6 +12,7 @@ import com.ecober.adapter.Dto.DriverRegistrationRequestDTO;
 import com.ecober.adapter.Dto.RideRequestDTO;
 import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.domain.model.Driver;
+import com.ecober.domain.service.CarbonScoringService;
 import com.ecober.domain.service.DriverService;
 import com.ecober.domain.service.TripService;
 import com.ecober.security.JwtService;
@@ -34,6 +35,9 @@ public class DriverController {
 
     @Autowired
     private TripService tripService;
+
+    @Autowired
+    private CarbonScoringService carbonScoringService;
 
     @GetMapping("/me/getProfile")
     public ResponseEntity<DriverDTO> getMyProfile() {
@@ -118,20 +122,24 @@ public class DriverController {
         if (tripOpt.isPresent()) {
             return ResponseEntity.ok(tripOpt.get());
         } else {
-            return ResponseEntity.status(404).body("Booking details not available. Please book a ride first.");
+            return ResponseEntity.status(404).body("Booking details not available. Please accept a ride first.");
         }
     }
 
     @GetMapping("/me/past-trips")
-    public ResponseEntity<?> getDriverPastTrips() {
-        UUID driverId = AuthUtil.getCurrentUserId();
-        String role = AuthUtil.getCurrentUserRole();
-        if (!"DRIVER".equalsIgnoreCase(role)) {
-            return ResponseEntity.status(403).body("Only drivers can view past trips.");
-        }
-        List<TripDTO> pastTrips = tripService.fetchAllDriverTrips(driverId);
-        return ResponseEntity.ok(pastTrips);
+public ResponseEntity<?> getDriverPastTrips() {
+    UUID driverId = AuthUtil.getCurrentUserId();
+    String role = AuthUtil.getCurrentUserRole();
+    System.out.println("Driver ID: " + driverId);
+    System.out.println("Role: " + role);
+
+    if (!"DRIVER".equalsIgnoreCase(role)) {
+        return ResponseEntity.status(403).body("Only drivers can view past trips.");
     }
+
+    List<TripDTO> pastTrips = tripService.fetchAllDriverTrips(driverId);
+    return ResponseEntity.ok(pastTrips);
+}
 
     @PostMapping("/start-trip/{tripId}")
     public ResponseEntity<?> startTrip(@PathVariable UUID tripId) {
@@ -223,4 +231,28 @@ public class DriverController {
             return ResponseEntity.status(500).body(Map.of("error", "Failed to fetch nearby trips: " + e.getMessage()));
         }
     }
+
+@GetMapping("/me/eco-report")
+public ResponseEntity<?> getEcoReport() {
+    try {
+        UUID driverId = AuthUtil.getCurrentUserId();
+
+        double totalCO2 = driverService.calculateDriverCO2Impact(driverId);
+        long tripCount = driverService.getDriverTripCount(driverId);
+
+        double carbonScore = carbonScoringService.calculateCarbonScore(totalCO2, (int) tripCount);
+        String rating = carbonScoringService.getCarbonRating(carbonScore);
+
+        Map<String, Object> report = new HashMap<>();
+        report.put("totalCO2", totalCO2);
+        report.put("tripCount", tripCount);
+        report.put("carbonScore", carbonScore);
+        report.put("carbonRating", rating);
+
+        return ResponseEntity.ok(report);
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error generating eco report: " + e.getMessage());
+    }
+}
+
 }
