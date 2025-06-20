@@ -140,7 +140,6 @@ public class DriverService {
     public TripDTO acceptRide(UUID rideRequestId, UUID driverId) {
         RideRequest request = rideRequestRepository.findById(rideRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("Ride request not found."));
-
         if (request.getStatus() != RideRequestStatus.REQUESTED)
             throw new IllegalStateException("Ride already accepted or unavailable.");
 
@@ -155,7 +154,7 @@ public class DriverService {
             distance = routeOptimizingService.getDistanceAndETA(
                     new Location(pickup[0], pickup[1], request.getPickupLocation(), 0),
                     new Location(dropoff[0], dropoff[1], request.getDropoffLocation(), 0)
-            );
+            ); 
         } catch (Exception e) {
             distance = GeoUtils.calculateDistanceAndDuration(pickup[0], pickup[1], dropoff[0], dropoff[1]);
         }

@@ -156,7 +156,7 @@ public class TripServiceTest {
 
     @Test
     void testFetchCurrentTrip_returnsDTO() {
-        when(tripRepository.findCurrentTrip(riderId)).thenReturn(mockTrip);
+        when(tripRepository.findCurrentTrip(riderId,TripStatus.ACCEPTED,TripStatus.IN_PROGRESS)).thenReturn(mockTrip);
         TripDTO tripDTO = new TripDTO();
         when(tripperMapper.toDto(mockTrip)).thenReturn(tripDTO);
 

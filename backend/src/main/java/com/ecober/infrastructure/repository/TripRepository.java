@@ -22,14 +22,19 @@ public interface TripRepository extends JpaRepository<Trip, UUID> {
     @Query("SELECT t FROM Trip t WHERE t.driver.driverId = :driverId AND t.status = 'IN_PROGRESS'")
     Optional<Trip> findOngoingTripByDriverId(@Param("driverId") UUID driverId);
 
-    @Query("SELECT t FROM Trip t WHERE t.user.userId = :riderId AND (t.status = 'ACCEPTED' OR t.status = 'IN_PROGRESS')")
-    Trip findCurrentTrip(@Param("riderId") UUID riderId);
+    @Query("SELECT t FROM Trip t WHERE t.user.userId = :riderId AND (t.status = :status1 OR t.status = :status2)")
+Trip findCurrentTrip(@Param("riderId") UUID riderId,
+                     @Param("status1") TripStatus status1,
+                     @Param("status2") TripStatus status2);
 
-    @Query("SELECT t FROM Trip t WHERE t.driver.driverId = :driverId AND t.status = 'ACCEPTED'")
+    @Query("SELECT t FROM Trip t WHERE t.driver.driverId = :driverId AND t.status = 'ACCEPTED' OR t.status = 'IN_PROGRESS'")
     Trip findAcceptedRide(@Param("driverId") UUID driverId);
 
     @Query("SELECT t FROM Trip t LEFT JOIN FETCH t.user WHERE t.driver.driverId = :driverId AND t.status = :status")
     List<Trip> findCompletedTripsWithUser(@Param("driverId") UUID driverId, @Param("status") TripStatus status);
+
+
+    List<Trip> findByUser_UserIdAndStatus(UUID riderId, TripStatus completed);
 
 
 } 

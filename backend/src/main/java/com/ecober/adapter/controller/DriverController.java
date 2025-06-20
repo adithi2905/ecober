@@ -204,6 +204,7 @@ public ResponseEntity<?> getDriverPastTrips() {
             }
 
             TripDTO trip = driverService.acceptRide(rideRequestId, driverId);
+            
             return ResponseEntity.ok(trip);
 
         } catch (IllegalArgumentException e) {

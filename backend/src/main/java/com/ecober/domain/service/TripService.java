@@ -39,7 +39,7 @@ public class TripService {
     }
 
     public List<TripDTO> fetchAllTrips(UUID riderId) {
-        List<Trip> trips = tripRepository.findByUser_UserId(riderId);
+        List<Trip> trips = tripRepository.findByUser_UserIdAndStatus(riderId,TripStatus.COMPLETED);
         return tripMapper.toDtoList(trips);
     }
     public List<TripDTO>fetchAllDriverTrips(UUID driverUuid)
@@ -60,7 +60,7 @@ public class TripService {
     }
 
     public TripDTO fetchCurrentTrip(UUID riderId) {
-        Trip currentTrip = tripRepository.findAcceptedRide(riderId);
+        Trip currentTrip = tripRepository.findCurrentTrip(riderId,TripStatus.ACCEPTED,TripStatus.IN_PROGRESS);
         return (currentTrip != null) ? tripMapper.toDto(currentTrip) : null;
     }
 
