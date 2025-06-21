@@ -6,6 +6,7 @@ com\ecober\adapter\Dto\RideResponseDTO.class
 com\ecober\adapter\Dto\RouteDTO.class
 com\ecober\adapter\Dto\DistanceDurationDTO.class
 com\ecober\application\config\SecurityConfig.class
+com\ecober\application\config\RedisConfig.class
 com\ecober\adapter\Dto\DriverDTO$DriverDTOBuilder.class
 com\ecober\domain\model\Route$RouteBuilder.class
 com\ecober\adapter\Dto\DriverAuthenticationRequest$DriverAuthenticationRequestBuilder.class

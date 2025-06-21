@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
+ import { useNavigate } from "react-router-dom"; 
 
 function DriverAvailabletrips() {
   const [rides, setRides] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [accepting, setAccepting] = useState(false);
   const token = localStorage.getItem("token");
+   const navigate = useNavigate(); 
 
   useEffect(() => {
     const fetchRides = async () => {
@@ -31,6 +34,9 @@ function DriverAvailabletrips() {
   }, [token]);
 
   const handleAcceptRide = async (rideRequestId) => {
+    if (accepting) return;
+    setAccepting(true);
+
     try {
       const response = await fetch(`http://localhost:8080/driver/acceptRide/${rideRequestId}`, {
         method: "POST",
@@ -39,15 +45,32 @@ function DriverAvailabletrips() {
         },
       });
 
+      const contentType = response.headers.get("content-type");
+      let errorData = {};
+
       if (!response.ok) {
-        throw new Error("Failed to accept ride");
+        if (contentType && contentType.includes("application/json")) {
+          errorData = await response.json();
+        }
+
+        if (errorData.message?.includes("Driver already has an active trip")) {
+          alert("❌ You already have an active trip. Complete it first.");
+        } else if (errorData.message?.includes("Ride already accepted")) {
+          alert("⚠️ This ride has already been taken by another driver.");
+        } else {
+          alert("🚫 Failed to accept ride. Try again.");
+        }
+        return;
       }
 
-      alert("Ride accepted successfully!");
-      setRides(prev => prev.filter(ride => ride.rideRequestId !== rideRequestId));
+      alert("✅ Ride accepted successfully!");
+      setRides([]);
+      navigate("/driver/currentTrip"); 
     } catch (error) {
       console.error("Error accepting ride:", error);
-      alert("Error accepting ride.");
+      alert("🚫 Error accepting ride.");
+    } finally {
+      setAccepting(false);
     }
   };
 
@@ -66,13 +89,14 @@ function DriverAvailabletrips() {
               <p><strong>Dropoff:</strong> {ride.dropoffLocation}</p>
               <p><strong>Vehicle Type:</strong> {ride.preferredVehicleType}</p>
               <p><strong>Willing to Pool:</strong> {ride.willingToPool ? "Yes" : "No"}</p>
-              <p><strong>Rider id:</strong> {ride.rideRequestId}</p>
-              
+              <p><strong>Ride ID:</strong> {ride.rideRequestId}</p>
+
               <button
                 onClick={() => handleAcceptRide(ride.rideRequestId)}
-                className="mt-3 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                className="mt-3 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                disabled={accepting}
               >
-                Accept Ride
+                {accepting ? "Processing..." : "Accept Ride"}
               </button>
             </div>
           ))}

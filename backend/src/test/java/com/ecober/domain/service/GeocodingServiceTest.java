@@ -2,6 +2,8 @@ package com.ecober.domain.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,7 +17,7 @@ class GeocodingServiceTest {
     @BeforeEach
     void setUp() {
         restTemplate = mock(RestTemplate.class);
-        geocodingService = new GeocodingService();
+        geocodingService = new GeocodingService(restTemplate);
     }
 
     @Test
@@ -35,7 +37,8 @@ class GeocodingServiceTest {
             }
         """;
 
-        when(restTemplate.getForObject(anyString(), eq(String.class))).thenReturn(fakeJson);
+        ResponseEntity<String> response = new ResponseEntity<>(fakeJson, HttpStatus.OK);
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(response);
 
         double[] result = geocodingService.getLatAndLong("Bangalore");
 
@@ -51,7 +54,8 @@ class GeocodingServiceTest {
             }
         """;
 
-        when(restTemplate.getForObject(anyString(), eq(String.class))).thenReturn(emptyJson);
+        ResponseEntity<String> response = new ResponseEntity<>(emptyJson, HttpStatus.OK);
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(response);
 
         RuntimeException exception = assertThrows(RuntimeException.class,
             () -> geocodingService.getLatAndLong("Nowhere"));
@@ -72,7 +76,8 @@ class GeocodingServiceTest {
     void testGetLatAndLong_malformedJson_throwsException() {
         String malformedJson = "invalid json";
 
-        when(restTemplate.getForObject(anyString(), eq(String.class))).thenReturn(malformedJson);
+        ResponseEntity<String> response = new ResponseEntity<>(malformedJson, HttpStatus.OK);
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(response);
 
         RuntimeException exception = assertThrows(RuntimeException.class,
             () -> geocodingService.getLatAndLong("Broken"));
@@ -97,7 +102,8 @@ class GeocodingServiceTest {
             }
         """;
 
-        when(restTemplate.getForObject(anyString(), eq(String.class))).thenReturn(emptyJson);
+        ResponseEntity<String> response = new ResponseEntity<>(emptyJson, HttpStatus.OK);
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(response);
 
         assertThrows(RuntimeException.class, () -> geocodingService.getLatAndLong("Nowhere"));
     }

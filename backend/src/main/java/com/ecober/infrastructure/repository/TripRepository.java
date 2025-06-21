@@ -27,7 +27,7 @@ Trip findCurrentTrip(@Param("riderId") UUID riderId,
                      @Param("status1") TripStatus status1,
                      @Param("status2") TripStatus status2);
 
-    @Query("SELECT t FROM Trip t WHERE t.driver.driverId = :driverId AND t.status = 'ACCEPTED' OR t.status = 'IN_PROGRESS'")
+   @Query("SELECT t FROM Trip t WHERE t.driver.driverId = :driverId AND t.status = 'ACCEPTED' OR t.status = 'IN_PROGRESS'")
     Trip findAcceptedRide(@Param("driverId") UUID driverId);
 
     @Query("SELECT t FROM Trip t LEFT JOIN FETCH t.user WHERE t.driver.driverId = :driverId AND t.status = :status")

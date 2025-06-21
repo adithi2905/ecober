@@ -11,7 +11,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -28,9 +27,11 @@ public class DriverService {
     @Autowired private TripperMapper tripMapper;
     @Autowired private RideRequestMapper rideRequestMapper;
     @Autowired private RideRequestRepository rideRequestRepository;
-    @Autowired
-    private RedisTemplate<String, UUID> redisTemplate;
+    @Autowired private RedisTemplate<String, UUID> redisTemplate;
 
+    private String getRedisKey(UUID driverId) {
+        return "active_trip:" + driverId;
+    }
 
     public void register(DriverRegistrationRequestDTO request) {
         Driver driver = Driver.builder()
@@ -67,10 +68,9 @@ public class DriverService {
     }
 
     public DriverDTO createDriver(DriverDTO driverDTO) {
-        Driver driver=driverMapper.toEntity(driverDTO);
+        Driver driver = driverMapper.toEntity(driverDTO);
         driver.setRole("DRIVER");
-        Driver savedDriver = driverRepository.save(driver);
-        return driverMapper.toDto(savedDriver);
+        return driverMapper.toDto(driverRepository.save(driver));
     }
 
     public Optional<DriverDTO> updateDriver(UUID driverId, DriverDTO driverDTO) {
@@ -114,15 +114,15 @@ public class DriverService {
     }
 
     public boolean endTrip(UUID tripId, UUID driverId) {
-    
         Trip trip = tripRepository.findByTripId(tripId);
         if (trip != null &&
             trip.getDriver() != null &&
             driverId.equals(trip.getDriver().getDriverId())) {
+
             trip.setEndTime(LocalDateTime.now());
             trip.setStatus(TripStatus.COMPLETED);
             tripRepository.save(trip);
-            redisTemplate.delete("active_trip:" + driverId);
+            redisTemplate.delete(getRedisKey(driverId));  // Clear Redis lock
             return true;
         }
         return false;
@@ -131,6 +131,7 @@ public class DriverService {
     public List<RideRequestDTO> getNearbyAvailableTrips(UUID driverId) {
         Driver driver = driverRepository.findByDriverId(driverId)
                 .orElseThrow(() -> new RuntimeException("Driver not found"));
+
         List<RideRequest> nearby = rideRequestRepository.findNearbyRideRequests(
                 driver.getDriverLocation(),
                 driver.getVehicleType(),
@@ -143,19 +144,18 @@ public class DriverService {
         return tripRepository.findByDriver_DriverId(driverId).size();
     }
 
-    @Transactional
     public TripDTO acceptRide(UUID rideRequestId, UUID driverId) {
-
-         String redisKey = "active_trip:" + driverId;
+        String redisKey = getRedisKey(driverId);
 
         if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) {
             throw new IllegalStateException("Driver already has an active trip.");
         }
-            
+
         RideRequest request = rideRequestRepository.findById(rideRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("Ride request not found."));
-        if (request.getStatus() != RideRequestStatus.REQUESTED)
+        if (request.getStatus() != RideRequestStatus.REQUESTED) {
             throw new IllegalStateException("Ride already accepted or unavailable.");
+        }
 
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new IllegalArgumentException("Driver not found."));
@@ -168,7 +168,7 @@ public class DriverService {
             distance = routeOptimizingService.getDistanceAndETA(
                     new Location(pickup[0], pickup[1], request.getPickupLocation(), 0),
                     new Location(dropoff[0], dropoff[1], request.getDropoffLocation(), 0)
-            ); 
+            );
         } catch (Exception e) {
             distance = GeoUtils.calculateDistanceAndDuration(pickup[0], pickup[1], dropoff[0], dropoff[1]);
         }
@@ -190,10 +190,10 @@ public class DriverService {
                 .estimatedEmission(emission)
                 .build();
 
-        Trip savedTrip=tripRepository.save(trip);
-        tripRepository.save(savedTrip);
-        rideRequestRepository.deleteById(request.getId());
-        redisTemplate.opsForValue().set(redisKey, trip.getTripId());
+        tripRepository.save(trip);
+        rideRequestRepository.delete(request);
+
+        redisTemplate.opsForValue().set(redisKey, trip.getTripId()); // Lock driver
 
         return tripMapper.toDto(trip);
     }

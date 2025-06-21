@@ -17,10 +17,6 @@ public class Trip {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID tripId;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "request_id")
-    private RideRequest request;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "driver_id")
     private Driver driver;

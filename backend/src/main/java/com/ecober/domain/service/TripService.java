@@ -6,6 +6,7 @@ import com.ecober.domain.model.*;
 import com.ecober.infrastructure.repository.TripRepository;
 import com.ecober.infrastructure.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,6 +23,9 @@ public class TripService {
 
     @Autowired
     private TripperMapper tripMapper;
+
+    @Autowired
+    private RedisTemplate<String, UUID> redisTemplate;
 
     public void createTrip(UUID riderId, Driver bestDriver, Route route, double carbonEmission) {
         User user = userRepository.findById(riderId)
@@ -60,6 +64,13 @@ public class TripService {
     }
 
     public TripDTO fetchCurrentTrip(UUID riderId) {
+        String redisKey = "rider:currentTrip:" + riderId;
+    UUID cachedTripId = redisTemplate.opsForValue().get(redisKey);
+    
+    if (cachedTripId != null) {
+        Optional<TripDTO> cachedTrip = getTripById(cachedTripId);
+        if (cachedTrip.isPresent()) return cachedTrip.get();
+    }
         Trip currentTrip = tripRepository.findCurrentTrip(riderId,TripStatus.ACCEPTED,TripStatus.IN_PROGRESS);
         return (currentTrip != null) ? tripMapper.toDto(currentTrip) : null;
     }
