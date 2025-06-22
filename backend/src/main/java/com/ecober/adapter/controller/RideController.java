@@ -16,7 +16,6 @@ import com.ecober.domain.service.RouteOptimizingService;
 import com.ecober.domain.service.TripService;
 import com.ecober.util.AuthUtil;
 import com.ecober.util.EmissionUtils;
-import com.ecober.util.GeoUtils;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;

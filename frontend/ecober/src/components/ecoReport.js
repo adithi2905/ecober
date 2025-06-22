@@ -15,6 +15,8 @@ const COLORS = ['#22c55e', '#3b82f6', '#a855f7'];
 
 function EcoReport() {
   const [totalCo2, setTotalCo2] = useState(0);
+  const [carbonScore, setCarbonScore] = useState(0);
+  const [ecoBadge, setEcoBadge] = useState('');
   const [monthlyData, setMonthlyData] = useState([]);
   const [rideTypeData, setRideTypeData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,9 +38,11 @@ function EcoReport() {
         }
 
         const data = await response.json();
-        setTotalCo2(data.totalCo2Saved || 0);
+        setTotalCo2(data.totalCO2 || 0);
+        setCarbonScore(data.carbonScore || 0);
+        setEcoBadge(data.carbonRating || '');
         setMonthlyData(data.monthlyCo2Savings || []);
-        setRideTypeData(data.riderDistribution || []);
+        setRideTypeData(data.rideTypeDistribution || []);
       } catch (err) {
         console.error('Error fetching eco report:', err);
         setError(err.message);
@@ -57,8 +61,10 @@ function EcoReport() {
     <div className="p-6 space-y-6">
       <h2 className="text-2xl font-bold text-center text-green-700">Eco Report</h2>
 
-      <div className="text-center text-lg font-medium">
-        Total CO₂ Saved: <span className="text-green-600 font-bold">{totalCo2.toFixed(2)} kg</span>
+      <div className="text-center text-lg font-medium space-y-1">
+        <div>Total CO₂ Saved: <span className="text-green-600 font-bold">{totalCo2.toFixed(2)} kg</span></div>
+        <div>Carbon Score: <span className="text-blue-600 font-bold">{carbonScore.toFixed(1)}</span></div>
+        <div>Eco Badge: <span className="text-purple-600 font-bold">{ecoBadge}</span></div>
       </div>
 
       {/* Monthly CO₂ Savings Bar Chart */}

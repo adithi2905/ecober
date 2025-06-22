@@ -8,21 +8,13 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-
-import com.ecober.adapter.Dto.DistanceDurationDTO;
 import com.ecober.adapter.Dto.DriverDTO;
 import com.ecober.adapter.Dto.RideRequestDTO;
 import com.ecober.domain.model.RideRequest;
 import com.ecober.domain.model.RideRequestStatus;
-import com.ecober.domain.model.Route;
-import com.ecober.domain.model.Trip;
-import com.ecober.domain.model.TripStatus;
 import com.ecober.domain.model.User;
-import com.ecober.infrastructure.repository.DriverRepository;
 import com.ecober.infrastructure.repository.RideRequestRepository;
-import com.ecober.infrastructure.repository.TripRepository;
 import com.ecober.infrastructure.repository.UserRepository;
-import com.ecober.util.GeoUtils;
 
 @Service
 public class RideRequestService {

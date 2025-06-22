@@ -31,6 +31,7 @@ public class TripService {
         User user = userRepository.findById(riderId)
                 .orElseThrow(() -> new RuntimeException("User not found with id " + riderId));
 
+        route.setEstimatedEmission(estimatedEmission);
         Trip trip = new Trip();
         trip.setUser(user);
         trip.setDriver(bestDriver);

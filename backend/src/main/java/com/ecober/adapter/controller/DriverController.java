@@ -13,13 +13,11 @@ import com.ecober.adapter.Dto.DriverRegistrationRequestDTO;
 import com.ecober.adapter.Dto.RideRequestDTO;
 import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.domain.model.Driver;
-import com.ecober.domain.service.CarbonScoringService;
 import com.ecober.domain.service.DriverScoringService;
 import com.ecober.domain.service.DriverService;
 import com.ecober.domain.service.TripService;
 import com.ecober.security.JwtService;
 import com.ecober.util.AuthUtil;
-import com.ecober.util.EmissionUtils;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;

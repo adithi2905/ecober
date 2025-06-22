@@ -67,7 +67,7 @@ function DriverTripHistory() {
               <p><strong>From:</strong> {trip.route?.source?.address || 'Unknown'}</p>
               <p><strong>To:</strong> {trip.route?.destination?.address || 'Unknown'}</p>
               <p><strong>Status:</strong> {trip.status}</p>
-              <p><strong>Estimated CO₂ Emission:</strong> {trip.estimatedEmission?.toFixed(2) || 0} kg</p>
+              <p><strong>Estimated CO₂ Emission:</strong> {trip.route?.estimatedEmission || 0} kg</p>
               <p><strong>Actual CO₂ Emission:</strong> {trip.actualEmission?.toFixed(2) || 0} kg</p>
               {trip.ecoScore && <p><strong>Eco Score:</strong> {trip.ecoScore}</p>}
               {trip.feedback && <p><strong>Feedback:</strong> {trip.feedback}</p>}
