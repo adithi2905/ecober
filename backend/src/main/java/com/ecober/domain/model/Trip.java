@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Trip {
@@ -26,6 +26,8 @@ public class Trip {
 
     private double estimatedEmission; // Calculated using GeoUtils
     private String ecoScore;
+
+    private String vehicleType;
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;

@@ -13,8 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DriverService {
@@ -123,6 +125,7 @@ public class DriverService {
             trip.setStatus(TripStatus.COMPLETED);
             tripRepository.save(trip);
             redisTemplate.delete("active_trip:" + driverId);
+            redisTemplate.delete("active_ride:" + trip.getUser().getUserId());
             return true;
         }
         return false;
@@ -146,7 +149,7 @@ public class DriverService {
     @Transactional
     public TripDTO acceptRide(UUID rideRequestId, UUID driverId) {
 
-         String redisKey = "active_trip:" + driverId;
+        String redisKey = "active_trip:" + driverId;
 
         if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) {
             throw new IllegalStateException("Driver already has an active trip.");
@@ -187,13 +190,13 @@ public class DriverService {
                         .isPooledEligible(request.isWillingToPool())
                         .build())
                 .status(TripStatus.ACCEPTED)
-                .estimatedEmission(emission)
+                .estimatedEmission(emission).vehicleType(request.getPreferredVehicleType())
                 .build();
 
         Trip savedTrip=tripRepository.save(trip);
         tripRepository.save(savedTrip);
         rideRequestRepository.deleteById(request.getId());
-        redisTemplate.opsForValue().set(redisKey, trip.getTripId());
+        redisTemplate.opsForValue().set(redisKey, trip.getTripId(),Duration.ofMinutes(30));
 
         return tripMapper.toDto(trip);
     }
@@ -210,4 +213,30 @@ public class DriverService {
                 .mapToDouble(Trip::getEstimatedEmission)
                 .sum();
     }
+
+    public double getCurrentMonthCO2Savings(UUID driverId) {
+    LocalDateTime startOfMonth = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+    return tripRepository.findByDriver_DriverId(driverId).stream()
+        .filter(trip -> trip.getEndTime() != null && trip.getEndTime().isAfter(startOfMonth))
+        .mapToDouble(Trip::getEstimatedEmission)
+        .sum();
 }
+
+
+    public List<Map<String, Object>> getRideTypeDistribution(UUID driverId) {
+    return tripRepository.findByDriver_DriverId(driverId).stream()
+        .map(Trip::getVehicleType)
+        .filter(Objects::nonNull)
+        .collect(Collectors.groupingBy(String::toUpperCase, Collectors.counting()))
+        .entrySet().stream()
+        .map(entry -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", entry.getKey());
+            map.put("value", entry.getValue());
+            return map;
+        })
+        .collect(Collectors.toList());
+}
+
+}
+

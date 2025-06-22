@@ -34,7 +34,8 @@ Trip findCurrentTrip(@Param("riderId") UUID riderId,
     List<Trip> findCompletedTripsWithUser(@Param("driverId") UUID driverId, @Param("status") TripStatus status);
 
 
-    List<Trip> findByUser_UserIdAndStatus(UUID riderId, TripStatus completed);
+    @Query("SELECT t FROM Trip t WHERE t.user.userId = :riderId AND t.status = :status")
+    List<Trip> findCompletedTripsForUser(@Param("riderId") UUID riderId, @Param("status") TripStatus status);
 
 
 } 

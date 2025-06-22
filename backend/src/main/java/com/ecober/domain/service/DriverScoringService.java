@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
+
 
 @Service
 public class DriverScoringService {
@@ -40,4 +42,6 @@ public class DriverScoringService {
     private double normalizeCO2Saved(double co2Saved) {
         return Math.min(1.0, co2Saved / 100.0);
     }
+
+    
 }

@@ -38,7 +38,7 @@ function EcoReport() {
         const data = await response.json();
         setTotalCo2(data.totalCo2Saved || 0);
         setMonthlyData(data.monthlyCo2Savings || []);
-        setRideTypeData(data.rideTypeDistribution || []);
+        setRideTypeData(data.riderDistribution || []);
       } catch (err) {
         console.error('Error fetching eco report:', err);
         setError(err.message);

@@ -1,5 +1,6 @@
 package com.ecober.adapter.controller;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -243,14 +244,18 @@ public ResponseEntity<?> getEcoReport() {
 
         double carbonScore = carbonScoringService.calculateCarbonScore(totalCO2, (int) tripCount);
         String rating = carbonScoringService.getCarbonRating(carbonScore);
+        double currentMonthCO2 = driverService.getCurrentMonthCO2Savings(driverId);
+        List<Map<String,Object>>riderDistribution=driverService.getRideTypeDistribution(driverId);
 
         Map<String, Object> report = new HashMap<>();
         report.put("totalCO2", totalCO2);
         report.put("tripCount", tripCount);
         report.put("carbonScore", carbonScore);
         report.put("carbonRating", rating);
-
+        report.put("monthlyCo2Savings", List.of(Map.of("month", LocalDate.now().getMonth().toString().substring(0, 3), "co2", currentMonthCO2)));
+        report.put("riderDistribution",riderDistribution);
         return ResponseEntity.ok(report);
+
     } catch (Exception e) {
         return ResponseEntity.status(500).body("Error generating eco report: " + e.getMessage());
     }

@@ -1,6 +1,5 @@
 package com.ecober.adapter.controller;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ecober.adapter.Dto.DistanceDurationDTO;
 import com.ecober.adapter.Dto.RideRequestDTO;
-import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.domain.model.Route;
 import com.ecober.domain.model.Trip;
 import com.ecober.domain.service.RideRequestService;

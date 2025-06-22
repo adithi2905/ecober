@@ -39,11 +39,12 @@ public class TripService {
         trip.setEstimatedEmission(carbonEmission);
         trip.setEcoScore("B+");
         trip.setStatus(TripStatus.ACCEPTED);
+        trip.setVehicleType(bestDriver.getVehicleType());
         tripRepository.save(trip);
     }
 
     public List<TripDTO> fetchAllTrips(UUID riderId) {
-        List<Trip> trips = tripRepository.findByUser_UserIdAndStatus(riderId,TripStatus.COMPLETED);
+        List<Trip> trips = tripRepository.findCompletedTripsForUser(riderId,TripStatus.COMPLETED);
         return tripMapper.toDtoList(trips);
     }
     public List<TripDTO>fetchAllDriverTrips(UUID driverUuid)
