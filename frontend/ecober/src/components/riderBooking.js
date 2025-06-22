@@ -6,43 +6,54 @@ function RiderBooking() {
   const [destination, setDestination] = useState('');
   const [preferredVehicleType, setPreferredVehicleType] = useState('Sedan');
   const [willingToPool, setWillingToPool] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
 
+    const trimmedPickup = pickup.trim();
+    const trimmedDestination = destination.trim();
+
+    if (!trimmedPickup || !trimmedDestination) {
+      alert("Please enter valid pickup and destination locations.");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      const response = await fetch("http://localhost:8080/ride/requestRide", {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE || "http://localhost:8080"}/ride/requestRide`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
-          pickupLocation: pickup,
-          dropoffLocation: destination,
-          preferredVehicleType: preferredVehicleType,
-          willingToPool: willingToPool,
+          pickupLocation: trimmedPickup,
+          dropoffLocation: trimmedDestination,
+          preferredVehicleType,
+          willingToPool,
         })
       });
 
       if (response.ok) {
-        const contentType = response.headers.get("content-type");
         let message = "Ride booked successfully.";
+        const contentType = response.headers.get("content-type");
 
-        if (contentType && contentType.includes("application/json")) {
+        if (contentType?.includes("application/json")) {
           const data = await response.json();
           message = data.message || message;
-        } else if (contentType && contentType.includes("text/plain")) {
+        } else if (contentType?.includes("text/plain")) {
           message = await response.text();
         }
 
         navigate("/bookingconfirmation", {
           state: {
             driver: null,
-            pickup: pickup,
-            destination: destination,
+            pickup: trimmedPickup,
+            destination: trimmedDestination,
             status: message,
           },
         });
@@ -53,6 +64,8 @@ function RiderBooking() {
     } catch (error) {
       console.error("Error booking ride:", error);
       alert("Something went wrong. " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,9 +120,10 @@ function RiderBooking() {
           </div>
           <button
             type="submit"
-            className="w-full bg-[#800000] text-white py-2 px-4 rounded hover:bg-[#a00000] transition"
+            disabled={loading}
+            className={`w-full ${loading ? 'bg-gray-400' : 'bg-[#800000]'} text-white py-2 px-4 rounded transition`}
           >
-            Book Ride
+            {loading ? "Booking..." : "Book Ride"}
           </button>
         </form>
       </div>

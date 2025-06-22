@@ -43,7 +43,7 @@ public class RideRequestService {
     private BroadcastingService broadcastingService;
 
     @Autowired
-    RedisTemplate redisTemplate;
+    private RedisTemplate<String, UUID> redisTemplate;
 
 public void processRideRequest(RideRequestDTO dto, UUID userId) {
     String redisKey = "active_ride:" + userId;
