@@ -12,6 +12,7 @@ public class EcoberApplication {
 		Dotenv dotenv = Dotenv.load();
         System.setProperty("GMAP_API_KEY", dotenv.get("GMAP_API_KEY"));
 		System.setProperty("OPENROUTER_API_KEY", dotenv.get("OPENROUTER_API_KEY"));
+		System.setProperty("CLIMATIQ_API_KEY", dotenv.get("CLIMATIQ_API_KEY"));
 		
 		SpringApplication.run(EcoberApplication.class, args);
 	}

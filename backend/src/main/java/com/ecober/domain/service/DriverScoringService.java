@@ -1,20 +1,30 @@
 package com.ecober.domain.service;
 
 import com.ecober.domain.model.Driver;
+import com.ecober.util.EmissionUtils;
 import com.ecober.util.GeoUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
-
 
 @Service
 public class DriverScoringService {
 
     @Autowired
     private GeocodingService geocodingService;
+
+    @Autowired
+    private EmissionUtils emissionUtils;
+
+    public double computeActualScores(double distanceInKm, String vehicleType) {
+        return emissionUtils.Co2ActualEmission(distanceInKm, vehicleType);
+    }
+
+    public double computeEstimatedScores(double distanceInKm, String vehicleType) {
+        return emissionUtils.Co2EstimatedEmission(distanceInKm, vehicleType);
+    }
 
     public List<Driver> rankDrivers(List<Driver> drivers, double pickupLat, double pickupLng) {
         return drivers.stream()
@@ -24,7 +34,7 @@ public class DriverScoringService {
                 .toList();
     }
 
-    private double scoreDriver(Driver driver, double pickupLat, double pickupLng) {
+    public double scoreDriver(Driver driver, double pickupLat, double pickupLng) {
         double[] driverCoords = geocodingService.getLatAndLong(driver.getDriverLocation());
         double distanceKm = GeoUtils.haversinDistance(pickupLat, pickupLng, driverCoords[0], driverCoords[1]);
         double distanceScore = 1 / (1 + distanceKm); // closer = higher score
@@ -43,5 +53,8 @@ public class DriverScoringService {
         return Math.min(1.0, co2Saved / 100.0);
     }
 
-    
+    public double calculateCarbonCost(double totalEmissionsKg, double costPerKg) {
+    return totalEmissionsKg * costPerKg;
+}
+
 }

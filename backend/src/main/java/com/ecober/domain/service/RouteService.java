@@ -3,6 +3,7 @@ package com.ecober.domain.service;
 import com.ecober.adapter.Dto.DistanceDurationDTO;
 import com.ecober.domain.model.Location;
 import com.ecober.domain.model.Route;
+import com.ecober.util.EmissionUtils;
 import com.ecober.util.GeoUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,12 @@ public class RouteService {
     @Autowired
     private RouteOptimizingService routeOptimizingService;
 
+    @Autowired
+    private EmissionUtils emissionUtils;
+
+    @Autowired
+    private CarbonScoringService carbonScoringService;
+
 public Route getOrCreateRoute(Location pickup, Location dropoff, String vehicleType) {
     DistanceDurationDTO distanceDuration;
     try {
@@ -24,15 +31,16 @@ public Route getOrCreateRoute(Location pickup, Location dropoff, String vehicleT
                 dropoff.getLatitude(), dropoff.getLongitude());
     }
 
-    double emission = GeoUtils.calculateEmissions(distanceDuration.getDistanceKm(), vehicleType);
+    double emission = emissionUtils.Co2ActualEmission(distanceDuration.getDistanceKm(), vehicleType);
+    double carbonCost=carbonScoringService.calculateCarbonCost(emission);
 
     return Route.builder()
             .source(pickup)
             .destination(dropoff)
             .distanceKm(distanceDuration.getDistanceKm())
-            .carbonCost(emission)
+            .carbonCost(carbonCost)
             .estimatedTime(distanceDuration.getDurationInMins())
-            .carbonEmission(emission)
+            .estimatedEmission(emission)
             .isPooledEligible(false)
             .build();
 }

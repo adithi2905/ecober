@@ -14,10 +14,12 @@ import com.ecober.adapter.Dto.RideRequestDTO;
 import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.domain.model.Driver;
 import com.ecober.domain.service.CarbonScoringService;
+import com.ecober.domain.service.DriverScoringService;
 import com.ecober.domain.service.DriverService;
 import com.ecober.domain.service.TripService;
 import com.ecober.security.JwtService;
 import com.ecober.util.AuthUtil;
+import com.ecober.util.EmissionUtils;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +40,7 @@ public class DriverController {
     private TripService tripService;
 
     @Autowired
-    private CarbonScoringService carbonScoringService;
+    private DriverScoringService driverScoringService;
 
     @GetMapping("/me/getProfile")
     public ResponseEntity<DriverDTO> getMyProfile() {
@@ -242,18 +244,22 @@ public ResponseEntity<?> getEcoReport() {
         double totalCO2 = driverService.calculateDriverCO2Impact(driverId);
         long tripCount = driverService.getDriverTripCount(driverId);
 
-        double carbonScore = carbonScoringService.calculateCarbonScore(totalCO2, (int) tripCount);
-        String rating = carbonScoringService.getCarbonRating(carbonScore);
+        double carbonScore = driverScoringService.calculateCarbonCost(totalCO2, (int) tripCount);
+        String rating = driverService.getEcoBadge(driverId);
         double currentMonthCO2 = driverService.getCurrentMonthCO2Savings(driverId);
-        List<Map<String,Object>>riderDistribution=driverService.getRideTypeDistribution(driverId);
+        List<Map<String, Object>> rideDistribution = driverService.getRideTypeDistribution(driverId);
 
         Map<String, Object> report = new HashMap<>();
         report.put("totalCO2", totalCO2);
         report.put("tripCount", tripCount);
         report.put("carbonScore", carbonScore);
         report.put("carbonRating", rating);
-        report.put("monthlyCo2Savings", List.of(Map.of("month", LocalDate.now().getMonth().toString().substring(0, 3), "co2", currentMonthCO2)));
-        report.put("riderDistribution",riderDistribution);
+        report.put("monthlyCo2Savings", List.of(Map.of(
+                "month", LocalDate.now().getMonth().toString().substring(0, 3),
+                "co2", currentMonthCO2
+        )));
+        report.put("rideTypeDistribution", rideDistribution);
+
         return ResponseEntity.ok(report);
 
     } catch (Exception e) {

@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-06-21T23:00:52-0400",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
+    date = "2025-06-22T17:43:52-0400",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.42.0.v20250514-1000, environment: Java 21.0.7 (Eclipse Adoptium)"
 )
 @Component
 public class DriverMapperImpl implements DriverMapper {
@@ -23,16 +23,16 @@ public class DriverMapperImpl implements DriverMapper {
 
         DriverDTO.DriverDTOBuilder driverDTO = DriverDTO.builder();
 
-        driverDTO.driverName( driver.getDriverName() );
-        driverDTO.password( driver.getPassword() );
-        driverDTO.vehicleNo( driver.getVehicleNo() );
         driverDTO.driverId( driver.getDriverId() );
-        driverDTO.verifiedDriver( driver.isVerifiedDriver() );
         driverDTO.driverLocation( driver.getDriverLocation() );
-        driverDTO.vehicleType( driver.getVehicleType() );
+        driverDTO.driverName( driver.getDriverName() );
         driverDTO.fuelEfficiency( driver.getFuelEfficiency() );
-        driverDTO.trustScore( driver.getTrustScore() );
+        driverDTO.password( driver.getPassword() );
         driverDTO.totalCO2Saved( driver.getTotalCO2Saved() );
+        driverDTO.trustScore( driver.getTrustScore() );
+        driverDTO.vehicleNo( driver.getVehicleNo() );
+        driverDTO.vehicleType( driver.getVehicleType() );
+        driverDTO.verifiedDriver( driver.isVerifiedDriver() );
 
         return driverDTO.build();
     }
@@ -46,15 +46,15 @@ public class DriverMapperImpl implements DriverMapper {
         Driver.DriverBuilder driver = Driver.builder();
 
         driver.driverId( driverDTO.getDriverId() );
-        driver.password( driverDTO.getPassword() );
-        driver.driverName( driverDTO.getDriverName() );
-        driver.vehicleNo( driverDTO.getVehicleNo() );
-        driver.verifiedDriver( driverDTO.isVerifiedDriver() );
         driver.driverLocation( driverDTO.getDriverLocation() );
-        driver.vehicleType( driverDTO.getVehicleType() );
+        driver.driverName( driverDTO.getDriverName() );
         driver.fuelEfficiency( driverDTO.getFuelEfficiency() );
-        driver.trustScore( driverDTO.getTrustScore() );
+        driver.password( driverDTO.getPassword() );
         driver.totalCO2Saved( driverDTO.getTotalCO2Saved() );
+        driver.trustScore( driverDTO.getTrustScore() );
+        driver.vehicleNo( driverDTO.getVehicleNo() );
+        driver.vehicleType( driverDTO.getVehicleType() );
+        driver.verifiedDriver( driverDTO.isVerifiedDriver() );
 
         return driver.build();
     }

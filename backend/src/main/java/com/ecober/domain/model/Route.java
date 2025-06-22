@@ -3,8 +3,8 @@ package com.ecober.domain.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Getter
-@Setter
+
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -41,5 +41,7 @@ public class Route {
     @Column(name = "is_pooled_eligible", nullable = false)
     private boolean isPooledEligible;
 
-    private double carbonEmission;
+    @Column(name = "estimated_emission")
+    private double estimatedEmission;
+
 }

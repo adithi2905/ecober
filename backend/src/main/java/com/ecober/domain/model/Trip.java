@@ -23,9 +23,10 @@ public class Trip {
 
     @Embedded
     private Route route;
-
-    private double estimatedEmission; // Calculated using GeoUtils
     private String ecoScore;
+
+    @Column(name = "actual_emission")
+    private double carbonEmission;
 
     private String vehicleType;
 

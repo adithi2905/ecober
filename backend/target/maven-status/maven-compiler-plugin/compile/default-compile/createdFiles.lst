@@ -72,6 +72,7 @@ com\ecober\domain\service\RideRequestService.class
 com\ecober\domain\model\Route.class
 com\ecober\domain\service\CarbonScoringService.class
 com\ecober\security\CustomUserDetails.class
+com\ecober\util\EmissionUtils.class
 com\ecober\domain\model\Trip$TripBuilder.class
 com\ecober\adapter\controller\UserController.class
 com\ecober\adapter\Dto\DriverRegistrationRequestDTO$DriverRegistrationRequestDTOBuilder.class

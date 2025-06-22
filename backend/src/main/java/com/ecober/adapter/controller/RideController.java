@@ -15,6 +15,8 @@ import com.ecober.domain.service.RideRequestService;
 import com.ecober.domain.service.RouteOptimizingService;
 import com.ecober.domain.service.TripService;
 import com.ecober.util.AuthUtil;
+import com.ecober.util.EmissionUtils;
+import com.ecober.util.GeoUtils;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -32,6 +34,8 @@ public class RideController {
 
     @Autowired
     private RouteOptimizingService routeOptimizingService;
+
+    private EmissionUtils emissionUtils;
 
     @PostMapping("/requestRide")
 public ResponseEntity<?> requestRide(@Valid @RequestBody RideRequestDTO rideDTO) {
@@ -73,4 +77,22 @@ public ResponseEntity<?> requestRide(@Valid @RequestBody RideRequestDTO rideDTO)
             return ResponseEntity.status(500).body("Failed to calculate distance/ETA: " + e.getMessage());
         }
     }
+
+    @GetMapping("/emissionEstimate")
+public ResponseEntity<?> estimateEmission(
+        @RequestParam double distanceKm,
+        @RequestParam String vehicleType
+) {
+    try {
+        double emissionKg = emissionUtils.Co2ActualEmission(distanceKm, vehicleType);
+        return ResponseEntity.ok(Map.of(
+            "vehicleType", vehicleType,
+            "distanceKm", distanceKm,
+            "estimatedCO2kg", emissionKg
+        ));
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body(Map.of("error", "Failed to estimate CO₂: " + e.getMessage()));
+    }
+}
+
 }

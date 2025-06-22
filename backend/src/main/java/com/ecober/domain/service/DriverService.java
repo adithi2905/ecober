@@ -30,9 +30,10 @@ public class DriverService {
     @Autowired private TripperMapper tripMapper;
     @Autowired private RideRequestMapper rideRequestMapper;
     @Autowired private RideRequestRepository rideRequestRepository;
+    @Autowired private DriverScoringService driverScoringService;
+
     @Autowired
     private RedisTemplate<String, UUID> redisTemplate;
-
 
     public void register(DriverRegistrationRequestDTO request) {
         Driver driver = Driver.builder()
@@ -176,8 +177,9 @@ public class DriverService {
             distance = GeoUtils.calculateDistanceAndDuration(pickup[0], pickup[1], dropoff[0], dropoff[1]);
         }
 
-        double emission = GeoUtils.calculateEmissions(distance.getDistanceKm(), request.getPreferredVehicleType());
-
+        double expectedEmission = driverScoringService.computeEstimatedScores(distance.getDistanceKm(),request.getPreferredVehicleType());
+        double actualEmissions=driverScoringService.computeActualScores(distance.getDistanceKm(),request.getPreferredVehicleType());
+        
         Trip trip = Trip.builder()
                 .user(request.getUser())
                 .driver(driver)
@@ -186,11 +188,11 @@ public class DriverService {
                         .destination(new Location(dropoff[0], dropoff[1], request.getDropoffLocation(), 0))
                         .distanceKm(distance.getDistanceKm())
                         .estimatedTime(distance.getDurationInMins())
-                        .carbonEmission(emission)
+                        .estimatedEmission(expectedEmission)
                         .isPooledEligible(request.isWillingToPool())
                         .build())
                 .status(TripStatus.ACCEPTED)
-                .estimatedEmission(emission).vehicleType(request.getPreferredVehicleType())
+                .carbonEmission(actualEmissions).vehicleType(request.getPreferredVehicleType())
                 .build();
 
         Trip savedTrip=tripRepository.save(trip);
@@ -201,24 +203,34 @@ public class DriverService {
         return tripMapper.toDto(trip);
     }
 
-    public double getDriverAverageEmissionPerTrip(UUID driverId) {
-        List<Trip> trips = tripRepository.findByDriver_DriverId(driverId);
-        if (trips.isEmpty()) return 0.0;
-        return trips.stream().mapToDouble(Trip::getEstimatedEmission).average().orElse(0.0);
-    }
+   public double getDriverAverageEmissionPerTrip(UUID driverId) {
+    List<Trip> trips = tripRepository.findByDriver_DriverId(driverId);
+    if (trips.isEmpty()) return 0.0;
+    return trips.stream()
+                .mapToDouble(trip -> trip.getRoute().getEstimatedEmission())
+                .average()
+                .orElse(0.0);
+}
 
     public double calculateDriverCO2Impact(UUID driverId) {
-        return tripRepository.findByDriver_DriverId(driverId)
-                .stream()
-                .mapToDouble(Trip::getEstimatedEmission)
-                .sum();
-    }
+    return tripRepository.findByDriver_DriverId(driverId)
+            .stream()
+            .mapToDouble(trip -> trip.getRoute().getEstimatedEmission())
+            .sum();
+}
 
-    public double getCurrentMonthCO2Savings(UUID driverId) {
-    LocalDateTime startOfMonth = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+
+  public double getCurrentMonthCO2Savings(UUID driverId) {
+    LocalDateTime startOfMonth = LocalDateTime.now()
+        .withDayOfMonth(1)
+        .withHour(0)
+        .withMinute(0)
+        .withSecond(0)
+        .withNano(0);
+
     return tripRepository.findByDriver_DriverId(driverId).stream()
         .filter(trip -> trip.getEndTime() != null && trip.getEndTime().isAfter(startOfMonth))
-        .mapToDouble(Trip::getEstimatedEmission)
+        .mapToDouble(trip -> trip.getRoute().getEstimatedEmission())
         .sum();
 }
 
@@ -237,6 +249,14 @@ public class DriverService {
         })
         .collect(Collectors.toList());
 }
+
+public String getEcoBadge(UUID driverId) {
+    double avgEmission = getDriverAverageEmissionPerTrip(driverId);
+    if (avgEmission <= 10) return "🌿 Eco Champion";
+    if (avgEmission <= 25) return "🌱 Sustainable Driver";
+    return "🚗 Standard Driver";
+}
+
 
 }
 
