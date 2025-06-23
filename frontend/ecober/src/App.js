@@ -8,7 +8,6 @@ import DashboardLayout from './dashboards/dashboardLayout';
 import TripHistory from './components/tripsHistory';
 import Profile from './components/Profile';
 import EcoReport from './components/ecoReport';
-import GreenGoals from './components/greenGoals';
 import CurrentRide from './components/CurrentRide';
 
 import Registration from './components/Registration';
@@ -40,7 +39,6 @@ function App() {
           <Route path="/tripsHistory" element={<TripHistory />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/ecoReport" element={<EcoReport />} />
-          <Route path="/goals" element={<GreenGoals />} />
           <Route path="/currentRide" element={<CurrentRide />} />
         </Route>
 
