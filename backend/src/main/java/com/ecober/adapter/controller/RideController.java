@@ -1,6 +1,5 @@
 package com.ecober.adapter.controller;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -10,13 +9,13 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ecober.adapter.Dto.DistanceDurationDTO;
 import com.ecober.adapter.Dto.RideRequestDTO;
-import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.domain.model.Route;
 import com.ecober.domain.model.Trip;
 import com.ecober.domain.service.RideRequestService;
 import com.ecober.domain.service.RouteOptimizingService;
 import com.ecober.domain.service.TripService;
 import com.ecober.util.AuthUtil;
+import com.ecober.util.EmissionUtils;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -34,6 +33,8 @@ public class RideController {
 
     @Autowired
     private RouteOptimizingService routeOptimizingService;
+
+    private EmissionUtils emissionUtils;
 
     @PostMapping("/requestRide")
 public ResponseEntity<?> requestRide(@Valid @RequestBody RideRequestDTO rideDTO) {
@@ -75,4 +76,22 @@ public ResponseEntity<?> requestRide(@Valid @RequestBody RideRequestDTO rideDTO)
             return ResponseEntity.status(500).body("Failed to calculate distance/ETA: " + e.getMessage());
         }
     }
+
+    @GetMapping("/emissionEstimate")
+public ResponseEntity<?> estimateEmission(
+        @RequestParam double distanceKm,
+        @RequestParam String vehicleType
+) {
+    try {
+        double emissionKg = emissionUtils.Co2ActualEmission(distanceKm, vehicleType);
+        return ResponseEntity.ok(Map.of(
+            "vehicleType", vehicleType,
+            "distanceKm", distanceKm,
+            "estimatedCO2kg", emissionKg
+        ));
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body(Map.of("error", "Failed to estimate CO₂: " + e.getMessage()));
+    }
+}
+
 }

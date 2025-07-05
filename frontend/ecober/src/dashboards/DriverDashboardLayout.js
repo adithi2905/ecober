@@ -3,7 +3,6 @@ import AvailableRides from '../components/DriverAvailabletrips';
 import DriverCurrentTrip from '../components/DriverCurrentTrip';
 import DriverProfile from '../components/DriverProfile'; 
 import EcoReport from '../components/ecoReport';
-import GreenGoals from '../components/greenGoals';
 import DriverTripHistory from '../components/DriverTripHistory';
 
 const tabs = [
@@ -11,7 +10,6 @@ const tabs = [
   { name: 'Current Trip', key: 'current' },
   { name: 'Profile', key: 'profile' },
   { name: 'Carbon Impact', key: 'eco' },
-  { name: 'Trip Count', key: 'goals' },
   { name: 'Trip History', key: 'history' }
 ];
 
@@ -28,8 +26,6 @@ function DriverDashboardPage() {
         return <DriverProfile />; 
       case 'eco':
         return <EcoReport />;
-      case 'goals':
-        return <GreenGoals />;
       case 'history':
         return <DriverTripHistory />;
       default:

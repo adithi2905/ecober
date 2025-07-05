@@ -5,11 +5,16 @@ function DriverTripHistory() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    const date = new Date(dateStr);
+    return date.toLocaleString(); 
+  };
+
   useEffect(() => {
     const fetchDriverTrips = async () => {
       try {
         const token = localStorage.getItem('token');
-
         const response = await fetch('http://localhost:8080/driver/me/past-trips', {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -52,15 +57,18 @@ function DriverTripHistory() {
           </div>
         ) : (
           trips.map((trip) => (
-            <div key={trip.tripId} className="bg-white p-4 rounded-xl shadow-md border-l-4 border-[#800000]">
+            <div
+              key={trip.tripId}
+              className="bg-white p-4 rounded-xl shadow-md border-l-4 border-[#800000]"
+            >
               <p><strong>Trip ID:</strong> {trip.tripId}</p>
-              <p><strong>Date:</strong> {trip.endTime?.split('T')[0] || trip.startTime?.split('T')[0] || 'N/A'}</p>
-              <p><strong>Passenger:</strong> {trip.riderName || trip.user?.riderName || 'Unknown'}</p>
-              <p><strong>From:</strong> {trip.pickupLocation}</p>
-              <p><strong>To:</strong> {trip.dropoffLocation}</p>
+              <p><strong>Date:</strong> {formatDate(trip.endTime || trip.startTime)}</p>
+              <p><strong>Passenger:</strong> {trip.user?.username || 'Unknown'}</p>
+              <p><strong>From:</strong> {trip.route?.source?.address || 'Unknown'}</p>
+              <p><strong>To:</strong> {trip.route?.destination?.address || 'Unknown'}</p>
               <p><strong>Status:</strong> {trip.status}</p>
-              <p><strong>CO₂ Saved:</strong> {trip.co2Saved?.toFixed(2) || 0} kg</p>
-              {trip.fare && <p><strong>Fare:</strong> ${trip.fare.toFixed(2)}</p>}
+              {trip.ecoScore && <p><strong>Eco Score:</strong> {trip.ecoScore}</p>}
+              {trip.feedback && <p><strong>Feedback:</strong> {trip.feedback}</p>}
             </div>
           ))
         )}

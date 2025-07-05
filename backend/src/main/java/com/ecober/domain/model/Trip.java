@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Trip {
@@ -17,25 +17,25 @@ public class Trip {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID tripId;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "request_id")
-    private RideRequest request;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "driver_id")
     private Driver driver;
 
     @Embedded
     private Route route;
-
-    private double estimatedEmission; // Calculated using GeoUtils
     private String ecoScore;
+
+    @Column(name = "actual_emission")
+    private double carbonEmission;
+
+    private String vehicleType;
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @org.hibernate.annotations.NotFound(action = org.hibernate.annotations.NotFoundAction.IGNORE)
     private User user;
 
     @Enumerated(EnumType.STRING)

@@ -6,6 +6,7 @@ import com.ecober.domain.model.*;
 import com.ecober.infrastructure.repository.TripRepository;
 import com.ecober.infrastructure.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,33 +24,38 @@ public class TripService {
     @Autowired
     private TripperMapper tripMapper;
 
-    public void createTrip(UUID riderId, Driver bestDriver, Route route, double carbonEmission) {
+    @Autowired
+    private RedisTemplate<String, UUID> redisTemplate;
+
+    public void createTrip(UUID riderId, Driver bestDriver, Route route, double estimatedEmission,double actualEmission) {
         User user = userRepository.findById(riderId)
                 .orElseThrow(() -> new RuntimeException("User not found with id " + riderId));
 
+        route.setEstimatedEmission(estimatedEmission);
         Trip trip = new Trip();
         trip.setUser(user);
         trip.setDriver(bestDriver);
         trip.setRoute(route);
         trip.setStartTime(LocalDateTime.now());
-        trip.setEstimatedEmission(carbonEmission);
+        trip.setCarbonEmission(actualEmission);
         trip.setEcoScore("B+");
         trip.setStatus(TripStatus.ACCEPTED);
+        trip.setVehicleType(bestDriver.getVehicleType());
         tripRepository.save(trip);
     }
 
     public List<TripDTO> fetchAllTrips(UUID riderId) {
-        List<Trip> trips = tripRepository.findByUser_UserId(riderId);
+        List<Trip> trips = tripRepository.findCompletedTripsForUser(riderId,TripStatus.COMPLETED);
         return tripMapper.toDtoList(trips);
     }
     public List<TripDTO>fetchAllDriverTrips(UUID driverUuid)
     {
-        List<Trip>trips= tripRepository.findByDriver_DriverIdAndStatus(driverUuid, TripStatus.COMPLETED);
+        List<Trip>trips= tripRepository.findCompletedTripsWithUser(driverUuid, TripStatus.COMPLETED);
         return tripMapper.toDtoList(trips);
     }
 
     public boolean startTrip(UUID driverId) {
-        Trip trip = tripRepository.findAcceptedRide(driverId, TripStatus.ACCEPTED);
+        Trip trip = tripRepository.findAcceptedRide(driverId);
         if (trip != null) {
             trip.setStartTime(LocalDateTime.now());
             trip.setStatus(TripStatus.IN_PROGRESS);
@@ -60,7 +66,14 @@ public class TripService {
     }
 
     public TripDTO fetchCurrentTrip(UUID riderId) {
-        Trip currentTrip = tripRepository.findCurrentTrip(riderId);
+        String redisKey = "rider:currentTrip:" + riderId;
+    UUID cachedTripId = redisTemplate.opsForValue().get(redisKey);
+    
+    if (cachedTripId != null) {
+        Optional<TripDTO> cachedTrip = getTripById(cachedTripId);
+        if (cachedTrip.isPresent()) return cachedTrip.get();
+    }
+        Trip currentTrip = tripRepository.findCurrentTrip(riderId,TripStatus.ACCEPTED,TripStatus.IN_PROGRESS);
         return (currentTrip != null) ? tripMapper.toDto(currentTrip) : null;
     }
 

@@ -31,7 +31,7 @@ public class Co2AnalyticsService {
         double totalEmissions = 0.0;
 
         for (Trip trip : trips) {
-            totalEmissions += trip.getEstimatedEmission();
+            totalEmissions += trip.getRoute().getEstimatedEmission();
         }
 
         String badge = determineBadge(totalEmissions);

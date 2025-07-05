@@ -44,23 +44,18 @@ const DriverProfile = () => {
       <div className="mb-6">
         <h3 className="text-xl font-semibold text-gray-700 mb-2">Personal Information</h3>
         <div className="space-y-1 text-gray-600">
-          <p><strong>Name:</strong> {driver.name || 'N/A'}</p>
-          <p><strong>Email:</strong> {driver.email || 'N/A'}</p>
-          <p><strong>Phone:</strong> {driver.phone || 'N/A'}</p>
-          <p><strong>Location:</strong> {driver.location || 'N/A'}</p>
-        </div>
-      </div>
-
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">Vehicle Information</h3>
-        <div className="space-y-1 text-gray-600">
-          <p><strong>Type:</strong> {driver.vehicleType || 'N/A'}</p>
-          <p><strong>Model:</strong> {driver.vehicleModel || 'N/A'}</p>
-          <p><strong>License Plate:</strong> {driver.vehicleNo || driver.licensePlate || 'N/A'}</p>
+          <p><strong>Name:</strong> {driver.driverName || 'N/A'}</p>
+          <p><strong>Vehicle No:</strong> {driver.vehicleNo|| 'N/A'}</p>
+          <p><strong>Vehicle Type:</strong> {driver.vehicleType || 'N/A'}</p>
+          <p><strong>Fuel Efficiency:</strong> {driver.fuelEfficiency || 'N/A'}</p>
+          <p><strong>Trust Score:</strong> {driver.trustScore || 'N/A'}</p>
+          <p><strong>Total co2 Saved:</strong> {driver.totalCo2Saved || 'N/A'}</p>
           <p><strong>Verified:</strong> {driver.isVerified ? 'Yes' : 'No'}</p>
+      
+      
+      
         </div>
       </div>
-
       <div className="mb-6 grid grid-cols-2 gap-6">
         <div className="bg-gray-100 p-4 rounded-lg shadow-inner">
           <h4 className="font-medium text-gray-700">Total Trips</h4>

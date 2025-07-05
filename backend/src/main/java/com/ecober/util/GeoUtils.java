@@ -1,12 +1,13 @@
 package com.ecober.util;
-
 import com.ecober.adapter.Dto.DistanceDurationDTO;
 import com.ecober.domain.model.Location;
+
 
 public final class GeoUtils {
 
     private static final int EARTH_RADIUS_KM = 6371;
     private static final double AVERAGE_SPEED_KMH = 50.0;
+
 
     // Private constructor to prevent instantiation
     private GeoUtils() {
@@ -39,15 +40,4 @@ public final class GeoUtils {
         return haversinDistance(a.getLatitude(), a.getLongitude(), b.getLatitude(), b.getLongitude());
     }
 
-    // Calculate estimated emissions in kg CO2 based on vehicle type
-    public static double calculateEmissions(double distanceKm, String vehicleType) {
-        return switch (vehicleType.toUpperCase()) {
-            case "EV"     -> distanceKm * 0.18;
-            case "HYBRID" -> distanceKm * 0.104;
-            case "SEDAN"  -> distanceKm * 0.173;
-            case "SUV"    -> distanceKm * 0.231;
-            case "BIKE"   -> 0.0;
-            default       -> distanceKm * 0.18; // fallback emission factor
-        };
-    }
 }

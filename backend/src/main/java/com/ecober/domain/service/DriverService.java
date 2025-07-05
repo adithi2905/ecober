@@ -6,13 +6,17 @@ import com.ecober.domain.model.*;
 import com.ecober.infrastructure.repository.*;
 import com.ecober.util.GeoUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DriverService {
@@ -24,9 +28,12 @@ public class DriverService {
     @Autowired private RouteOptimizingService routeOptimizingService;
     @Autowired private GeocodingService geocodingService;
     @Autowired private TripperMapper tripMapper;
-    @Autowired private TripService tripService;
     @Autowired private RideRequestMapper rideRequestMapper;
     @Autowired private RideRequestRepository rideRequestRepository;
+    @Autowired private DriverScoringService driverScoringService;
+
+    @Autowired
+    private RedisTemplate<String, UUID> redisTemplate;
 
     public void register(DriverRegistrationRequestDTO request) {
         Driver driver = Driver.builder()
@@ -63,7 +70,9 @@ public class DriverService {
     }
 
     public DriverDTO createDriver(DriverDTO driverDTO) {
-        Driver savedDriver = driverRepository.save(driverMapper.toEntity(driverDTO));
+        Driver driver=driverMapper.toEntity(driverDTO);
+        driver.setRole("DRIVER");
+        Driver savedDriver = driverRepository.save(driver);
         return driverMapper.toDto(savedDriver);
     }
 
@@ -90,7 +99,7 @@ public class DriverService {
     }
 
     public Optional<TripDTO> getCurrentTripForDriver(UUID driverId) {
-        return Optional.ofNullable(tripService.fetchCurrentTrip(driverId));
+        return Optional.ofNullable(tripMapper.toDto(tripRepository.findAcceptedRide(driverId)));
     }
 
     public TripDTO startTrip(UUID tripId, UUID driverId) {
@@ -108,6 +117,7 @@ public class DriverService {
     }
 
     public boolean endTrip(UUID tripId, UUID driverId) {
+    
         Trip trip = tripRepository.findByTripId(tripId);
         if (trip != null &&
             trip.getDriver() != null &&
@@ -115,6 +125,8 @@ public class DriverService {
             trip.setEndTime(LocalDateTime.now());
             trip.setStatus(TripStatus.COMPLETED);
             tripRepository.save(trip);
+            redisTemplate.delete("active_trip:" + driverId);
+            redisTemplate.delete("active_ride:" + trip.getUser().getUserId());
             return true;
         }
         return false;
@@ -135,10 +147,17 @@ public class DriverService {
         return tripRepository.findByDriver_DriverId(driverId).size();
     }
 
+    @Transactional
     public TripDTO acceptRide(UUID rideRequestId, UUID driverId) {
+
+        String redisKey = "active_trip:" + driverId;
+
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) {
+            throw new IllegalStateException("Driver already has an active trip.");
+        }
+            
         RideRequest request = rideRequestRepository.findById(rideRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("Ride request not found."));
-
         if (request.getStatus() != RideRequestStatus.REQUESTED)
             throw new IllegalStateException("Ride already accepted or unavailable.");
 
@@ -153,45 +172,91 @@ public class DriverService {
             distance = routeOptimizingService.getDistanceAndETA(
                     new Location(pickup[0], pickup[1], request.getPickupLocation(), 0),
                     new Location(dropoff[0], dropoff[1], request.getDropoffLocation(), 0)
-            );
+            ); 
         } catch (Exception e) {
             distance = GeoUtils.calculateDistanceAndDuration(pickup[0], pickup[1], dropoff[0], dropoff[1]);
         }
 
-        double emission = GeoUtils.calculateEmissions(distance.getDistanceKm(), request.getPreferredVehicleType());
-
+        double expectedEmission = driverScoringService.computeEstimatedScores(distance.getDistanceKm(),request.getPreferredVehicleType());
+        double actualEmissions=driverScoringService.computeActualScores(distance.getDistanceKm(),request.getPreferredVehicleType());
+        
         Trip trip = Trip.builder()
                 .user(request.getUser())
                 .driver(driver)
-                .request(request)
                 .route(Route.builder()
                         .source(new Location(pickup[0], pickup[1], request.getPickupLocation(), 0))
                         .destination(new Location(dropoff[0], dropoff[1], request.getDropoffLocation(), 0))
                         .distanceKm(distance.getDistanceKm())
                         .estimatedTime(distance.getDurationInMins())
-                        .carbonEmission(emission)
+                        .estimatedEmission(expectedEmission)
                         .isPooledEligible(request.isWillingToPool())
                         .build())
                 .status(TripStatus.ACCEPTED)
-                .estimatedEmission(emission)
+                .carbonEmission(actualEmissions).vehicleType(request.getPreferredVehicleType())
                 .build();
 
-        tripRepository.save(trip);
-        rideRequestRepository.delete(request);
+        Trip savedTrip=tripRepository.save(trip);
+        tripRepository.save(savedTrip);
+        rideRequestRepository.deleteById(request.getId());
+        redisTemplate.opsForValue().set(redisKey, trip.getTripId(),Duration.ofMinutes(30));
 
         return tripMapper.toDto(trip);
     }
 
-    public double getDriverAverageEmissionPerTrip(UUID driverId) {
-        List<Trip> trips = tripRepository.findByDriver_DriverId(driverId);
-        if (trips.isEmpty()) return 0.0;
-        return trips.stream().mapToDouble(Trip::getEstimatedEmission).average().orElse(0.0);
-    }
+   public double getDriverAverageEmissionPerTrip(UUID driverId) {
+    List<Trip> trips = tripRepository.findByDriver_DriverId(driverId);
+    if (trips.isEmpty()) return 0.0;
+    return trips.stream()
+                .mapToDouble(trip -> trip.getRoute().getEstimatedEmission())
+                .average()
+                .orElse(0.0);
+}
 
     public double calculateDriverCO2Impact(UUID driverId) {
-        return tripRepository.findByDriver_DriverId(driverId)
-                .stream()
-                .mapToDouble(Trip::getEstimatedEmission)
-                .sum();
-    }
+    return tripRepository.findByDriver_DriverId(driverId)
+            .stream()
+            .mapToDouble(trip -> trip.getRoute().getEstimatedEmission())
+            .sum();
 }
+
+
+  public double getCurrentMonthCO2Savings(UUID driverId) {
+    LocalDateTime startOfMonth = LocalDateTime.now()
+        .withDayOfMonth(1)
+        .withHour(0)
+        .withMinute(0)
+        .withSecond(0)
+        .withNano(0);
+
+    return tripRepository.findByDriver_DriverId(driverId).stream()
+        .filter(trip -> trip.getEndTime() != null && trip.getEndTime().isAfter(startOfMonth))
+        .mapToDouble(trip -> trip.getRoute().getEstimatedEmission())
+        .sum();
+}
+
+
+    public List<Map<String, Object>> getRideTypeDistribution(UUID driverId) {
+    return tripRepository.findByDriver_DriverId(driverId).stream()
+        .map(Trip::getVehicleType)
+        .filter(Objects::nonNull)
+        .collect(Collectors.groupingBy(String::toUpperCase, Collectors.counting()))
+        .entrySet().stream()
+        .map(entry -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", entry.getKey());
+            map.put("value", entry.getValue());
+            return map;
+        })
+        .collect(Collectors.toList());
+}
+
+public String getEcoBadge(UUID driverId) {
+    double avgEmission = getDriverAverageEmissionPerTrip(driverId);
+    if (avgEmission <= 10) return "🌿 Eco Champion";
+    if (avgEmission <= 25) return "🌱 Sustainable Driver";
+    return "🚗 Standard Driver";
+}
+
+
+}
+
