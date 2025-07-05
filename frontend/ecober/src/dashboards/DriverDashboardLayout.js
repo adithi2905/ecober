@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import AvailableRides from '../components/DriverAvailabletrips';
 import DriverCurrentTrip from '../components/DriverCurrentTrip';
@@ -6,11 +7,11 @@ import EcoReport from '../components/ecoReport';
 import DriverTripHistory from '../components/DriverTripHistory';
 
 const tabs = [
-  { name: 'Available Rides', key: 'available' },
-  { name: 'Current Trip', key: 'current' },
-  { name: 'Profile', key: 'profile' },
-  { name: 'Carbon Impact', key: 'eco' },
-  { name: 'Trip History', key: 'history' }
+  { name: 'Available Rides', key: 'available', color: 'from-blue-500 to-blue-600', bgColor: 'bg-blue-500' },
+  { name: 'Current Trip', key: 'current', color: 'from-emerald-500 to-emerald-600', bgColor: 'bg-emerald-500' },
+  { name: 'Profile', key: 'profile', color: 'from-purple-500 to-purple-600', bgColor: 'bg-purple-500' },
+  { name: 'Carbon Impact', key: 'eco', color: 'from-teal-500 to-emerald-600', bgColor: 'bg-teal-500' },
+  { name: 'Trip History', key: 'history', color: 'from-amber-500 to-amber-600', bgColor: 'bg-amber-500' }
 ];
 
 function DriverDashboardPage() {
@@ -33,45 +34,137 @@ function DriverDashboardPage() {
     }
   };
 
+  const activeTab = tabs.find(t => t.key === selectedTab);
+
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-lg flex flex-col justify-between">
-        <div>
-          <h2 className="text-2xl font-bold p-6 text-maroon-700">Ecober Driver</h2>
-          <nav className="space-y-2 px-6">
-            {tabs.map((tab) => (
+    <div className="flex h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Enhanced Driver Sidebar */}
+      <aside className="w-80 bg-white shadow-xl border-r border-slate-200 flex flex-col">
+        {/* Logo Section */}
+        <div className="p-8 border-b border-slate-100">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-xl font-bold">D</span>
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800">Ecober Driver</h2>
+              <p className="text-sm text-slate-500">Professional Dashboard</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Driver Stats */}
+        <div className="p-6 border-b border-slate-100">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-xl">
+              <div className="flex items-center space-x-2 mb-2">
+                <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                <span className="text-xs font-medium text-emerald-700">Rating</span>
+              </div>
+              <p className="text-2xl font-bold text-emerald-800">4.9</p>
+            </div>
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl">
+              <div className="flex items-center space-x-2 mb-2">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span className="text-xs font-medium text-blue-700">Today</span>
+              </div>
+              <p className="text-2xl font-bold text-blue-800">$124</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-6 py-8 space-y-3">
+          {tabs.map((tab) => {
+            const isActive = selectedTab === tab.key;
+            
+            return (
               <button
                 key={tab.key}
                 onClick={() => setSelectedTab(tab.key)}
-                className={`w-full text-left px-4 py-2 rounded-lg transition ${
-                  selectedTab === tab.key
-                    ? 'bg-maroon-700 text-white'
-                    : 'text-gray-700 hover:bg-gray-200'
-                }`}
+                className={`
+                  group w-full flex items-center space-x-4 px-5 py-4 rounded-xl transition-all duration-300 text-left font-medium
+                  ${isActive 
+                    ? `bg-gradient-to-r ${tab.color} text-white shadow-lg transform scale-105` 
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800 hover:transform hover:scale-102'
+                  }
+                `}
               >
-                {tab.name}
+                <div className={`w-3 h-3 rounded-full ${isActive ? 'bg-white' : `${tab.bgColor} opacity-60 group-hover:opacity-100`}`}></div>
+                <span>{tab.name}</span>
+                {isActive && (
+                  <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse" />
+                )}
               </button>
-            ))}
-          </nav>
+            );
+          })}
+        </nav>
+
+        {/* Online Status */}
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl">
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-emerald-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-emerald-700">Online & Available</span>
+            </div>
+            <div className="w-6 h-6 bg-emerald-500 rounded-lg"></div>
+          </div>
         </div>
-        <div className="p-6 text-sm text-gray-500">&copy; 2025 Ecober</div>
+
+        {/* Footer */}
+        <div className="p-6 text-center border-t border-slate-100">
+          <p className="text-xs text-slate-400">&copy; 2025 Ecober Driver. All rights reserved.</p>
+        </div>
       </aside>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-y-auto">
-        <header className="bg-white shadow px-6 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-semibold text-gray-700">
-            {tabs.find((t) => t.key === selectedTab)?.name}
-          </h1>
-          <div className="flex items-center gap-2">
-            <span className="text-gray-600">Hello, Driver</span>
-            <div className="w-8 h-8 rounded-full bg-gray-300" />
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Enhanced Header */}
+        <header className="bg-white shadow-lg border-b border-slate-200 px-8 py-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-800">
+                {activeTab?.name}
+              </h1>
+              <p className="text-sm text-slate-500 mt-2">
+                {selectedTab === 'available' && 'Find your next ride opportunity'}
+                {selectedTab === 'current' && 'Manage your ongoing trip'}
+                {selectedTab === 'profile' && 'Update your driver information'}
+                {selectedTab === 'eco' && 'Track your environmental impact'}
+                {selectedTab === 'history' && 'Review your completed trips'}
+              </p>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              {/* Notifications */}
+              <div className="relative">
+                <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer">
+                  <div className="w-5 h-5 bg-slate-400 rounded-full"></div>
+                </div>
+                <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">2</span>
+                </span>
+              </div>
+
+              {/* Driver Profile */}
+              <div className="flex items-center space-x-3 bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl px-4 py-2 hover:from-slate-100 hover:to-slate-200 transition-all duration-200 cursor-pointer">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-semibold">D</span>
+                </div>
+                <div className="hidden sm:block">
+                  <p className="text-sm font-semibold text-slate-700">Driver</p>
+                  <p className="text-xs text-slate-500">Pro Driver</p>
+                </div>
+              </div>
+            </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6">
-          {renderContent()}
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 to-slate-100 p-8">
+          <div className="animate-fade-in">
+            {renderContent()}
+          </div>
         </main>
       </div>
     </div>
