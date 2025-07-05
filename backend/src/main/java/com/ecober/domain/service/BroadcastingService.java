@@ -1,49 +1,46 @@
+
 package com.ecober.domain.service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.ecober.adapter.Dto.DriverDTO;
 import com.ecober.adapter.mapper.DriverMapper;
+import com.ecober.domain.model.Driver;
 import com.ecober.infrastructure.repository.DriverRepository;
+import com.ecober.util.GeoUtils;
 
 @Service
 public class BroadcastingService {
 
-    private final DriverRepository driverRepository;
-    private final DriverMapper driverMapper;
-    
-    public BroadcastingService(DriverRepository driverRepository, DriverMapper driverMapper) {
-        this.driverRepository = driverRepository;
-        this.driverMapper = driverMapper;
-    }
+    @Autowired
+    private DriverRepository driverRepository;
 
-    /**
-     * Finds and returns top N drivers nearest to the pickup location within the given radius.
-     * 
-     * @param pickupLat Rider's pickup latitude
-     * @param pickupLng Rider's pickup longitude
-     * @param vehicleType Preferred vehicle type
-     * @param radiusKm Search radius in kilometers
-     * @param topN Max number of drivers to return
-     * @return List of DriverDTOs sorted by proximity
-     */
-    @Transactional(readOnly = true)
+    @Autowired
+    private GeocodingService geocodingService;
+
+    @Autowired
+    private DriverMapper driverMapper;
+
     public List<DriverDTO> findAndNotifyTopDrivers(
             double pickupLat,
             double pickupLng,
             String vehicleType,
-            double radiusKm,
             int topN
     ) {
-        var drivers = driverRepository.findNearbyDrivers(
-            pickupLat, pickupLng, vehicleType, radiusKm, topN
-        );
+        List<Driver> topDrivers = driverRepository.findAll().stream()
+                .filter(d -> vehicleType.equalsIgnoreCase(d.getVehicleType()))
+                .sorted(Comparator.comparingDouble(driver -> {
+                    double[] coords = geocodingService.getLatAndLong(driver.getDriverLocation());
+                    return GeoUtils.haversinDistance(pickupLat, pickupLng, coords[0], coords[1]);
+                }))
+                .limit(topN)
+                .collect(Collectors.toList());
 
-        return drivers.stream()
-                      .map(driverMapper::toDto)
-                      .toList();
+        return topDrivers.stream().map(driverMapper::toDto).collect(Collectors.toList());
     }
 }
