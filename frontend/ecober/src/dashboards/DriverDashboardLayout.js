@@ -1,15 +1,13 @@
-
 import React, { useState } from 'react';
 import AvailableRides from '../components/DriverAvailabletrips';
 import DriverCurrentTrip from '../components/DriverCurrentTrip';
-import DriverProfile from '../components/DriverProfile'; 
+import DriverProfile from '../components/DriverProfile';
 import EcoReport from '../components/ecoReport';
 import DriverTripHistory from '../components/DriverTripHistory';
 
 const tabs = [
   { name: 'Available Rides', key: 'available', color: 'from-blue-500 to-blue-600', bgColor: 'bg-blue-500' },
   { name: 'Current Trip', key: 'current', color: 'from-emerald-500 to-emerald-600', bgColor: 'bg-emerald-500' },
-  { name: 'Profile', key: 'profile', color: 'from-purple-500 to-purple-600', bgColor: 'bg-purple-500' },
   { name: 'Carbon Impact', key: 'eco', color: 'from-teal-500 to-emerald-600', bgColor: 'bg-teal-500' },
   { name: 'Trip History', key: 'history', color: 'from-amber-500 to-amber-600', bgColor: 'bg-amber-500' }
 ];
@@ -23,12 +21,12 @@ function DriverDashboardPage() {
         return <AvailableRides />;
       case 'current':
         return <DriverCurrentTrip />;
-      case 'profile':
-        return <DriverProfile />; 
       case 'eco':
         return <EcoReport />;
       case 'history':
         return <DriverTripHistory />;
+      case 'profile':
+        return <DriverProfile />;
       default:
         return <AvailableRides />;
     }
@@ -38,9 +36,9 @@ function DriverDashboardPage() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Enhanced Driver Sidebar */}
+      {/* Sidebar */}
       <aside className="w-80 bg-white shadow-xl border-r border-slate-200 flex flex-col">
-        {/* Logo Section */}
+        {/* Logo */}
         <div className="p-8 border-b border-slate-100">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -77,7 +75,6 @@ function DriverDashboardPage() {
         <nav className="flex-1 px-6 py-8 space-y-3">
           {tabs.map((tab) => {
             const isActive = selectedTab === tab.key;
-            
             return (
               <button
                 key={tab.key}
@@ -117,9 +114,9 @@ function DriverDashboardPage() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Enhanced Header */}
+        {/* Header */}
         <header className="bg-white shadow-lg border-b border-slate-200 px-8 py-6">
           <div className="flex justify-between items-center">
             <div>
@@ -129,32 +126,23 @@ function DriverDashboardPage() {
               <p className="text-sm text-slate-500 mt-2">
                 {selectedTab === 'available' && 'Find your next ride opportunity'}
                 {selectedTab === 'current' && 'Manage your ongoing trip'}
-                {selectedTab === 'profile' && 'Update your driver information'}
                 {selectedTab === 'eco' && 'Track your environmental impact'}
                 {selectedTab === 'history' && 'Review your completed trips'}
+                {selectedTab === 'profile' && 'View or edit your driver profile'}
               </p>
             </div>
-            
-            <div className="flex items-center space-x-4">
-              {/* Notifications */}
-              <div className="relative">
-                <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer">
-                  <div className="w-5 h-5 bg-slate-400 rounded-full"></div>
-                </div>
-                <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">2</span>
-                </span>
-              </div>
 
-              {/* Driver Profile */}
-              <div className="flex items-center space-x-3 bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl px-4 py-2 hover:from-slate-100 hover:to-slate-200 transition-all duration-200 cursor-pointer">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold">D</span>
-                </div>
-                <div className="hidden sm:block">
-                  <p className="text-sm font-semibold text-slate-700">Driver</p>
-                  <p className="text-xs text-slate-500">Pro Driver</p>
-                </div>
+            {/* Driver Avatar */}
+            <div
+              onClick={() => setSelectedTab('profile')}
+              className="flex items-center space-x-3 bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl px-4 py-2 hover:from-slate-100 hover:to-slate-200 transition-all duration-200 cursor-pointer"
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-semibold">D</span>
+              </div>
+              <div className="hidden sm:block">
+                <p className="text-sm font-semibold text-slate-700">Driver</p>
+                <p className="text-xs text-slate-500">Pro Driver</p>
               </div>
             </div>
           </div>
@@ -162,9 +150,7 @@ function DriverDashboardPage() {
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 to-slate-100 p-8">
-          <div className="animate-fade-in">
-            {renderContent()}
-          </div>
+          <div className="animate-fade-in">{renderContent()}</div>
         </main>
       </div>
     </div>
