@@ -39,22 +39,13 @@ function RiderBooking() {
       });
 
       if (response.ok) {
-        let message = "Ride booked successfully.";
-        const contentType = response.headers.get("content-type");
-
-        if (contentType?.includes("application/json")) {
-          const data = await response.json();
-          message = data.message || message;
-        } else if (contentType?.includes("text/plain")) {
-          message = await response.text();
-        }
-
+        const data = await response.json();
         navigate("/bookingconfirmation", {
           state: {
             driver: null,
             pickup: trimmedPickup,
             destination: trimmedDestination,
-            status: message,
+            status: data.message || "Ride booked successfully.",
           },
         });
       } else {
@@ -70,38 +61,38 @@ function RiderBooking() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl border border-gray-300 transform transition hover:scale-105 hover:shadow-[0px_10px_20px_rgba(0,0,0,0.3)]">
-        <h2 className="text-2xl font-bold mb-6 text-center">Book Your Ride</h2>
+    <div className="p-8 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen flex items-center justify-center">
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg">
+        <h2 className="text-3xl font-bold mb-6 text-slate-800 text-center">Book Your Ride</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block mb-1 text-gray-700">Pickup Location:</label>
+            <label className="block mb-1 text-slate-700">Pickup Location</label>
             <input
               type="text"
               value={pickup}
               onChange={(e) => setPickup(e.target.value)}
-              className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring focus:ring-maroon-500"
+              className="w-full border border-slate-300 p-3 rounded-lg focus:outline-none focus:ring focus:ring-emerald-500"
               placeholder="Enter pickup location"
               required
             />
           </div>
           <div>
-            <label className="block mb-1 text-gray-700">Destination Location:</label>
+            <label className="block mb-1 text-slate-700">Destination Location</label>
             <input
               type="text"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
-              className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring focus:ring-maroon-500"
+              className="w-full border border-slate-300 p-3 rounded-lg focus:outline-none focus:ring focus:ring-emerald-500"
               placeholder="Enter destination"
               required
             />
           </div>
           <div>
-            <label className="block mb-1 text-gray-700">Preferred Vehicle Type:</label>
+            <label className="block mb-1 text-slate-700">Preferred Vehicle Type</label>
             <select
               value={preferredVehicleType}
               onChange={(e) => setPreferredVehicleType(e.target.value)}
-              className="w-full border border-gray-300 p-2 rounded focus:outline-none"
+              className="w-full border border-slate-300 p-3 rounded-lg focus:outline-none"
             >
               <option value="Sedan">Sedan</option>
               <option value="SUV">SUV</option>
@@ -114,14 +105,18 @@ function RiderBooking() {
               type="checkbox"
               checked={willingToPool}
               onChange={(e) => setWillingToPool(e.target.checked)}
-              className="mr-2"
+              className="mr-2 rounded border-slate-300"
             />
-            <label className="text-gray-700">Willing to Pool</label>
+            <label className="text-slate-700">Willing to Pool</label>
           </div>
           <button
             type="submit"
             disabled={loading}
-            className={`w-full ${loading ? 'bg-gray-400' : 'bg-[#800000]'} text-white py-2 px-4 rounded transition`}
+            className={`w-full py-3 rounded-lg transition duration-200 font-semibold ${
+              loading
+                ? 'bg-slate-400 cursor-not-allowed'
+                : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+            }`}
           >
             {loading ? "Booking..." : "Book Ride"}
           </button>

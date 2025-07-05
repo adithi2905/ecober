@@ -13,17 +13,14 @@ function CurrentRide() {
       try {
         const res = await fetch("http://localhost:8080/user/trip/current", {
           headers: {
-            "Authorization": `Bearer ${token}`
+            Authorization: `Bearer ${token}`
           },
         });
-        
+
         if (res.ok) {
           const data = await res.json();
-          if (data) {
-            setRide(data);
-          }
+          setRide(data || null);
         } else if (res.status === 404) {
-          // No current ride found - this is normal
           setRide(null);
         } else {
           const errorText = await res.text();
@@ -43,52 +40,54 @@ function CurrentRide() {
     navigate("/rideBooking");
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading current ride...</div>;
+  if (loading) {
+    return (
+      <div className="p-8 text-center text-slate-600">
+        Loading current ride...
+      </div>
+    );
+  }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-6 rounded-lg shadow-md text-center">
-          <h2 className="text-xl font-bold mb-4 text-red-600">Error</h2>
-          <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={handleBookRide}
-            className="mt-2 px-4 py-2 bg-[#800000] text-white rounded hover:bg-[#a00000]"
-          >
-            Book a Ride
-          </button>
-        </div>
+      <div className="p-8 bg-red-100 rounded-xl shadow-md text-center">
+        <h2 className="text-xl font-bold text-red-700 mb-3">Error</h2>
+        <p className="text-red-600 mb-4">{error}</p>
+        <button
+          onClick={handleBookRide}
+          className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg"
+        >
+          Book a Ride
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-6 rounded-lg shadow-md text-center">
-        {ride ? (
-          <>
-            <h2 className="text-xl font-bold mb-4 text-[#800000]">Your Ride is In Progress</h2>
-            <p><strong>Trip ID:</strong> {ride.tripId}</p>
-            <p><strong>Driver:</strong> {ride.driver?.driverName || 'Unknown'}</p>
-            <p><strong>Vehicle:</strong> {ride.driver?.vehicleType || 'N/A'}</p>
-            <p><strong>Pickup:</strong> {ride.pickupLocation || ride.user?.pickupLocation}</p>
-            <p><strong>Dropoff:</strong> {ride.dropoffLocation || ride.user?.dropoffLocation}</p>
-            <p><strong>Status:</strong> {ride.status}</p>
-            {ride.fare && <p><strong>Estimated Fare:</strong> ${ride.fare.toFixed(2)}</p>}
-          </>
-        ) : (
-          <>
-            <h2 className="text-xl font-bold mb-4">No Ongoing Rides</h2>
-            <p className="text-gray-600 mb-4">You don't have any active rides at the moment.</p>
-            <button
-              onClick={handleBookRide}
-              className="mt-2 px-4 py-2 bg-[#800000] text-white rounded hover:bg-[#a00000]"
-            >
-              Book a Ride
-            </button>
-          </>
-        )}
-      </div>
+    <div className="p-8">
+      {ride ? (
+        <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-emerald-500">
+          <h2 className="text-2xl font-bold mb-3 text-emerald-600">Your Ride in Progress</h2>
+          <p><strong>Trip ID:</strong> {ride.tripId}</p>
+          <p><strong>Driver:</strong> {ride.driver?.driverName || 'Unknown'}</p>
+          <p><strong>Vehicle:</strong> {ride.driver?.vehicleType || 'N/A'}</p>
+          <p><strong>Pickup:</strong> {ride.pickupLocation}</p>
+          <p><strong>Dropoff:</strong> {ride.dropoffLocation}</p>
+          <p><strong>Status:</strong> {ride.status}</p>
+          {ride.fare && <p><strong>Estimated Fare:</strong> ${ride.fare.toFixed(2)}</p>}
+        </div>
+      ) : (
+        <div className="bg-white p-6 rounded-xl shadow text-center">
+          <h2 className="text-xl font-bold text-slate-700">No Ongoing Rides</h2>
+          <p className="text-slate-500 mb-4">You don’t have any active rides at the moment.</p>
+          <button
+            onClick={handleBookRide}
+            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg"
+          >
+            Book a Ride
+          </button>
+        </div>
+      )}
     </div>
   );
 }
