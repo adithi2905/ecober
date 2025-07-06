@@ -265,4 +265,11 @@ public ResponseEntity<?> getEcoReport() {
     }
 }
 
+@PostMapping("/logout")
+public ResponseEntity<?>logout()
+{
+   return ResponseEntity.ok("Please clear token on client"); 
+
+}
+
 }

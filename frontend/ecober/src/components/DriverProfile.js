@@ -1,9 +1,29 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const DriverProfile = () => {
   const [driver, setDriver] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate=useNavigate();
+
+  const handleLogout=async()=>
+
+  {
+    const token = localStorage.getItem("token");
+
+      await fetch("http://localhost:8080/driver/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      localStorage.removeItem("token");
+      navigate("/");
+      return <div>Logging out...</div>;
+  }
 
   useEffect(() => {
     const fetchDriverProfile = async () => {
@@ -43,6 +63,7 @@ const DriverProfile = () => {
     return (
       <div className="p-6 text-center text-slate-500">No profile data found.</div>
     );
+
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow p-6 mt-6">
@@ -92,6 +113,11 @@ const DriverProfile = () => {
           </div>
         </div>
       </div>
+      <button
+  onClick={handleLogout}
+  className="mt-8 w-full md:w-40 mx-auto block py-3 px-6 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white text-lg font-medium shadow hover:from-red-600 hover:to-red-700 transition-all duration-300 ease-in-out"
+>
+Logout</button>
     </div>
   );
 };
