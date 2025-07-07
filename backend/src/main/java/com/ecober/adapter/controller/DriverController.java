@@ -15,6 +15,7 @@ import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.domain.model.Driver;
 import com.ecober.domain.service.DriverScoringService;
 import com.ecober.domain.service.DriverService;
+import com.ecober.domain.service.FuelScoringService;
 import com.ecober.domain.service.TripService;
 import com.ecober.security.JwtService;
 import com.ecober.util.AuthUtil;
@@ -39,6 +40,9 @@ public class DriverController {
 
     @Autowired
     private DriverScoringService driverScoringService;
+
+    @Autowired
+    private FuelScoringService fuelScoringService;
 
     @GetMapping("/me/getProfile")
     public ResponseEntity<DriverDTO> getMyProfile() {
@@ -265,29 +269,46 @@ public ResponseEntity<?> getEcoReport() {
     }
 }
 
+
+@PostMapping("/fuelScoring")
+public ResponseEntity<?> computeEcoScore() {
+    UUID driverId = AuthUtil.getCurrentUserId();
+    String role = AuthUtil.getCurrentUserRole();
+
+    if (driverId == null || !"DRIVER".equalsIgnoreCase(role)) {
+        return ResponseEntity.status(403).body(Map.of(
+            "error", "Only authenticated drivers can compute eco scores."
+        ));
+    }
+
+    Optional<DriverDTO> driverDTO = driverService.getDriverById(driverId);
+
+    if (driverDTO.isEmpty()) {
+        return ResponseEntity.status(404).body(Map.of(
+            "error", "Driver not found"
+        ));
+    }
+
+    String vin = driverDTO.get().getVin();
+    if (vin == null || vin.isBlank()) {
+        return ResponseEntity.badRequest().body(Map.of(
+            "error", "Driver VIN is missing. Cannot compute eco score."
+        ));
+    }
+
+    double ecoScore = fuelScoringService.computeEcoScoreFromVin(vin);
+    return ResponseEntity.ok(Map.of(
+        "driverId", driverId,
+        "ecoScore", ecoScore
+    ));
+}
+
 @PostMapping("/logout")
 public ResponseEntity<?>logout()
 {
     return ResponseEntity.ok("Please clear token on client"); 
 
 }
-@GetMapping("/fuelType")
-public ResponseEntity<?> getFuelType(@RequestParam(required = true) String vin) {
-    try {
-        if (vin == null || vin.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "error", "VIN must be provided to fetch fuel type."
-            ));
-        }
 
-        String fuelType = driverService.getFuelMapping(vin);
-        return ResponseEntity.ok(Map.of("fuelType", fuelType));
-
-    } catch (Exception e) {
-        return ResponseEntity.status(500).body(Map.of(
-            "error", "Failed to fetch fuel type: " + e.getMessage()
-        ));
-    }
-}
 
 }

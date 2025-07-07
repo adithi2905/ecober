@@ -3,10 +3,13 @@ package com.ecober;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
 import io.github.cdimascio.dotenv.Dotenv;
 
 @SpringBootApplication(scanBasePackages = "com.ecober")
 @EnableCaching
+@EnableScheduling
 public class EcoberApplication {
 	public static void main(String[] args) {
 		Dotenv dotenv = Dotenv.load();
