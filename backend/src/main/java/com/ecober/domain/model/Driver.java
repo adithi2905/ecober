@@ -42,5 +42,6 @@ public class Driver {
     private double trustScore;
     private double totalCO2Saved;
     private String role="DRIVER";
+    private String vin;
 
 }

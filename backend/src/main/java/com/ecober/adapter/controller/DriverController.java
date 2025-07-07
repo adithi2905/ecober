@@ -15,6 +15,7 @@ import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.domain.model.Driver;
 import com.ecober.domain.service.DriverScoringService;
 import com.ecober.domain.service.DriverService;
+import com.ecober.domain.service.FuelScoringService;
 import com.ecober.domain.service.TripService;
 import com.ecober.security.JwtService;
 import com.ecober.util.AuthUtil;
@@ -39,6 +40,9 @@ public class DriverController {
 
     @Autowired
     private DriverScoringService driverScoringService;
+
+    @Autowired
+    private FuelScoringService fuelScoringService;
 
     @GetMapping("/me/getProfile")
     public ResponseEntity<DriverDTO> getMyProfile() {
@@ -92,9 +96,9 @@ public class DriverController {
     }
 
     @GetMapping("/me/trip-count")
-    public ResponseEntity<Long> getMyTripCount() {
+    public ResponseEntity<?> getMyTripCount() {
         UUID driverId = AuthUtil.getCurrentUserId();
-        return ResponseEntity.ok(driverService.getDriverTripCount(driverId));
+        return ResponseEntity.ok(driverService.getDriverTripCounts(driverId));
     }
 
     @GetMapping("/trip/{tripId}")
@@ -240,9 +244,9 @@ public ResponseEntity<?> getEcoReport() {
         UUID driverId = AuthUtil.getCurrentUserId();
 
         double totalCO2 = driverService.calculateDriverCO2Impact(driverId);
-        long tripCount = driverService.getDriverTripCount(driverId);
+        Map<String,Long> tripCount = driverService.getDriverTripCounts(driverId);
 
-        double carbonScore = driverScoringService.calculateCarbonCost(totalCO2, (int) tripCount);
+        double carbonScore = driverScoringService.calculateCarbonCost(totalCO2,tripCount.get("totalRides"));
         String rating = driverService.getEcoBadge(driverId);
         double currentMonthCO2 = driverService.getCurrentMonthCO2Savings(driverId);
         List<Map<String, Object>> rideDistribution = driverService.getRideTypeDistribution(driverId);
@@ -264,5 +268,47 @@ public ResponseEntity<?> getEcoReport() {
         return ResponseEntity.status(500).body("Error generating eco report: " + e.getMessage());
     }
 }
+
+
+@PostMapping("/fuelScoring")
+public ResponseEntity<?> computeEcoScore() {
+    UUID driverId = AuthUtil.getCurrentUserId();
+    String role = AuthUtil.getCurrentUserRole();
+
+    if (driverId == null || !"DRIVER".equalsIgnoreCase(role)) {
+        return ResponseEntity.status(403).body(Map.of(
+            "error", "Only authenticated drivers can compute eco scores."
+        ));
+    }
+
+    Optional<DriverDTO> driverDTO = driverService.getDriverById(driverId);
+
+    if (driverDTO.isEmpty()) {
+        return ResponseEntity.status(404).body(Map.of(
+            "error", "Driver not found"
+        ));
+    }
+
+    String vin = driverDTO.get().getVin();
+    if (vin == null || vin.isBlank()) {
+        return ResponseEntity.badRequest().body(Map.of(
+            "error", "Driver VIN is missing. Cannot compute eco score."
+        ));
+    }
+
+    double ecoScore = fuelScoringService.computeEcoScoreFromVin(vin);
+    return ResponseEntity.ok(Map.of(
+        "driverId", driverId,
+        "ecoScore", ecoScore
+    ));
+}
+
+@PostMapping("/logout")
+public ResponseEntity<?>logout()
+{
+    return ResponseEntity.ok("Please clear token on client"); 
+
+}
+
 
 }
