@@ -89,9 +89,9 @@ const DriverProfile = () => {
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-gray-50 to-purple-100 p-4 rounded-xl shadow">
+        <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-4 rounded-xl shadow">
           <h4 className="text-sm text-slate-600">Trust Score</h4>
-          <p className="text-2xl font-bold text-gray-700">
+          <p className="text-2xl font-bold text-pink-700">
             {driver.trustScore || "0.0"}
           </p>
         </div>
