@@ -24,5 +24,6 @@ public class DriverDTO {
     private double fuelEfficiency;
     private double trustScore;
     private double totalCO2Saved;
+    private String vin;
 
 }

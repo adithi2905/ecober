@@ -92,9 +92,9 @@ public class DriverController {
     }
 
     @GetMapping("/me/trip-count")
-    public ResponseEntity<Long> getMyTripCount() {
+    public ResponseEntity<?> getMyTripCount() {
         UUID driverId = AuthUtil.getCurrentUserId();
-        return ResponseEntity.ok(driverService.getDriverTripCount(driverId));
+        return ResponseEntity.ok(driverService.getDriverTripCounts(driverId));
     }
 
     @GetMapping("/trip/{tripId}")
@@ -240,9 +240,9 @@ public ResponseEntity<?> getEcoReport() {
         UUID driverId = AuthUtil.getCurrentUserId();
 
         double totalCO2 = driverService.calculateDriverCO2Impact(driverId);
-        long tripCount = driverService.getDriverTripCount(driverId);
+        Map<String,Long> tripCount = driverService.getDriverTripCounts(driverId);
 
-        double carbonScore = driverScoringService.calculateCarbonCost(totalCO2, (int) tripCount);
+        double carbonScore = driverScoringService.calculateCarbonCost(totalCO2,tripCount.get("totalRides"));
         String rating = driverService.getEcoBadge(driverId);
         double currentMonthCO2 = driverService.getCurrentMonthCO2Savings(driverId);
         List<Map<String, Object>> rideDistribution = driverService.getRideTypeDistribution(driverId);
@@ -268,8 +268,26 @@ public ResponseEntity<?> getEcoReport() {
 @PostMapping("/logout")
 public ResponseEntity<?>logout()
 {
-   return ResponseEntity.ok("Please clear token on client"); 
+    return ResponseEntity.ok("Please clear token on client"); 
 
+}
+@GetMapping("/fuelType")
+public ResponseEntity<?> getFuelType(@RequestParam(required = true) String vin) {
+    try {
+        if (vin == null || vin.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", "VIN must be provided to fetch fuel type."
+            ));
+        }
+
+        String fuelType = driverService.getFuelMapping(vin);
+        return ResponseEntity.ok(Map.of("fuelType", fuelType));
+
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body(Map.of(
+            "error", "Failed to fetch fuel type: " + e.getMessage()
+        ));
+    }
 }
 
 }

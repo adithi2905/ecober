@@ -79,3 +79,4 @@ com\ecober\adapter\Dto\DriverRegistrationRequestDTO$DriverRegistrationRequestDTO
 com\ecober\adapter\Dto\UserDTO$UserDTOBuilder.class
 com\ecober\adapter\Dto\DriverAuthenticationRequest.class
 com\ecober\domain\service\GeocodingService.class
+com\ecober\util\FuelMappingUtil.class

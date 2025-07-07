@@ -17,4 +17,5 @@ public class DriverRegistrationRequestDTO {
     private String vehicleType;
     private boolean isVerified;
     private String vehicleNo;
+    private String vin;
 }

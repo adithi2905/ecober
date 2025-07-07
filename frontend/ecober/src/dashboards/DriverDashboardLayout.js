@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AvailableRides from '../components/DriverAvailabletrips';
 import DriverCurrentTrip from '../components/DriverCurrentTrip';
 import DriverProfile from '../components/DriverProfile';
@@ -14,6 +14,40 @@ const tabs = [
 
 function DriverDashboardPage() {
   const [selectedTab, setSelectedTab] = useState('available');
+  const [tripCounts, setTripCounts] = useState({
+    totalRides: 0,
+    ridesThisMonth: 0,
+    ridesToday: 0,
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  useEffect(() => {
+    const fetchTripCounts = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:8080/driver/me/trip-count", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setTripCounts({
+            totalRides: data.totalRides || 0,
+            ridesThisMonth: data.ridesThisMonth || 0,
+            ridesToday: data.ridesToday || 0,
+          });
+        } else {
+          console.error("Failed to fetch trip counts.");
+        }
+      } catch (error) {
+        console.error("Error fetching trip counts:", error);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+
+    fetchTripCounts();
+  }, []);
 
   const renderContent = () => {
     switch (selectedTab) {
@@ -53,22 +87,38 @@ function DriverDashboardPage() {
 
         {/* Driver Stats */}
         <div className="p-6 border-b border-slate-100">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-xl">
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                <span className="text-xs font-medium text-emerald-700">Rating</span>
+          {loadingStats ? (
+            <p className="text-center text-slate-400 animate-pulse">Loading stats...</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Total Rides */}
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl">
+                <div className="flex items-center space-x-2 mb-2">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                  <span className="text-xs font-medium text-purple-700">Total Rides</span>
+                </div>
+                <p className="text-2xl font-bold text-purple-700">{tripCounts.totalRides}</p>
               </div>
-              <p className="text-2xl font-bold text-emerald-800">4.9</p>
-            </div>
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl">
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                <span className="text-xs font-medium text-blue-700">Today</span>
+
+              {/* Rides This Month */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl">
+                <div className="flex items-center space-x-2 mb-2">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <span className="text-xs font-medium text-blue-700">This Month</span>
+                </div>
+                <p className="text-2xl font-bold text-blue-700">{tripCounts.ridesThisMonth}</p>
               </div>
-              <p className="text-2xl font-bold text-blue-800">$124</p>
+
+              {/* Rides Today */}
+              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-xl">
+                <div className="flex items-center space-x-2 mb-2">
+                  <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                  <span className="text-xs font-medium text-emerald-700">Today</span>
+                </div>
+                <p className="text-2xl font-bold text-emerald-800">{tripCounts.ridesToday}</p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Navigation */}
@@ -79,10 +129,9 @@ function DriverDashboardPage() {
               <button
                 key={tab.key}
                 onClick={() => setSelectedTab(tab.key)}
-                className={`
-                  group w-full flex items-center space-x-4 px-5 py-4 rounded-xl transition-all duration-300 text-left font-medium
-                  ${isActive 
-                    ? `bg-gradient-to-r ${tab.color} text-white shadow-lg transform scale-105` 
+                className={`group w-full flex items-center space-x-4 px-5 py-4 rounded-xl transition-all duration-300 text-left font-medium
+                  ${isActive
+                    ? `bg-gradient-to-r ${tab.color} text-white shadow-lg transform scale-105`
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800 hover:transform hover:scale-102'
                   }
                 `}
@@ -120,9 +169,7 @@ function DriverDashboardPage() {
         <header className="bg-white shadow-lg border-b border-slate-200 px-8 py-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800">
-                {activeTab?.name}
-              </h1>
+              <h1 className="text-3xl font-bold text-slate-800">{activeTab?.name}</h1>
               <p className="text-sm text-slate-500 mt-2">
                 {selectedTab === 'available' && 'Find your next ride opportunity'}
                 {selectedTab === 'current' && 'Manage your ongoing trip'}

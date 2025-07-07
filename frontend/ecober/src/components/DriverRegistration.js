@@ -9,6 +9,7 @@ function DriverRegistration() {
   const [vehicleType, setVehicleType] = useState("");
   const [isVerified, setIsVerified] = useState(false);
   const [vehicleNo, setVehicleNo] = useState("");
+  const [vin,setVin]=useState("");
 
   const navigate = useNavigate();
 
@@ -29,6 +30,7 @@ function DriverRegistration() {
           vehicleType,
           isVerified,
           vehicleNo,
+          vin
         }),
       });
 
@@ -48,7 +50,7 @@ function DriverRegistration() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-200 p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
         <h2 className="text-3xl font-bold text-center text-slate-800 mb-6">
-           Driver Registration
+          Driver Registration
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
@@ -128,6 +130,17 @@ function DriverRegistration() {
             />
             <label className="text-slate-700 text-sm">Verified Driver?</label>
           </div>
+
+          {/*Vin*/}
+          <input
+            type="text"
+            name="vin"
+            value={vin}
+            onChange={(e) => setVin(e.target.value)}
+            required
+            placeholder="Vehicle Identification Number"
+            className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
 
           {/* Submit Button */}
           <button

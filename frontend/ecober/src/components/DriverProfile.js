@@ -5,25 +5,23 @@ const DriverProfile = () => {
   const [driver, setDriver] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
-  const handleLogout=async()=>
-
-  {
+  const handleLogout = async () => {
     const token = localStorage.getItem("token");
 
-      await fetch("http://localhost:8080/driver/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        }
-      });
+    await fetch("http://localhost:8080/driver/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      localStorage.removeItem("token");
-      navigate("/");
-      return <div>Logging out...</div>;
-  }
+    localStorage.removeItem("token");
+    navigate("/");
+    return <div>Logging out...</div>;
+  };
 
   useEffect(() => {
     const fetchDriverProfile = async () => {
@@ -64,60 +62,57 @@ const DriverProfile = () => {
       <div className="p-6 text-center text-slate-500">No profile data found.</div>
     );
 
-
   return (
-    <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow p-6 mt-6">
+    <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow p-6 mt-6">
       <h2 className="text-3xl font-bold text-slate-800 mb-6 text-center">
         Driver Profile
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <p className="text-slate-700">
-            <strong>Name:</strong> {driver.driverName || "N/A"}
-          </p>
-          <p className="text-slate-700">
-            <strong>Vehicle No:</strong> {driver.vehicleNo || "N/A"}
-          </p>
-          <p className="text-slate-700">
-            <strong>Vehicle Type:</strong> {driver.vehicleType || "N/A"}
-          </p>
-          <p className="text-slate-700">
-            <strong>Fuel Efficiency:</strong> {driver.fuelEfficiency || "N/A"}
+
+      {/* Eco Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 rounded-xl shadow">
+          <h4 className="text-sm text-slate-600">Total CO₂ Saved</h4>
+          <p className="text-2xl font-bold text-emerald-700">
+            {driver.totalCo2Saved?.toFixed(2) || "0.00"} kg
           </p>
         </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl shadow">
-            <h4 className="text-sm text-slate-600">Total Trips</h4>
-            <p className="text-2xl font-bold text-blue-700">
-              {driver.totalTrips || 0}
-            </p>
-          </div>
-          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-xl shadow">
-            <h4 className="text-sm text-slate-600">Average Rating</h4>
-            <p className="text-2xl font-bold text-yellow-500">
-              {driver.rating || 0} ★
-            </p>
-          </div>
-          <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl shadow">
-            <h4 className="text-sm text-slate-600">Acceptance Rate</h4>
-            <p className="text-2xl font-bold text-green-700">
-              {driver.acceptanceRate || 0}%
-            </p>
-          </div>
-          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 rounded-xl shadow">
-            <h4 className="text-sm text-slate-600">CO₂ Saved</h4>
-            <p className="text-2xl font-bold text-emerald-700">
-              {driver.co2Saved || 0} kg
-            </p>
-          </div>
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl shadow">
+          <h4 className="text-sm text-slate-600">Carbon Score</h4>
+          <p className="text-2xl font-bold text-blue-700">
+            {driver.carbonScore?.toFixed(1) || "0.0"}
+          </p>
+        </div>
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl shadow">
+          <h4 className="text-sm text-slate-600">Eco Badge</h4>
+          <p className="text-2xl font-bold text-purple-700">
+            {driver.ecoBadge || "♻️ Standard Driver"}
+          </p>
         </div>
       </div>
+
+      {/* Driver Info */}
+      <div className="space-y-2 text-center">
+        <p className="text-slate-700">
+          <strong>Name:</strong> {driver.driverName || "N/A"}
+        </p>
+        <p className="text-slate-700">
+          <strong>Vehicle No:</strong> {driver.vehicleNo || "N/A"}
+        </p>
+        <p className="text-slate-700">
+          <strong>Vehicle Type:</strong> {driver.vehicleType || "N/A"}
+        </p>
+        <p className="text-slate-700">
+          <strong>Fuel Efficiency:</strong> {driver.fuelEfficiency || "N/A"}
+        </p>
+      </div>
+
+      {/* Logout Button */}
       <button
-  onClick={handleLogout}
-  className="mt-8 w-full md:w-40 mx-auto block py-3 px-6 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white text-lg font-medium shadow hover:from-red-600 hover:to-red-700 transition-all duration-300 ease-in-out"
->
-Logout</button>
+        onClick={handleLogout}
+        className="mt-8 w-full md:w-40 mx-auto block py-3 px-6 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white text-lg font-medium shadow hover:from-red-600 hover:to-red-700 transition-all duration-300 ease-in-out"
+      >
+        Logout
+      </button>
     </div>
   );
 };
