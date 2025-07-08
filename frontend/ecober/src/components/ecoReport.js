@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  ResponsiveContainer,
   BarChart,
   Bar,
   XAxis,
@@ -55,61 +56,79 @@ function EcoReport() {
     fetchEcoReport();
   }, []);
 
-  if (loading) return <div className="text-center py-10">Loading Eco Report...</div>;
-  if (error) return <div className="text-center py-10 text-red-600">{error}</div>;
+  if (loading)
+    return <div className="text-center py-10 animate-pulse text-gray-500">Loading Eco Report...</div>;
+
+  if (error)
+    return <div className="text-center py-10 text-red-600 font-medium">{error}</div>;
 
   const currentMonthSaved = getCurrentMonthCO2();
   const goalProgress = Math.min((currentMonthSaved / MONTHLY_TARGET) * 100, 100);
 
   return (
     <div className="p-6 space-y-6">
-      <h2 className="text-2xl font-bold text-center text-green-700">Eco Report</h2>
+      <h2 className="text-3xl font-bold text-center text-green-700">🌿 Eco Report</h2>
 
       {/* Green Goal Progress */}
-      <div className="bg-gray-100 p-4 rounded-lg shadow text-center">
-        <h3 className="text-lg font-semibold text-green-800">Your Green Goal</h3>
-        <p>Target: {MONTHLY_TARGET} kg | Saved: {currentMonthSaved.toFixed(2)} kg</p>
-        <div className="w-full bg-gray-300 h-4 rounded mt-2">
+      <div className="bg-green-50 p-5 rounded-xl shadow-md text-center">
+        <h3 className="text-xl font-semibold text-green-800">Your Green Goal</h3>
+        <p className="mt-2 text-gray-700">
+          🎯 Target: <span className="font-bold">{MONTHLY_TARGET} kg</span> | ✅ Saved:{" "}
+          <span className="font-bold text-green-600">{currentMonthSaved.toFixed(2)} kg</span>
+        </p>
+        <div className="w-full bg-gray-200 h-4 rounded mt-4 overflow-hidden">
           <div
-            className="h-4 bg-green-500 rounded"
+            className="h-4 bg-green-500 transition-all duration-700 ease-in-out"
             style={{ width: `${goalProgress}%` }}
           />
         </div>
-        <p className="mt-1 text-sm text-gray-600">{goalProgress.toFixed(0)}% of your goal</p>
+        <p className="mt-2 text-sm text-gray-600">
+          {goalProgress.toFixed(0)}% of your goal
+        </p>
+        {goalProgress >= 100 && (
+          <p className="text-green-700 font-medium mt-1">🌱 You smashed your goal this month!</p>
+        )}
       </div>
 
       {/* Monthly CO₂ Savings Bar Chart */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-lg font-semibold mb-2">Monthly CO₂ Savings</h3>
-        <BarChart width={500} height={300} data={monthlyData}>
-          <XAxis dataKey="month" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="co2" fill="#22c55e" />
-        </BarChart>
+      <div className="bg-white p-5 rounded-xl shadow-md">
+        <h3 className="text-xl font-semibold mb-4 text-green-800">📊 Monthly CO₂ Savings</h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={monthlyData}>
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="co2" fill="#22c55e" radius={[6, 6, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       {/* Ride Type Pie Chart */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-lg font-semibold mb-2">Ride Type Distribution</h3>
-        <PieChart width={400} height={300}>
-          <Pie
-            data={rideTypeData}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-            outerRadius={100}
-            fill="#8884d8"
-            dataKey="value"
-          >
-            {rideTypeData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip />
-          <Legend />
-        </PieChart>
+      <div className="bg-white p-5 rounded-xl shadow-md">
+        <h3 className="text-xl font-semibold mb-4 text-green-800">🚘 Ride Type Distribution</h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <PieChart>
+            <Pie
+              data={rideTypeData}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              outerRadius={100}
+              fill="#10b981"
+              dataKey="value"
+            >
+              {rideTypeData.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

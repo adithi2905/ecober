@@ -43,6 +43,10 @@ public class DriverService {
     @Autowired
     public FuelScoringService fuelScoringService;
 
+    @Autowired
+    private CarbonScoringService carbonScoringService;
+
+
     public void register(DriverRegistrationRequestDTO request) {
         Driver driver = Driver.builder()
                 .driverName(request.getName())
@@ -221,6 +225,7 @@ public class DriverService {
                 distance.getDistanceKm(), request.getPreferredVehicleType());
         double actualEmissions = driverScoringService.computeActualScores(
                 distance.getDistanceKm(), request.getPreferredVehicleType());
+        double carbonScore=carbonScoringService.calculateCO2Savings(distance.getDistanceKm(),request.getPreferredVehicleType()); 
 
         Trip trip = Trip.builder()
                 .user(request.getUser())
@@ -231,6 +236,7 @@ public class DriverService {
                         .distanceKm(distance.getDistanceKm())
                         .estimatedTime(distance.getDurationInMins())
                         .estimatedEmission(expectedEmission)
+                        .carbonCost(carbonScore)
                         .isPooledEligible(request.isWillingToPool())
                         .build())
                 .status(TripStatus.ACCEPTED)

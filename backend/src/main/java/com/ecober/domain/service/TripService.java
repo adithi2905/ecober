@@ -43,9 +43,6 @@ public class TripService {
         trip.setCarbonEmission(actualEmission);
         trip.setStatus(TripStatus.ACCEPTED);
         trip.setVehicleType(bestDriver.getVehicleType());
-        double carbonScore=carbonScoringService.calculateCO2Savings(trip.getRoute().getDistanceKm(), trip.getVehicleType());
-        route.setCarbonCost(carbonScore);
-        trip.setRoute(route);
         tripRepository.save(trip);
     }
 
