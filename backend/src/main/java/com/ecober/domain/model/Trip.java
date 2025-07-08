@@ -23,7 +23,7 @@ public class Trip {
 
     @Embedded
     private Route route;
-    private String ecoScore;
+    private Double ecoScore;
 
     @Column(name = "actual_emission")
     private double carbonEmission;

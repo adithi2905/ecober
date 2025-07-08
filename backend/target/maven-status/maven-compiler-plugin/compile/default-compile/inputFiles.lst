@@ -9,6 +9,7 @@ C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\Dr
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\controller\DriverController.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\application\config\RedisConfig.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\security\CustomUserDetails.java
+C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\FuelScoringService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\LoginRequestDTO.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\security\JwtService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\RouteDTO.java
@@ -32,6 +33,7 @@ C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\T
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\RideRequestService.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\mapper\UserMapper.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\mapper\TripperMapper.java
+C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\FuelScoringScheduler.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\RideResponseDTO.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\RideRequestDTO.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\TripStatus.java

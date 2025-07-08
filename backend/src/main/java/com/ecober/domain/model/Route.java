@@ -33,7 +33,7 @@ public class Route {
     private double distanceKm;
 
     @Column(name = "carbon_cost", nullable = false)
-    private double carbonCost;
+    private Double carbonCost;
 
     @Column(name = "estimated_time", nullable = false)
     private double estimatedTime;

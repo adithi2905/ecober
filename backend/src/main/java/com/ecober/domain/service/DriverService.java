@@ -40,6 +40,9 @@ public class DriverService {
     @Autowired
     public FuelMappingUtil fuelMappingUtil;
 
+    @Autowired
+    public FuelScoringService fuelScoringService;
+
     public void register(DriverRegistrationRequestDTO request) {
         Driver driver = Driver.builder()
                 .driverName(request.getName())
@@ -133,6 +136,9 @@ public class DriverService {
             tripRepository.save(trip);
             redisTemplate.delete("active_trip:" + driverId);
             redisTemplate.delete("active_ride:" + trip.getUser().getUserId());
+            double ecoScore=fuelScoringService.computeEcoScoreFromVin(trip.getDriver().getVin());
+            trip.setEcoScore(ecoScore);
+            tripRepository.save(trip);
             return true;
         }
         return false;
@@ -291,8 +297,5 @@ public class DriverService {
         return "Standard Driver";
     }
 
-    public String getFuelMapping(String vin) {
-    return fuelMappingUtil.getFuelTypeByVin(vin);
-}
 
 }

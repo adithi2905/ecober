@@ -24,7 +24,7 @@ function DriverLogin() {
         const data = await response.json();
         localStorage.setItem("token", data.token);
         alert("✅ Login successful!");
-        navigate("/driverDashboard");
+        navigate("/availableRides");
       } else {
         alert("❌ Login failed. Please check your credentials.");
       }

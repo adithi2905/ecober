@@ -27,6 +27,9 @@ public class TripService {
     @Autowired
     private RedisTemplate<String, UUID> redisTemplate;
 
+    @Autowired
+    private CarbonScoringService carbonScoringService;
+
     public void createTrip(UUID riderId, Driver bestDriver, Route route, double estimatedEmission,double actualEmission) {
         User user = userRepository.findById(riderId)
                 .orElseThrow(() -> new RuntimeException("User not found with id " + riderId));
@@ -38,9 +41,11 @@ public class TripService {
         trip.setRoute(route);
         trip.setStartTime(LocalDateTime.now());
         trip.setCarbonEmission(actualEmission);
-        trip.setEcoScore("B+");
         trip.setStatus(TripStatus.ACCEPTED);
         trip.setVehicleType(bestDriver.getVehicleType());
+        double carbonScore=carbonScoringService.calculateCO2Savings(trip.getRoute().getDistanceKm(), trip.getVehicleType());
+        route.setCarbonCost(carbonScore);
+        trip.setRoute(route);
         tripRepository.save(trip);
     }
 
