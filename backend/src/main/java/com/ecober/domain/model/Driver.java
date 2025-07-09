@@ -43,5 +43,15 @@ public class Driver {
     private double totalCO2Saved;
     private String role="DRIVER";
     private String vin;
+    private double totalDistanceTracked;
+    private double totalFuelUsed;
+    private double vehicleEfficiency;
+    public double getFuelEfficiency()
+    {
+        if(totalFuelUsed==0)
+            return 0.0;
+        return totalDistanceTracked/totalFuelUsed;
+    }
+
 
 }

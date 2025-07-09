@@ -35,6 +35,7 @@ C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\mapper
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\mapper\TripperMapper.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\service\FuelScoringScheduler.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\RideResponseDTO.java
+C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\controller\BadgeController.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\adapter\Dto\RideRequestDTO.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\domain\model\TripStatus.java
 C:\Users\adith\innovation\ecober\backend\src\main\java\com\ecober\security\JwtAuthenticationFilter.java

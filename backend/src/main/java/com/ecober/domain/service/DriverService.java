@@ -140,12 +140,13 @@ public class DriverService {
             tripRepository.save(trip);
             redisTemplate.delete("active_trip:" + driverId);
             redisTemplate.delete("active_ride:" + trip.getUser().getUserId());
-            double ecoScore=fuelScoringService.computeEcoScoreFromVin(trip.getDriver().getVin());
-            trip.setEcoScore(ecoScore);
-            tripRepository.save(trip);
-            return true;
-        }
-        return false;
+        double ecoScore = fuelScoringService.computeEcoScoreFromVin(trip.getDriver().getVin());
+        trip.setEcoScore(ecoScore);
+        tripRepository.save(trip);
+        updateDriverFuelStats(trip.getDriver(), trip.getRoute().getDistanceKm());
+    return true;
+            }
+    return false;
     }
 
     public List<RideRequestDTO> getNearbyAvailableTrips(UUID driverId) {
@@ -302,6 +303,21 @@ public class DriverService {
         if (avgEmission <= 25) return "🌱 Sustainable Driver";
         return "Standard Driver";
     }
+
+    private void updateDriverFuelStats(Driver driver, double tripDistance) {
+    driver.setTotalDistanceTracked(driver.getTotalDistanceTracked() + tripDistance);
+
+    double estimatedFuelUsed = tripDistance / driver.getVehicleEfficiency();
+    driver.setTotalFuelUsed(driver.getTotalFuelUsed() + estimatedFuelUsed);
+
+    if (driver.getTotalFuelUsed() > 0) {
+        double updatedFuelEfficiency = driver.getTotalDistanceTracked() / driver.getTotalFuelUsed();
+        driver.setFuelEfficiency(updatedFuelEfficiency);
+    }
+
+    driverRepository.save(driver);
+}
+
 
 
 }

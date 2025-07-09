@@ -13,6 +13,7 @@ com\ecober\domain\model\Route$RouteBuilder.class
 com\ecober\adapter\Dto\DriverAuthenticationRequest$DriverAuthenticationRequestBuilder.class
 com\ecober\domain\model\Driver.class
 com\ecober\domain\model\RideRequest$RideRequestBuilder.class
+com\ecober\adapter\controller\BadgeController.class
 com\ecober\infrastructure\repository\UserRepository.class
 com\ecober\adapter\mapper\DriverMapperImpl.class
 com\ecober\util\AuthUtil.class
