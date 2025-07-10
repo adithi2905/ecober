@@ -5,7 +5,6 @@ const navLinks = [
   { name: 'Book Ride', path: '/rideBooking' },
   { name: 'Current Rides', path: '/currentRide' },
   { name: 'Past Rides', path: '/tripsHistory' },
-  { name: 'Eco Report', path: '/ecoReport' }, 
 ];
 
 function DashboardLayout() {
@@ -109,7 +108,6 @@ function DashboardLayout() {
                   <p className="text-xs text-slate-500">Premium Member</p>
                 </div>
               </div>
-            
           </div>
         </header>
 
