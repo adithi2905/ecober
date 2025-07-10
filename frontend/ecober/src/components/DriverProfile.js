@@ -62,40 +62,55 @@ const DriverProfile = () => {
       <div className="p-6 text-center text-slate-500">No profile data found.</div>
     );
 
+  // 🌱 Generate actionable eco tips
+  const ecoTips = [
+    "📦 Accept more carpool requests to unlock Eco Hero badge.",
+    "🛣️ Plan routes smartly to reduce fuel usage.",
+    "⏱️ Keep trips efficient to improve your Trust Score.",
+    "♻️ Using an electric vehicle will boost your Eco Badge faster.",
+  ];
+
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow p-6 mt-6">
       <h2 className="text-3xl font-bold text-slate-800 mb-6 text-center">
         Driver Profile
       </h2>
 
-      {/* Eco Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 rounded-xl shadow">
-          <h4 className="text-sm text-slate-600">Total CO₂ Saved</h4>
-          <p className="text-2xl font-bold text-emerald-700">
-            {driver.totalCo2Saved?.toFixed(2) || "0.00"} kg
-          </p>
-        </div>
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl shadow">
-          <h4 className="text-sm text-slate-600">Carbon Score</h4>
-          <p className="text-2xl font-bold text-blue-700">
-            {driver.carbonScore?.toFixed(1) || "0.0"}
-          </p>
-        </div>
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl shadow">
+      {/* Eco Badge & Trust Score */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl shadow text-center">
           <h4 className="text-sm text-slate-600">Eco Badge</h4>
           <p className="text-2xl font-bold text-purple-700">
             {driver.ecoBadge || "♻️ Standard Driver"}
           </p>
+          <p className="text-xs text-slate-500 mt-1">
+            Earn badges by saving CO₂ and completing eco-friendly trips
+          </p>
         </div>
 
-        <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-4 rounded-xl shadow">
+        <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-4 rounded-xl shadow text-center">
           <h4 className="text-sm text-slate-600">Trust Score</h4>
           <p className="text-2xl font-bold text-pink-700">
             {driver.trustScore || "0.0"}
           </p>
+          <p className="text-xs text-slate-500 mt-1">
+            Higher scores increase rider confidence
+          </p>
         </div>
-  
+      </div>
+
+      {/* Actionable Eco Tips */}
+      <div className="bg-emerald-50 p-4 rounded-xl shadow mb-8">
+        <h4 className="text-lg font-semibold text-emerald-800 mb-2">
+          🌱 Eco Insights & Tips
+        </h4>
+        <ul className="list-disc list-inside space-y-1 text-emerald-700">
+          {ecoTips.map((tip, index) => (
+            <li key={index} className="text-sm">
+              {tip}
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* Driver Info */}

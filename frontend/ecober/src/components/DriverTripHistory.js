@@ -110,6 +110,14 @@ function DriverTripHistory() {
                   </span>
                 </p>
               )}
+              {trip.route?.carbonCost && (
+                <p className="text-slate-700">
+                  <strong>Carbon Cost:</strong>{" "}
+                  <span className="font-medium text-amber-700">
+                    {trip.route.carbonCost} kg CO₂
+                  </span>
+                </p>
+              )}
               {trip.feedback && (
                 <p className="text-slate-700">
                   <strong>Feedback:</strong> "{trip.feedback}"

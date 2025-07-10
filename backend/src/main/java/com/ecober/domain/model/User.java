@@ -35,5 +35,9 @@ public class User {
     private boolean enabled = true;
 
     private String role="RIDER";
+    private double totalCO2Saved;
+    private double avgCo2Saved;
+    private String status;
+    private double tripCount;
 
 }

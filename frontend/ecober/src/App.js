@@ -20,6 +20,7 @@ import AvailableRides from './components/DriverAvailabletrips';
 import DriverCurrentTrip from './components/DriverCurrentTrip';
 import DriverDashboardLayout from './dashboards/DriverDashboardLayout';
 import DriverTripHistory from './components/DriverTripHistory';
+import UserEcoReport from './components/UserEcoReport';
 
 function App() {
   return (
@@ -38,7 +39,7 @@ function App() {
           <Route path="/bookingConfirmation" element={<BookingConfirmation />} />
           <Route path="/tripsHistory" element={<TripHistory />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/ecoReport" element={<EcoReport />} />
+          <Route path="/ecoReport" element={<UserEcoReport />} />
           <Route path="/currentRide" element={<CurrentRide />} />
         </Route>
 

@@ -5,7 +5,6 @@ const navLinks = [
   { name: 'Book Ride', path: '/rideBooking' },
   { name: 'Current Rides', path: '/currentRide' },
   { name: 'Past Rides', path: '/tripsHistory' },
-  { name: 'Eco History', path: '/ecoReport' },
 ];
 
 function DashboardLayout() {
@@ -38,22 +37,28 @@ function DashboardLayout() {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`
-                  group flex items-center space-x-4 px-5 py-4 rounded-xl transition-all duration-300 font-medium
-                  ${isActive
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg transform scale-105'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800 hover:transform hover:scale-102'
+                className={`group flex items-center space-x-4 px-5 py-4 rounded-xl transition-all duration-300 font-medium
+                  ${
+                    isActive
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg transform scale-105'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800 hover:transform hover:scale-102'
                   }
                 `}
               >
-                <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-white' : 'bg-slate-400 group-hover:bg-slate-600'}`}></div>
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    isActive
+                      ? 'bg-white'
+                      : 'bg-slate-400 group-hover:bg-slate-600'
+                  }`}
+                ></div>
                 <span>{link.name}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* User Section - Clickable for Profile */}
+        {/* User Section */}
         <div
           onClick={() => navigate('/profile')}
           className="p-6 border-t border-slate-100 cursor-pointer"
@@ -71,7 +76,9 @@ function DashboardLayout() {
 
         {/* Footer */}
         <div className="p-6 text-center">
-          <p className="text-xs text-slate-400">&copy; 2025 Ecober. All rights reserved.</p>
+          <p className="text-xs text-slate-400">
+            &copy; 2025 Ecober. All rights reserved.
+          </p>
         </div>
       </aside>
 
@@ -82,20 +89,12 @@ function DashboardLayout() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-slate-800">Dashboard</h1>
-              <p className="text-sm text-slate-500 mt-2">Welcome back! Here's what's happening today.</p>
+              <p className="text-sm text-slate-500 mt-2">
+                Welcome back! Here's what's happening today.
+              </p>
             </div>
 
-            <div className="flex items-center space-x-4">
-              {/* Notification Badge */}
-              <div className="relative">
-                <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer">
-                  <div className="w-5 h-5 bg-slate-400 rounded-full"></div>
-                </div>
-                <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">3</span>
-                </span>
-              </div>
-
+            
               {/* User Profile (Clickable) */}
               <div
                 onClick={() => navigate('/profile')}
@@ -109,14 +108,13 @@ function DashboardLayout() {
                   <p className="text-xs text-slate-500">Premium Member</p>
                 </div>
               </div>
-            </div>
           </div>
         </header>
 
         {/* Main Page Content */}
         <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 to-slate-100 p-8">
           <div className="animate-fade-in">
-            <Outlet />
+            <Outlet /> {/* This is where UserEcoReport will render */}
           </div>
         </main>
       </div>

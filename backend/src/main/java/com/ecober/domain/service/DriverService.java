@@ -40,6 +40,13 @@ public class DriverService {
     @Autowired
     public FuelMappingUtil fuelMappingUtil;
 
+    @Autowired
+    public FuelScoringService fuelScoringService;
+
+    @Autowired
+    private CarbonScoringService carbonScoringService;
+
+
     public void register(DriverRegistrationRequestDTO request) {
         Driver driver = Driver.builder()
                 .driverName(request.getName())
@@ -133,9 +140,13 @@ public class DriverService {
             tripRepository.save(trip);
             redisTemplate.delete("active_trip:" + driverId);
             redisTemplate.delete("active_ride:" + trip.getUser().getUserId());
-            return true;
-        }
-        return false;
+        double ecoScore = fuelScoringService.computeEcoScoreFromVin(trip.getDriver().getVin());
+        trip.setEcoScore(ecoScore);
+        tripRepository.save(trip);
+        updateDriverFuelStats(trip.getDriver(), trip.getRoute().getDistanceKm());
+    return true;
+            }
+    return false;
     }
 
     public List<RideRequestDTO> getNearbyAvailableTrips(UUID driverId) {
@@ -215,6 +226,7 @@ public class DriverService {
                 distance.getDistanceKm(), request.getPreferredVehicleType());
         double actualEmissions = driverScoringService.computeActualScores(
                 distance.getDistanceKm(), request.getPreferredVehicleType());
+        double carbonScore=carbonScoringService.calculateCO2Savings(distance.getDistanceKm(),request.getPreferredVehicleType()); 
 
         Trip trip = Trip.builder()
                 .user(request.getUser())
@@ -225,6 +237,7 @@ public class DriverService {
                         .distanceKm(distance.getDistanceKm())
                         .estimatedTime(distance.getDurationInMins())
                         .estimatedEmission(expectedEmission)
+                        .carbonCost(carbonScore)
                         .isPooledEligible(request.isWillingToPool())
                         .build())
                 .status(TripStatus.ACCEPTED)
@@ -291,8 +304,20 @@ public class DriverService {
         return "Standard Driver";
     }
 
-    public String getFuelMapping(String vin) {
-    return fuelMappingUtil.getFuelTypeByVin(vin);
+    private void updateDriverFuelStats(Driver driver, double tripDistance) {
+    driver.setTotalDistanceTracked(driver.getTotalDistanceTracked() + tripDistance);
+
+    double estimatedFuelUsed = tripDistance / driver.getVehicleEfficiency();
+    driver.setTotalFuelUsed(driver.getTotalFuelUsed() + estimatedFuelUsed);
+
+    if (driver.getTotalFuelUsed() > 0) {
+        double updatedFuelEfficiency = driver.getTotalDistanceTracked() / driver.getTotalFuelUsed();
+        driver.setFuelEfficiency(updatedFuelEfficiency);
+    }
+
+    driverRepository.save(driver);
 }
+
+
 
 }

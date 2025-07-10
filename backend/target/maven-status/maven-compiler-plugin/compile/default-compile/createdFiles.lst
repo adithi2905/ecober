@@ -7,6 +7,7 @@ com\ecober\adapter\Dto\RouteDTO.class
 com\ecober\adapter\Dto\DistanceDurationDTO.class
 com\ecober\application\config\SecurityConfig.class
 com\ecober\application\config\RedisConfig.class
+com\ecober\domain\service\FuelScoringScheduler.class
 com\ecober\adapter\Dto\DriverDTO$DriverDTOBuilder.class
 com\ecober\domain\model\Route$RouteBuilder.class
 com\ecober\adapter\Dto\DriverAuthenticationRequest$DriverAuthenticationRequestBuilder.class
@@ -24,7 +25,6 @@ com\ecober\adapter\Dto\RouteDTO$RouteDTOBuilder.class
 com\ecober\adapter\mapper\RouteMapperImpl.class
 com\ecober\util\GeoUtils.class
 com\ecober\domain\model\Driver$DriverBuilder.class
-com\ecober\domain\service\UserLoginService.class
 com\ecober\adapter\Dto\RideResponseDTO$RideResponseDTOBuilder.class
 com\ecober\adapter\mapper\LocationMapper.class
 com\ecober\adapter\mapper\RouteMapper.class
@@ -54,6 +54,7 @@ com\ecober\adapter\Dto\DistanceDurationDTO$DistanceDurationDTOBuilder.class
 com\ecober\infrastructure\repository\DriverRepository.class
 com\ecober\adapter\controller\RideController.class
 com\ecober\domain\model\RideRequestStatus.class
+com\ecober\domain\service\FuelScoringService.class
 com\ecober\adapter\Dto\LoginRequestDTO.class
 com\ecober\adapter\Dto\RideRequestDTO.class
 com\ecober\domain\model\User.class
@@ -74,7 +75,6 @@ com\ecober\domain\service\CarbonScoringService.class
 com\ecober\security\CustomUserDetails.class
 com\ecober\util\EmissionUtils.class
 com\ecober\domain\model\Trip$TripBuilder.class
-com\ecober\adapter\controller\UserController.class
 com\ecober\adapter\Dto\DriverRegistrationRequestDTO$DriverRegistrationRequestDTOBuilder.class
 com\ecober\adapter\Dto\UserDTO$UserDTOBuilder.class
 com\ecober\adapter\Dto\DriverAuthenticationRequest.class

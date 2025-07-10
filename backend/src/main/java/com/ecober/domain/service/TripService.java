@@ -27,6 +27,7 @@ public class TripService {
     @Autowired
     private RedisTemplate<String, UUID> redisTemplate;
 
+  
     public void createTrip(UUID riderId, Driver bestDriver, Route route, double estimatedEmission,double actualEmission) {
         User user = userRepository.findById(riderId)
                 .orElseThrow(() -> new RuntimeException("User not found with id " + riderId));
@@ -38,7 +39,6 @@ public class TripService {
         trip.setRoute(route);
         trip.setStartTime(LocalDateTime.now());
         trip.setCarbonEmission(actualEmission);
-        trip.setEcoScore("B+");
         trip.setStatus(TripStatus.ACCEPTED);
         trip.setVehicleType(bestDriver.getVehicleType());
         tripRepository.save(trip);

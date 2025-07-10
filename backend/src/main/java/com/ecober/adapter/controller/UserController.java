@@ -14,10 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ecober.adapter.Dto.LoginRequestDTO;
 import com.ecober.adapter.Dto.TripDTO;
 import com.ecober.adapter.Dto.UserDTO;
+import com.ecober.adapter.Dto.UserProfileDTO;
 import com.ecober.adapter.mapper.UserMapper;
 import com.ecober.domain.model.User;
 import com.ecober.domain.service.TripService;
-import com.ecober.domain.service.UserLoginService;
+import com.ecober.domain.service.UserService;
 import com.ecober.domain.service.UserRegistrationService;
 import com.ecober.infrastructure.repository.UserRepository;
 import com.ecober.security.JwtService;
@@ -25,6 +26,7 @@ import com.ecober.util.AuthUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -34,11 +36,31 @@ public class UserController {
     @Autowired private UserMapper userMapper;
     @Autowired private JwtService jwtService;
     @Autowired private UserRegistrationService userRegService;
-    @Autowired private UserLoginService userLogin;
     @Autowired private UserRepository userRepository;
     @Autowired private AuthenticationManager authenticateManager;
     @Autowired private TripService tripService;
+    @Autowired private UserService userService;
 
+    @GetMapping("/profile")
+public ResponseEntity<?> getProfile() {
+    UUID userId = AuthUtil.getCurrentUserId();
+    String role = AuthUtil.getCurrentUserRole();
+
+    if (userId == null || !"RIDER".equalsIgnoreCase(role)) {
+        return ResponseEntity.status(403)
+                .body(Map.of("error", "Unauthorized access to profile"));
+    }
+
+    UserProfileDTO userProfileDTO = userService.buildUserProfile(userId);
+    if (userProfileDTO!=null) {
+        return ResponseEntity.ok(userProfileDTO);
+    } else {
+        return ResponseEntity.status(404)
+                .body(Map.of("error", "User not found"));
+    }
+}
+
+    
     @PostMapping("/registration")
     public ResponseEntity<String> registerUser(@RequestBody UserDTO userDto) {
         if (userDto.getPassword() != null) {
