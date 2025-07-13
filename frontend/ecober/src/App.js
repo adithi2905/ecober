@@ -2,13 +2,12 @@ import './App.css';
 import './index.css'; 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import RiderBooking from './components/RiderBooking';
+import RiderBooking from './components/riderBooking';
 import BookingConfirmation from './components/bookingConfirmation';
 import DashboardLayout from './dashboards/dashboardLayout';
 import TripHistory from './components/tripsHistory';
 import Profile from './components/Profile';
-import EcoReport from './components/ecoReport';
-import CurrentRide from './components/CurrentRide';
+import CurrentRide from './components/currentRide';
 
 import Registration from './components/Registration';
 import Login from './components/Login';

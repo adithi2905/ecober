@@ -56,7 +56,7 @@ function DriverAvailableTrips() {
 
       alert("✅ Ride accepted successfully!");
       setRides([]);
-      navigate("/driver/currentTrip");
+      navigate("/availableRides");
     } catch (error) {
       console.error("Error accepting ride:", error);
       alert("🚫 Error accepting ride.");
