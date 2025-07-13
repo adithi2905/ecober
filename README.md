@@ -1,6 +1,3 @@
-Here’s a **trimmed-down and realistic version** of your README that only includes what you’ve actually implemented so far, avoiding exaggeration while keeping it professional and FAANG-ready:
-
----
 
 # EcoBer - Smart Ride-Sharing Backend
 
