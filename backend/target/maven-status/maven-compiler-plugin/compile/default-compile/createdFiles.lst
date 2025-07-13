@@ -43,8 +43,10 @@ com\ecober\adapter\Dto\TripDTO$TripDTOBuilder.class
 com\ecober\adapter\mapper\UserMapperImpl.class
 com\ecober\adapter\Dto\DriverRegistrationRequestDTO.class
 com\ecober\adapter\mapper\RideRequestMapper.class
+com\ecober\domain\service\UserService.class
 com\ecober\infrastructure\repository\TripRepository.class
 com\ecober\application\config\SwaggerConfig.class
+com\ecober\adapter\Dto\UserProfileDTO.class
 com\ecober\domain\model\RideRequest.class
 com\ecober\domain\service\DriverService.class
 com\ecober\domain\model\TripStatus.class
@@ -72,9 +74,11 @@ com\ecober\adapter\Dto\LoginResponseDTO.class
 com\ecober\domain\service\RideRequestService.class
 com\ecober\domain\model\Route.class
 com\ecober\domain\service\CarbonScoringService.class
+com\ecober\adapter\Dto\UserProfileDTO$UserProfileDTOBuilder.class
 com\ecober\security\CustomUserDetails.class
 com\ecober\util\EmissionUtils.class
 com\ecober\domain\model\Trip$TripBuilder.class
+com\ecober\adapter\controller\UserController.class
 com\ecober\adapter\Dto\DriverRegistrationRequestDTO$DriverRegistrationRequestDTOBuilder.class
 com\ecober\adapter\Dto\UserDTO$UserDTOBuilder.class
 com\ecober\adapter\Dto\DriverAuthenticationRequest.class
