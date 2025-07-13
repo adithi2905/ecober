@@ -1,257 +1,131 @@
-# EcoBer - Smart Ride-Sharing Platform
+Here’s a **trimmed-down and realistic version** of your README that only includes what you’ve actually implemented so far, avoiding exaggeration while keeping it professional and FAANG-ready:
 
-A sophisticated ride-sharing platform that optimizes driver matching through multi-objective algorithms, real-time traffic integration, and environmental impact scoring.
+---
 
-## Core Innovation
+# EcoBer - Smart Ride-Sharing Backend
 
-EcoBer goes beyond simple "nearest driver" matching by implementing a multi-factor scoring algorithm that balances:
+EcoBer is a backend system for a ride-sharing platform designed to match drivers with riders, calculate trip emissions, and promote eco-friendly transportation. This project demonstrates my ability to design and deploy a feature-rich backend with real-world considerations like environmental impact and driver scoring.
 
-* Proximity (Haversine distance calculation)
-* Driver Trust Score (reputation-based reliability)
-* Environmental Impact (CO2 savings optimization)
-* Real-time Traffic Conditions (dynamic ETA calculation)
+---
 
-## Key Features
+## 🌱 Core Innovation
+
+EcoBer introduces features beyond basic ride requests:
+
+* **Driver Matching**: Finds nearby drivers using geospatial queries and vehicle type filters.
+* **Carbon Tracking**: Calculates CO₂ emissions per trip based on distance and vehicle type.
+* **Driver Eco Report**: Tracks driver trip history, total CO₂ saved, and assigns an eco-badge based on their environmental impact.
+
+---
+
+## ✅ Key Features
 
 ### Intelligent Driver Matching
 
-* Multi-objective optimization algorithm
-* Real-time geospatial distance calculations
-* Trust score integration for reliability
-* Carbon footprint optimization
+* Finds drivers within a radius using **Haversine distance**.
+* Filters by **vehicle type** (e.g., Sedan, EV, Hybrid).
+* Prevents multiple drivers from accepting the same ride.
 
-### Smart Route Optimization
+### Smart Trip Management
 
-* Google Maps API integration with fallback strategies
-* Traffic-aware routing and ETA calculation
-* Dynamic route cost calculation
-* Pooling eligibility detection
+* Trip lifecycle: **ACCEPTED → IN\_PROGRESS → COMPLETED**.
+* Tracks trip details including distance, estimated/actual CO₂ emissions, and timestamps.
 
 ### Environmental Focus
 
-* CO2 emission tracking and scoring
-* Carbon rating system (A+ to F scale)
-* Environmental impact-based driver ranking
-* Sustainable transportation incentives
+* Estimates CO₂ emissions per trip.
+* Assigns drivers a **carbon score** and badge (e.g., 🚗 *Standard Driver*).
+* Monthly CO₂ savings and ride type distribution reports.
 
-### Production-Ready Architecture
+### Deployment Journey
 
-* Graceful API fallback mechanisms
-* Service-oriented architecture
-* Comprehensive error handling
-* Scalable design patterns
+* Deployed backend on **AWS Elastic Beanstalk** with **Aurora Serverless MySQL**.
+* Configured health checks and debugged security/port issues during deployment.
 
-## Architecture Overview
+---
+
+## 🛠 Technology Stack
+
+* **Backend**: Spring Boot (Java 17)
+* **Database**: Aurora Serverless MySQL (Hibernate auto schema creation)
+* **Cloud Deployment**: AWS Elastic Beanstalk
+* **APIs**: RESTful endpoints for riders and drivers
+* **Testing**: JUnit & Mockito
+
+---
+
+## 🚀 Backend Architecture
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Ride Request  │───▶│ Driver Matching  │───▶│ Route Planning  │
-│    Service      │    │    Algorithm     │    │    Service      │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Carbon        │    │ Trust Score      │    │ Traffic & Maps  │
-│  Scoring        │    │   Evaluation     │    │   Integration   │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+Rider Request → Driver Matching → Trip Creation
+      ↓                    ↓
+Carbon Emission Estimation → Trip Lifecycle Management
+      ↓
+Driver Eco Report & Analytics
 ```
 
-## Algorithm Deep Dive
+---
 
-### Multi-Factor Driver Scoring
-
-```java
-Score = α(Distance) + β(TrustScore) + γ(CO2Impact) + δ(TrafficFactor)
-```
-
-* **Distance**: Haversine formula for great-circle distance
-* **TrustScore**: Driver reliability rating (0-5 scale)
-* **CO2Impact**: Environmental efficiency score
-* **TrafficFactor**: Real-time traffic conditions
-
-### Carbon Scoring Algorithm
-
-* Vehicle-specific emission calculations
-* Distance-based environmental impact
-* Dynamic scoring (0-100 scale)
-* A+ to F rating system
-
-### Fallback Strategy
-
-```java
-Primary: Google Maps API (traffic-aware)
-    ↓ (on failure)
-Fallback: Haversine distance calculation
-    ↓ (maintains service availability)
-Graceful degradation with estimated values
-```
-
-## Technology Stack
-
-* **Backend**: Java Spring Boot
-* **Database**: \[Your database choice]
-* **External APIs**: Google Maps API, Traffic data
-* **Architecture**: Microservices-ready design
-* **Testing**: JUnit with comprehensive test coverage
-
-## Performance Characteristics
-
-| Operation            | Complexity | Performance                 |
-| -------------------- | ---------- | --------------------------- |
-| Driver Matching      | O(n log n) | Sub-second for 10K+ drivers |
-| Distance Calculation | O(1)       | Microsecond response        |
-| Route Optimization   | O(1)       | Real-time API integration   |
-| Carbon Scoring       | O(1)       | Instant calculation         |
-
-## Getting Started
-
-### Prerequisites
-
-* Java 11+
-* Maven 3.6+
-* Google Maps API key
-
-### Installation
-
-```bash
-git clone https://github.com/yourusername/ecober
-cd ecober
-mvn clean install
-```
-
-### Configuration
-
-```properties
-# application.properties
-google.maps.api.key=your_api_key_here
-carbon.scoring.enabled=true
-fallback.distance.calculation=haversine
-```
-
-### Running the Application
-
-```bash
-mvn spring-boot:run
-```
-
-## API Examples
+## 🌍 API Examples
 
 ### Request a Ride
 
 ```http
 POST /api/rides/request
 {
-  "pickupLatitude": 40.7128,
-  "pickupLongitude": -74.0060,
-  "destinationLatitude": 40.7589,
-  "destinationLongitude": -73.9851,
-  "vehiclePreference": "ECO",
-  "poolingAllowed": true
+  "pickupLatitude": 39.1696,
+  "pickupLongitude": -86.5385,
+  "dropoffLatitude": 39.7684,
+  "dropoffLongitude": -86.1581,
+  "vehicleType": "SEDAN"
 }
 ```
 
-### Get Driver Rankings
+### Driver Eco Report
 
 ```http
-GET /api/drivers/ranked?lat=40.7128&lng=-74.0060&radius=5
+GET /driver/me/eco-report
+Authorization: Bearer <token>
 ```
 
-### Carbon Impact Analysis
+Response:
 
-```http
-GET /api/carbon/analysis?distance=15.5&vehicleType=HYBRID
-```
-
-## Key Test Scenarios
-
-### Driver Ranking Algorithm
-
-```java
-@Test
-public void testMultiFactorDriverRanking() {
-    // Tests distance + trust + carbon scoring
-    // Validates optimal driver selection
-    // Ensures consistent ranking under various conditions
+```json
+{
+  "tripCount": 2,
+  "totalCO2": 78.52,
+  "rideTypeDistribution": [
+    { "name": "SEDAN", "value": 2 }
+  ],
+  "carbonRating": "🚗 Standard Driver",
+  "monthlyCo2Savings": [
+    { "co2": 64.25, "month": "JUN" }
+  ],
+  "carbonScore": 157.04
 }
 ```
 
-### Fallback Mechanism
+---
 
-```java
-@Test  
-public void testGracefulAPIFallback() {
-    // Simulates Google Maps API failure
-    // Validates Haversine fallback calculation
-    // Ensures service continuity
-}
-```
+## 🌱 Deployment Highlights
 
-### Carbon Scoring Accuracy
+1. **Port Binding Fix**: Configured Elastic Beanstalk environment properties to align with Spring Boot.
+2. **Database Configuration**: Switched from manually created schema to Hibernate auto schema creation for foreign key constraints.
+3. **Security Debugging**: Resolved `403 Forbidden` errors by relaxing Spring Security during deployment testing.
+4. **Health Monitoring**: Added a `/health` API endpoint for Elastic Beanstalk health checks.
 
-```java
-@Test
-public void testCarbonScoringPrecision() {
-    // Validates emission calculations
-    // Tests A+ to F rating boundaries
-    // Ensures environmental impact accuracy
-}
-```
+---
 
-## System Design Highlights
+## ⚡ Future Enhancements
 
-### Scalability Considerations
+* Frontend hosting on AWS S3 + CloudFront.
+* Real-time driver location updates using WebSockets.
+* Event-driven architecture with Kafka for trip state changes.
+* Advanced driver matching using trust scores and demand prediction.
 
-* Stateless service design
-* Database query optimization
-* API rate limiting readiness
-* Horizontal scaling support
+---
 
-### Reliability Patterns
+## 🌟 Why EcoBer?
 
-* Circuit breaker for external APIs
-* Graceful degradation strategies
-* Comprehensive error handling
-* Service health monitoring
-
-### Real-World Constraints
-
-* API failure handling
-* Traffic condition integration
-* Multi-objective optimization
-* Fair driver distribution
-
-## Future Enhancements
-
-### Phase 2: Machine Learning
-
-* Predictive demand forecasting
-* Dynamic pricing algorithms
-* Driver behavior analysis
-* Route learning from historical data
-
-### Phase 3: Advanced Optimization
-
-* Graph algorithms for optimal routing
-* Real-time pooling optimization
-* Distributed caching layer
-* Event streaming architecture
-
-## Technical Achievements
-
-* Multi-objective optimization in production environment
-* Real-time constraint handling with traffic integration
-* Graceful degradation ensuring 99.9% uptime
-* Environmental sustainability through smart algorithms
-* Scalable architecture ready for millions of requests
-
-## Business Impact
-
-* 30% improvement in driver utilization efficiency
-* 25% reduction in average pickup time
-* 40% increase in ride completion rates
-* Significant CO2 savings through optimized routing
-
-## Contributing
-
-This project demonstrates production-ready algorithms and architecture patterns suitable for large-scale ride-sharing platforms. The codebase emphasizes clean architecture, comprehensive testing, and real-world constraint handling.
+This project reflects a **real-world backend deployment journey** with debugging, optimization, and a clean architecture to scale future features. It highlights a **feature-rich backend-focused innovation** without placing more emphasis on the frontend presentation and system design.
 
