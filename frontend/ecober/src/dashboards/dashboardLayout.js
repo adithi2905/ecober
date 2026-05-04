@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { LeafIcon, MapPinIcon, NavigationIcon, HistoryIcon, UserIcon } from '../components/Icons';
-import { EcoBadgePill } from '../components/EcoBadge';
+import { BadgeShield } from '../components/EcoBadge';
 
 const navLinks = [
   { name: 'Book Ride',    path: '/rideBooking',  Icon: MapPinIcon },
   { name: 'Current Ride', path: '/currentRide',  Icon: NavigationIcon },
   { name: 'Past Rides',   path: '/tripsHistory', Icon: HistoryIcon },
   { name: 'Eco Report',   path: '/ecoReport',    Icon: LeafIcon },
+  { name: 'Profile',      path: '/profile',      Icon: UserIcon },
 ];
 
 function DashboardLayout() {
-  const location  = useLocation();
-  const navigate  = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState({ username: '', ecoBadge: '', totalCO2Saved: 0 });
 
   useEffect(() => {
@@ -24,8 +25,8 @@ function DashboardLayout() {
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         if (d) setProfile({
-          username:     d.username     || '',
-          ecoBadge:     d.ecoBadge     || '',
+          username:      d.username      || '',
+          ecoBadge:      d.ecoBadge      || '',
           totalCO2Saved: d.totalCO2Saved ?? 0,
         });
       })
@@ -34,9 +35,7 @@ function DashboardLayout() {
 
   const initial     = profile.username ? profile.username[0].toUpperCase() : '?';
   const displayName = profile.username || 'Rider';
-  const currentPage =
-    navLinks.find(l => l.path === location.pathname)?.name
-    ?? (location.pathname === '/profile' ? 'Profile' : 'Dashboard');
+  const currentPage = navLinks.find(l => l.path === location.pathname)?.name ?? 'Dashboard';
 
   return (
     <div className="flex h-screen bg-slate-50">
@@ -50,7 +49,7 @@ function DashboardLayout() {
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-800 leading-tight">Ecober</h2>
-              <p className="text-xs text-slate-400">Eco-friendly rides</p>
+              <p className="text-xs text-emerald-600">Eco-friendly rides</p>
             </div>
           </div>
         </div>
@@ -65,8 +64,8 @@ function DashboardLayout() {
                 to={path}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
                   ${active
-                    ? 'bg-emerald-500 text-white shadow-sm'
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-emerald-600'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'text-slate-500 hover:bg-gray-50 hover:text-emerald-600'
                   }`}
               >
                 <Icon size={16} className={active ? 'text-white' : 'text-slate-400'} />
@@ -76,20 +75,22 @@ function DashboardLayout() {
           })}
         </nav>
 
-        {/* ── Eco Status (visible on every page) ── */}
+        {/* ── ECO STATUS card ── */}
         {profile.ecoBadge && (
-          <div className="px-4 py-3 border-t border-slate-100">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-1">
-              Eco Status
-            </p>
-            <EcoBadgePill
-              badgeName={profile.ecoBadge}
-              co2Saved={profile.totalCO2Saved}
-            />
+          <div className="px-4 py-3">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-1">Eco Status</p>
+            <div className="bg-green-50 border border-green-200 rounded-xl px-3 py-3 flex items-center gap-2.5">
+              <BadgeShield badgeName={profile.ecoBadge} size={34} />
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-emerald-600 leading-tight truncate">{profile.ecoBadge}</p>
+                <p className="text-xs text-slate-500 leading-tight mt-0.5">
+                  {profile.totalCO2Saved.toFixed(1)} kg CO₂ saved
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Spacer */}
         <div className="flex-1" />
 
         {/* User pill */}
@@ -113,14 +114,14 @@ function DashboardLayout() {
 
       {/* ── Main ── */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Header */}
         <header className="bg-white border-b border-slate-100 px-8 py-4 flex-shrink-0">
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-lg font-bold text-slate-800">{currentPage}</h1>
               <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
                 <LeafIcon size={12} className="text-emerald-500" />
-                Welcome back, {displayName}
+                Welcome back,{' '}
+                <span className="text-emerald-600 font-medium">{displayName}</span>
               </p>
             </div>
             <div
