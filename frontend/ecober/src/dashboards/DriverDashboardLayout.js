@@ -1,204 +1,197 @@
 import React, { useEffect, useState } from 'react';
-import AvailableRides from '../components/DriverAvailabletrips';
+import AvailableRides    from '../components/DriverAvailabletrips';
 import DriverCurrentTrip from '../components/DriverCurrentTrip';
-import DriverProfile from '../components/DriverProfile';
-import EcoReport from '../components/ecoReport';
+import DriverProfile     from '../components/DriverProfile';
+import EcoReport         from '../components/ecoReport';
 import DriverTripHistory from '../components/DriverTripHistory';
+import { LeafIcon, CarIcon, NavigationIcon, HistoryIcon } from '../components/Icons';
+import { EcoBadgePill } from '../components/EcoBadge';
 
 const tabs = [
-  { name: 'Available Rides', key: 'available', color: 'from-blue-500 to-blue-600', bgColor: 'bg-blue-500' },
-  { name: 'Current Trip', key: 'current', color: 'from-emerald-500 to-emerald-600', bgColor: 'bg-emerald-500' },
-  { name: 'Carbon Impact', key: 'eco', color: 'from-teal-500 to-emerald-600', bgColor: 'bg-teal-500' },
-  { name: 'Trip History', key: 'history', color: 'from-amber-500 to-amber-600', bgColor: 'bg-amber-500' }
+  { name: 'Available Rides', key: 'available', Icon: CarIcon },
+  { name: 'Current Trip',    key: 'current',   Icon: NavigationIcon },
+  { name: 'Eco Impact',      key: 'eco',        Icon: LeafIcon },
+  { name: 'Trip History',    key: 'history',    Icon: HistoryIcon },
 ];
 
 function DriverDashboardPage() {
   const [selectedTab, setSelectedTab] = useState('available');
-  const [tripCounts, setTripCounts] = useState({
-    totalRides: 0,
-    ridesThisMonth: 0,
-    ridesToday: 0,
-  });
-  const [loadingStats, setLoadingStats] = useState(true);
+  const [tripCounts, setTripCounts]   = useState({ totalRides: 0, ridesThisMonth: 0, ridesToday: 0 });
+  const [driverProfile, setDriverProfile] = useState({ driverName: '', ecoBadge: '' });
 
   useEffect(() => {
-    const fetchTripCounts = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:8080/driver/me/trip-count", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
-        if (response.ok) {
-          const data = await response.json();
-          setTripCounts({
-            totalRides: data.totalRides || 0,
-            ridesThisMonth: data.ridesThisMonth || 0,
-            ridesToday: data.ridesToday || 0,
-          });
-        } else {
-          console.error("Failed to fetch trip counts.");
-        }
-      } catch (error) {
-        console.error("Error fetching trip counts:", error);
-      } finally {
-        setLoadingStats(false);
-      }
-    };
+    fetch('http://localhost:8080/driver/me/trip-count', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setTripCounts({ totalRides: d.totalRides || 0, ridesThisMonth: d.ridesThisMonth || 0, ridesToday: d.ridesToday || 0 }); })
+      .catch(() => {});
 
-    fetchTripCounts();
+    fetch('http://localhost:8080/driver/me/getProfile', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setDriverProfile({ driverName: d.driverName || '', ecoBadge: d.ecoBadge || '' }); })
+      .catch(() => {});
   }, []);
+
+  const initial     = driverProfile.driverName ? driverProfile.driverName[0].toUpperCase() : 'D';
+  const displayName = driverProfile.driverName || 'Driver';
+  const currentTab  = tabs.find(t => t.key === selectedTab);
 
   const renderContent = () => {
     switch (selectedTab) {
-      case 'available':
-        return <AvailableRides />;
-      case 'current':
-        return <DriverCurrentTrip />;
-      case 'eco':
-        return <EcoReport />;
-      case 'history':
-        return <DriverTripHistory />;
-      case 'profile':
-        return <DriverProfile />;
-      default:
-        return <AvailableRides />;
+      case 'available': return <AvailableRides ridesToday={tripCounts.ridesToday} />;
+      case 'current':   return <DriverCurrentTrip />;
+      case 'eco':       return <EcoReport />;
+      case 'history':   return <DriverTripHistory />;
+      case 'profile':   return <DriverProfile />;
+      default:          return <AvailableRides />;
     }
   };
 
-  const activeTab = tabs.find(t => t.key === selectedTab);
-
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Sidebar */}
-      <aside className="w-80 bg-white shadow-xl border-r border-slate-200 flex flex-col">
+    <div className="flex h-screen bg-slate-50">
+      {/* ── Sidebar ── */}
+      <aside className="w-64 bg-white border-r border-slate-100 flex flex-col flex-shrink-0">
         {/* Logo */}
-        <div className="p-8 border-b border-slate-100">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-xl font-bold">D</span>
+        <div className="px-6 py-5 border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+              <LeafIcon size={18} className="text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">Ecober Driver</h2>
-              <p className="text-sm text-slate-500">Professional Dashboard</p>
+              <h2 className="text-base font-bold text-slate-800 leading-tight">Ecober Driver</h2>
+              <p className="text-xs text-slate-400">Driver Portal</p>
             </div>
           </div>
         </div>
 
-        {/* Driver Stats */}
-        <div className="p-6 border-b border-slate-100">
-          {loadingStats ? (
-            <p className="text-center text-slate-400 animate-pulse">Loading stats...</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Total Rides */}
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl">
-                <div className="flex items-center space-x-2 mb-2">
-                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                  <span className="text-xs font-medium text-purple-700">Total Rides</span>
-                </div>
-                <p className="text-2xl font-bold text-purple-700">{tripCounts.totalRides}</p>
+        {/* Stats row */}
+        <div className="px-4 py-3 border-b border-slate-100">
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label: 'Total', value: tripCounts.totalRides,     color: 'bg-purple-50 text-purple-700' },
+              { label: 'Month', value: tripCounts.ridesThisMonth, color: 'bg-blue-50 text-blue-700' },
+              { label: 'Today', value: tripCounts.ridesToday,     color: 'bg-emerald-50 text-emerald-700' },
+            ].map(s => (
+              <div key={s.label} className={`${s.color} rounded-xl p-2.5 text-center`}>
+                <p className="text-lg font-bold leading-tight">{s.value}</p>
+                <p className="text-xs opacity-80">{s.label}</p>
               </div>
-
-              {/* Rides This Month */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl">
-                <div className="flex items-center space-x-2 mb-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="text-xs font-medium text-blue-700">This Month</span>
-                </div>
-                <p className="text-2xl font-bold text-blue-700">{tripCounts.ridesThisMonth}</p>
-              </div>
-
-              {/* Rides Today */}
-              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-xl">
-                <div className="flex items-center space-x-2 mb-2">
-                  <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                  <span className="text-xs font-medium text-emerald-700">Today</span>
-                </div>
-                <p className="text-2xl font-bold text-emerald-800">{tripCounts.ridesToday}</p>
-              </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-6 py-8 space-y-3">
-          {tabs.map((tab) => {
-            const isActive = selectedTab === tab.key;
+        <nav className="px-4 py-4 space-y-0.5">
+          {tabs.map(({ name, key, Icon }) => {
+            const active = selectedTab === key;
             return (
               <button
-                key={tab.key}
-                onClick={() => setSelectedTab(tab.key)}
-                className={`group w-full flex items-center space-x-4 px-5 py-4 rounded-xl transition-all duration-300 text-left font-medium
-                  ${isActive
-                    ? `bg-gradient-to-r ${tab.color} text-white shadow-lg transform scale-105`
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800 hover:transform hover:scale-102'
-                  }
-                `}
+                key={key}
+                onClick={() => setSelectedTab(key)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 text-left
+                  ${active
+                    ? 'bg-blue-500 text-white shadow-sm'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-blue-600'
+                  }`}
               >
-                <div className={`w-3 h-3 rounded-full ${isActive ? 'bg-white' : `${tab.bgColor} opacity-60 group-hover:opacity-100`}`}></div>
-                <span>{tab.name}</span>
-                {isActive && (
-                  <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse" />
-                )}
+                <Icon size={16} className={active ? 'text-white' : 'text-slate-400'} />
+                {name}
+                {active && <span className="ml-auto w-1.5 h-1.5 bg-white rounded-full animate-pulse" />}
               </button>
             );
           })}
         </nav>
 
-        {/* Online Status */}
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl">
-            <div className="flex items-center space-x-3">
-              <div className="w-4 h-4 bg-emerald-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-emerald-700">Online & Available</span>
-            </div>
-            <div className="w-6 h-6 bg-emerald-500 rounded-lg"></div>
+        {/* ── Eco Status (visible on every page) ── */}
+        {driverProfile.ecoBadge && (
+          <div className="px-4 py-3 border-t border-slate-100">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-1">
+              Eco Status
+            </p>
+            <EcoBadgePill badgeName={driverProfile.ecoBadge} />
+          </div>
+        )}
+
+        {/* Online indicator */}
+        <div className="px-4 py-2">
+          <div className="flex items-center gap-2 bg-emerald-50 rounded-xl px-3 py-2.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+            <span className="text-xs font-medium text-emerald-700">Online & Available</span>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="p-6 text-center border-t border-slate-100">
-          <p className="text-xs text-slate-400">&copy; 2025 Ecober Driver. All rights reserved.</p>
+        <div className="flex-1" />
+
+        {/* Green Streak pill */}
+        <div className="px-4 pb-2">
+          <div
+            className="flex items-center gap-2 px-3 py-2 rounded-xl border"
+            style={{ background: 'linear-gradient(135deg, #fef3c7, #d1fae5)', borderColor: '#86efac' }}
+          >
+            <span className="text-sm">🔥</span>
+            <span className="text-xs font-semibold text-emerald-900">Green Streak: 5 days</span>
+          </div>
         </div>
+
+        {/* Driver pill */}
+        <div
+          onClick={() => setSelectedTab('profile')}
+          className="px-4 pb-3 pt-2 border-t border-slate-100 cursor-pointer"
+        >
+          <div className="flex items-center gap-3 bg-slate-50 hover:bg-blue-50 rounded-xl px-3 py-3 transition-all">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xs font-semibold">{initial}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-700 truncate">{displayName}</p>
+              <p className="text-xs text-blue-600">View Profile →</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-4 py-3">
+          <div className="rounded-lg border border-gray-300 bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-3 shadow-sm">
+            <p className="text-xs font-medium text-gray-700 text-center">Performance with purpose</p>
+          </div>
+        </div>
+        <p className="text-xs text-gray-500 text-center pb-4 mt-3">&copy; 2025 Ecober</p>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <header className="bg-white shadow-lg border-b border-slate-200 px-8 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-800">{activeTab?.name}</h1>
-              <p className="text-sm text-slate-500 mt-2">
-                {selectedTab === 'available' && 'Find your next ride opportunity'}
-                {selectedTab === 'current' && 'Manage your ongoing trip'}
-                {selectedTab === 'eco' && 'Track your environmental impact'}
-                {selectedTab === 'history' && 'Review your completed trips'}
-                {selectedTab === 'profile' && 'View or edit your driver profile'}
-              </p>
+      {/* ── Main ── */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header className="bg-white border-b border-emerald-100 px-8 py-4 flex-shrink-0">
+          <div className="flex justify-between items-center gap-4">
+            <div className="flex-1 rounded-3xl border border-emerald-100 bg-slate-50 px-5 py-4 shadow-sm">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-sm font-semibold text-emerald-900">
+                  <LeafIcon size={16} className="text-emerald-600" />
+                  <span>{currentTab?.name ?? 'Dashboard'}</span>
+                </div>
+                <p className="text-xs text-slate-500">Welcome back, {displayName}</p>
+              </div>
             </div>
-
-            {/* Driver Avatar */}
             <div
               onClick={() => setSelectedTab('profile')}
-              className="flex items-center space-x-3 bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl px-4 py-2 hover:from-slate-100 hover:to-slate-200 transition-all duration-200 cursor-pointer"
+              className="flex items-center gap-3 cursor-pointer rounded-2xl border border-slate-200 bg-white px-4 py-2 transition-all hover:shadow-sm"
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-semibold">D</span>
+              <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center text-white text-sm font-semibold">
+                {initial}
               </div>
               <div className="hidden sm:block">
-                <p className="text-sm font-semibold text-slate-700">Driver</p>
-                <p className="text-xs text-slate-500">Pro Driver</p>
+                <p className="text-sm font-semibold text-slate-900 leading-tight">{displayName}</p>
+                <p className="text-xs text-slate-500">Driver</p>
               </div>
             </div>
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 to-slate-100 p-8">
-          <div className="animate-fade-in">{renderContent()}</div>
-        </main>
+        <main className="flex-1 overflow-y-auto">{renderContent()}</main>
       </div>
     </div>
   );

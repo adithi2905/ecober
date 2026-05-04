@@ -1,143 +1,158 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { BadgeShield, BADGE_TIERS, BADGE_LABELS, BADGE_ORDER } from './EcoBadge';
+import { StarIcon, CarIcon, LeafIcon } from './Icons';
 
-const DriverProfile = () => {
-  const [driver, setDriver] = useState(null);
+const VEHICLE_ICONS = { Sedan: '🚗', SUV: '🚙', Van: '🚐', Electric: '⚡' };
+
+function DriverProfile() {
+  const [driver, setDriver]   = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError]     = useState(null);
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    const token = localStorage.getItem("token");
-
-    await fetch("http://localhost:8080/driver/logout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    localStorage.removeItem("token");
-    navigate("/");
-    return <div>Logging out...</div>;
-  };
-
   useEffect(() => {
-    const fetchDriverProfile = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:8080/driver/me/getProfile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setDriver(data);
-        } else {
-          const errorText = await response.text();
-          setError("Failed to load profile: " + errorText);
-        }
-      } catch (error) {
-        console.error("Error fetching driver profile:", error);
-        setError("Network error occurred");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDriverProfile();
+    const token = localStorage.getItem('token');
+    fetch('http://localhost:8080/driver/me/getProfile', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(setDriver)
+      .catch(() => setError('Failed to load profile.'))
+      .finally(() => setLoading(false));
   }, []);
 
-  if (loading)
+  const handleLogout = async () => {
+    const token = localStorage.getItem('token');
+    await fetch('http://localhost:8080/driver/logout', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => {});
+    localStorage.removeItem('token');
+    navigate('/');
+  };
+
+  if (loading) {
     return (
-      <div className="flex justify-center items-center h-full text-slate-500 animate-pulse">
-        Loading profile...
+      <div className="p-8 max-w-xl mx-auto space-y-4">
+        <div className="h-64 bg-white rounded-2xl animate-pulse" />
+        <div className="grid grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-white rounded-2xl animate-pulse" />)}
+        </div>
       </div>
     );
-  if (error)
-    return <div className="p-6 text-red-600 text-center">{error}</div>;
-  if (!driver)
-    return (
-      <div className="p-6 text-center text-slate-500">No profile data found.</div>
-    );
+  }
 
-  // 🌱 Generate actionable eco tips
-  const ecoTips = [
-    "📦 Accept more carpool requests to unlock Eco Hero badge.",
-    "🛣️ Plan routes smartly to reduce fuel usage.",
-    "⏱️ Keep trips efficient to improve your Trust Score.",
-    "♻️ Using an electric vehicle will boost your Eco Badge faster.",
-  ];
+  if (error || !driver) {
+    return (
+      <div className="p-8 flex items-center justify-center">
+        <p className="text-sm text-red-500">{error || 'No profile data found.'}</p>
+      </div>
+    );
+  }
+
+  const tierIndex = Math.max(BADGE_ORDER.indexOf(driver.ecoBadge), 0);
+  const tierCfg   = BADGE_TIERS[tierIndex];
+  const badgeLabel = BADGE_LABELS[driver.ecoBadge] || '';
+  const initial   = driver.driverName?.[0]?.toUpperCase() ?? 'D';
 
   return (
-    <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow p-6 mt-6">
-      <h2 className="text-3xl font-bold text-slate-800 mb-6 text-center">
-        Driver Profile
-      </h2>
+    <div className="p-8 max-w-xl mx-auto space-y-5">
 
-      {/* Eco Badge & Trust Score */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl shadow text-center">
-          <h4 className="text-sm text-slate-600">Eco Badge</h4>
-          <p className="text-2xl font-bold text-purple-700">
-            {driver.ecoBadge || "♻️ Standard Driver"}
-          </p>
-          <p className="text-xs text-slate-500 mt-1">
-            Earn badges by saving CO₂ and completing eco-friendly trips
-          </p>
+      {/* ── Badge Hero ── */}
+      <div
+        className="rounded-2xl p-8 text-white shadow-lg relative overflow-hidden"
+        style={{ background: `linear-gradient(135deg, ${tierCfg.fill} 0%, ${tierCfg.stroke} 100%)` }}
+      >
+        {/* Decorative circles */}
+        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full" style={{ background: 'rgba(255,255,255,0.12)' }} />
+        <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full" style={{ background: 'rgba(0,0,0,0.08)' }} />
+
+        <div className="relative flex items-center gap-6">
+          {/* Large shield badge */}
+          <div className="flex-shrink-0 drop-shadow-lg">
+            <BadgeShield badgeName={driver.ecoBadge} size={96} />
+          </div>
+
+          <div>
+            {/* Driver name */}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 bg-white/20 border-2 border-white/40 rounded-xl flex items-center justify-center text-xl font-bold">
+                {initial}
+              </div>
+              <div>
+                <h2 className="text-xl font-bold leading-tight">{driver.driverName}</h2>
+                <p className="text-white/70 text-xs">Ecober Driver</p>
+              </div>
+            </div>
+
+            {/* Badge name + label */}
+            <div className="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2.5">
+              <p className="text-sm font-bold leading-tight">{driver.ecoBadge || 'Standard Driver'}</p>
+              <p className="text-white/70 text-xs mt-0.5">{badgeLabel}</p>
+            </div>
+
+            {/* Badge tier dots */}
+            <div className="flex gap-1.5 mt-3">
+              {BADGE_ORDER.map((_, i) => (
+                <div
+                  key={i}
+                  className="w-2 h-2 rounded-full transition-all"
+                  style={{ backgroundColor: i <= tierIndex ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.25)' }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Stats grid ── */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Trust Score */}
+        <div className="bg-white rounded-2xl p-5 border border-slate-100">
+          <div className="flex items-center gap-2 mb-3">
+            <StarIcon size={16} className="text-amber-400" filled />
+            <span className="text-xs text-slate-400 font-medium uppercase tracking-wide">Trust Score</span>
+          </div>
+          <p className="text-2xl font-bold text-slate-800">{driver.trustScore ?? '—'}</p>
+          <p className="text-xs text-slate-400 mt-0.5">rider confidence rating</p>
         </div>
 
-        <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-4 rounded-xl shadow text-center">
-          <h4 className="text-sm text-slate-600">Trust Score</h4>
-          <p className="text-2xl font-bold text-pink-700">
-            {driver.trustScore || "0.0"}
+        {/* Vehicle */}
+        <div className="bg-white rounded-2xl p-5 border border-slate-100">
+          <div className="flex items-center gap-2 mb-3">
+            <CarIcon size={16} className="text-blue-400" />
+            <span className="text-xs text-slate-400 font-medium uppercase tracking-wide">Vehicle</span>
+          </div>
+          <p className="text-2xl font-bold text-slate-800">
+            {VEHICLE_ICONS[driver.vehicleType] ?? ''} {driver.vehicleType || 'N/A'}
           </p>
-          <p className="text-xs text-slate-500 mt-1">
-            Higher scores increase rider confidence
-          </p>
+          <p className="text-xs text-slate-400 mt-0.5">{driver.vehicleNo || 'N/A'}</p>
+        </div>
+
+        {/* Fuel Efficiency */}
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 col-span-2">
+          <div className="flex items-center gap-2 mb-3">
+            <LeafIcon size={16} className="text-emerald-500" />
+            <span className="text-xs text-slate-400 font-medium uppercase tracking-wide">Fuel Efficiency</span>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold text-emerald-600">{driver.fuelEfficiency || 'N/A'}</p>
+            <p className="text-sm text-slate-400">km/L</p>
+          </div>
+          <p className="text-xs text-slate-400 mt-0.5">Higher efficiency = lower CO₂ per trip</p>
         </div>
       </div>
 
-      {/* Actionable Eco Tips */}
-      <div className="bg-emerald-50 p-4 rounded-xl shadow mb-8">
-        <h4 className="text-lg font-semibold text-emerald-800 mb-2">
-          🌱 Eco Insights & Tips
-        </h4>
-        <ul className="list-disc list-inside space-y-1 text-emerald-700">
-          {ecoTips.map((tip, index) => (
-            <li key={index} className="text-sm">
-              {tip}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Driver Info */}
-      <div className="space-y-2 text-center">
-        <p className="text-slate-700">
-          <strong>Name:</strong> {driver.driverName || "N/A"}
-        </p>
-        <p className="text-slate-700">
-          <strong>Vehicle No:</strong> {driver.vehicleNo || "N/A"}
-        </p>
-        <p className="text-slate-700">
-          <strong>Vehicle Type:</strong> {driver.vehicleType || "N/A"}
-        </p>
-        <p className="text-slate-700">
-          <strong>Fuel Efficiency:</strong> {driver.fuelEfficiency || "N/A"}
-        </p>
-      </div>
-
-      {/* Logout Button */}
+      {/* Sign out */}
       <button
         onClick={handleLogout}
-        className="mt-8 w-full md:w-40 mx-auto block py-3 px-6 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white text-lg font-medium shadow hover:from-red-600 hover:to-red-700 transition-all duration-300 ease-in-out"
+        className="w-full py-3.5 rounded-xl font-semibold text-sm text-slate-500 bg-white border border-slate-200 hover:bg-red-50 hover:border-red-200 hover:text-red-500 transition-all"
       >
-        Logout
+        Sign Out
       </button>
     </div>
   );
-};
+}
 
 export default DriverProfile;

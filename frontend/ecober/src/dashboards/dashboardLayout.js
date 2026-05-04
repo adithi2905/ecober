@@ -1,121 +1,145 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { LeafIcon, MapPinIcon, NavigationIcon, HistoryIcon, UserIcon } from '../components/Icons';
+import { EcoBadgePill } from '../components/EcoBadge';
 
 const navLinks = [
-  { name: 'Book Ride', path: '/rideBooking' },
-  { name: 'Current Rides', path: '/currentRide' },
-  { name: 'Past Rides', path: '/tripsHistory' },
+  { name: 'Book Ride',    path: '/rideBooking',  Icon: MapPinIcon },
+  { name: 'Current Ride', path: '/currentRide',  Icon: NavigationIcon },
+  { name: 'Past Rides',   path: '/tripsHistory', Icon: HistoryIcon },
+  { name: 'Eco Report',   path: '/ecoReport',    Icon: LeafIcon },
 ];
 
 function DashboardLayout() {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const location  = useLocation();
+  const navigate  = useNavigate();
+  const [profile, setProfile] = useState({ username: '', ecoBadge: '', totalCO2Saved: 0 });
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    fetch('http://localhost:8080/user/profile', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d) setProfile({
+          username:     d.username     || '',
+          ecoBadge:     d.ecoBadge     || '',
+          totalCO2Saved: d.totalCO2Saved ?? 0,
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  const initial     = profile.username ? profile.username[0].toUpperCase() : '?';
+  const displayName = profile.username || 'Rider';
+  const currentPage =
+    navLinks.find(l => l.path === location.pathname)?.name
+    ?? (location.pathname === '/profile' ? 'Profile' : 'Dashboard');
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Sidebar */}
-      <aside className="w-72 bg-white shadow-xl border-r border-slate-200 flex flex-col">
-        {/* Logo Section */}
-        <div className="p-8 border-b border-slate-100">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-xl font-bold">E</span>
+    <div className="flex h-screen bg-slate-50">
+      {/* ── Sidebar ── */}
+      <aside className="w-64 bg-white border-r border-slate-100 flex flex-col flex-shrink-0">
+        {/* Logo */}
+        <div className="px-6 py-5 border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+              <LeafIcon size={18} className="text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">Ecober</h2>
-              <p className="text-sm text-slate-500">Eco-friendly rides</p>
+              <h2 className="text-base font-bold text-slate-800 leading-tight">Ecober</h2>
+              <p className="text-xs text-slate-400">Eco-friendly rides</p>
             </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-6 py-8 space-y-3">
-          {navLinks.map((link) => {
-            const isActive = location.pathname === link.path;
-
+        <nav className="px-4 py-5 space-y-0.5">
+          {navLinks.map(({ name, path, Icon }) => {
+            const active = location.pathname === path;
             return (
               <Link
-                key={link.path}
-                to={link.path}
-                className={`group flex items-center space-x-4 px-5 py-4 rounded-xl transition-all duration-300 font-medium
-                  ${
-                    isActive
-                      ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg transform scale-105'
-                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800 hover:transform hover:scale-102'
-                  }
-                `}
-              >
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    isActive
-                      ? 'bg-white'
-                      : 'bg-slate-400 group-hover:bg-slate-600'
+                key={path}
+                to={path}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
+                  ${active
+                    ? 'bg-emerald-500 text-white shadow-sm'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-emerald-600'
                   }`}
-                ></div>
-                <span>{link.name}</span>
+              >
+                <Icon size={16} className={active ? 'text-white' : 'text-slate-400'} />
+                {name}
               </Link>
             );
           })}
         </nav>
 
-        {/* User Section */}
+        {/* ── Eco Status (visible on every page) ── */}
+        {profile.ecoBadge && (
+          <div className="px-4 py-3 border-t border-slate-100">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-1">
+              Eco Status
+            </p>
+            <EcoBadgePill
+              badgeName={profile.ecoBadge}
+              co2Saved={profile.totalCO2Saved}
+            />
+          </div>
+        )}
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* User pill */}
         <div
           onClick={() => navigate('/profile')}
-          className="p-6 border-t border-slate-100 cursor-pointer"
+          className="px-4 pb-3 pt-2 border-t border-slate-100 cursor-pointer"
         >
-          <div className="flex items-center space-x-3 bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl px-4 py-3 hover:from-slate-100 hover:to-slate-200 transition-all duration-200">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-semibold">A</span>
+          <div className="flex items-center gap-3 bg-slate-50 hover:bg-emerald-50 rounded-xl px-3 py-3 transition-all">
+            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xs font-semibold">{initial}</span>
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-slate-700">Adithi</p>
-              <p className="text-xs text-slate-500">Premium Member</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-700 truncate">{displayName}</p>
+              <p className="text-xs text-emerald-600">View Profile →</p>
             </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="p-6 text-center">
-          <p className="text-xs text-slate-400">
-            &copy; 2025 Ecober. All rights reserved.
-          </p>
-        </div>
+        <p className="text-xs text-slate-300 text-center pb-4">&copy; 2025 Ecober</p>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* ── Main ── */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
-        <header className="bg-white shadow-lg border-b border-slate-200 px-8 py-6">
+        <header className="bg-white border-b border-slate-100 px-8 py-4 flex-shrink-0">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800">Dashboard</h1>
-              <p className="text-sm text-slate-500 mt-2">
-                Welcome back! Here's what's happening today.
+              <h1 className="text-lg font-bold text-slate-800">{currentPage}</h1>
+              <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                <LeafIcon size={12} className="text-emerald-500" />
+                Welcome back, {displayName}
               </p>
             </div>
-
-            
-              {/* User Profile (Clickable) */}
-              <div
-                onClick={() => navigate('/profile')}
-                className="flex items-center space-x-3 bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl px-4 py-2 hover:from-slate-100 hover:to-slate-200 transition-all duration-200 cursor-pointer"
-              >
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold">A</span>
-                </div>
-                <div className="hidden sm:block">
-                  <p className="text-sm font-semibold text-slate-700">Adithi</p>
-                  <p className="text-xs text-slate-500">Premium Member</p>
-                </div>
+            <div
+              onClick={() => navigate('/profile')}
+              className="flex items-center gap-2.5 cursor-pointer bg-slate-50 hover:bg-slate-100 rounded-xl px-3 py-2 transition-all"
+            >
+              <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-xs font-semibold">{initial}</span>
               </div>
+              <div className="hidden sm:block">
+                <p className="text-sm font-semibold text-slate-700 leading-tight">{displayName}</p>
+                <p className="text-xs text-slate-400">Rider</p>
+              </div>
+            </div>
           </div>
         </header>
 
-        {/* Main Page Content */}
-        <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 to-slate-100 p-8">
-          <div className="animate-fade-in">
-            <Outlet /> {/* This is where UserEcoReport will render */}
-          </div>
+        <main className="flex-1 overflow-y-auto">
+          <Outlet />
         </main>
       </div>
     </div>
