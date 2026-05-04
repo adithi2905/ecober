@@ -29,11 +29,11 @@ EcoBer is a full-stack ride-sharing platform built around environmental accounta
 
 ## Screenshots
 
-### Driver — Eco Impact Dashboard
-![Driver Eco Impact](screenshots/driver-eco-impact.png)
+### Driver: Eco Impact Dashboard
+<img width="944" height="491" alt="image" src="https://github.com/user-attachments/assets/c2a990e1-9c27-4c3f-bbab-a97133477e12" />
 
-### Rider — Eco Report Dashboard
-![Rider Eco Report](screenshots/rider-eco-report.png)
+### Rider: Eco Report Dashboard
+<img width="959" height="505" alt="image" src="https://github.com/user-attachments/assets/b4bcce25-b564-4495-a6a0-8cb1dc412291" />
 
 ---
 
