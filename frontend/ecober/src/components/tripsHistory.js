@@ -115,11 +115,15 @@ function TripCard({ ride, index }) {
         <div className="flex-1 flex flex-col justify-between gap-2 min-w-0">
           <div>
             <p className="text-xs text-slate-400 uppercase tracking-wide font-medium">Pickup</p>
-            <p className="text-sm font-medium text-slate-700 mt-0.5 truncate">{ride.pickupLocation || 'N/A'}</p>
+            <p className="text-sm font-medium text-slate-700 mt-0.5 truncate">
+              {ride.route?.source?.address || ride.pickupLocation || 'N/A'}
+            </p>
           </div>
           <div>
             <p className="text-xs text-slate-400 uppercase tracking-wide font-medium">Drop-off</p>
-            <p className="text-sm font-medium text-slate-700 mt-0.5 truncate">{ride.dropoffLocation || 'N/A'}</p>
+            <p className="text-sm font-medium text-slate-700 mt-0.5 truncate">
+              {ride.route?.destination?.address || ride.dropoffLocation || 'N/A'}
+            </p>
           </div>
         </div>
 

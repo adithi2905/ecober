@@ -25,6 +25,8 @@ public class TripDTO {
     private UserDTO user;
 
     private RouteDTO route;
+    private String pickupLocation;
+    private String dropoffLocation;
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;

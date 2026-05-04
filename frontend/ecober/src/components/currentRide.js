@@ -105,11 +105,15 @@ function CurrentRide() {
           <div className="flex-1 flex flex-col justify-between gap-2 min-w-0">
             <div>
               <p className="text-xs text-slate-400 uppercase tracking-wide font-medium">Pickup</p>
-              <p className="text-sm font-semibold text-slate-700 mt-0.5">{ride.pickupLocation}</p>
+              <p className="text-sm font-semibold text-slate-700 mt-0.5">
+                {ride.route?.source?.address || ride.pickupLocation || 'N/A'}
+              </p>
             </div>
             <div>
               <p className="text-xs text-slate-400 uppercase tracking-wide font-medium">Drop-off</p>
-              <p className="text-sm font-semibold text-slate-700 mt-0.5">{ride.dropoffLocation}</p>
+              <p className="text-sm font-semibold text-slate-700 mt-0.5">
+                {ride.route?.destination?.address || ride.dropoffLocation || 'N/A'}
+              </p>
             </div>
           </div>
           {ride.fare != null && (
